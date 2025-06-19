@@ -151,7 +151,7 @@ export default function TeacherDashboard() {
                                                         {submissions.map((submission) => (
                                                                 <Card key={submission.id}>
                                                                         <CardHeader className='!pb-0'>
-                                                                                <div className='flex items-start justify-between max-sm:flex-col max-sm:gap-y-2'>
+                                                                                <div className='flex items-start justify-between max-sm:flex-col-reverse max-sm:gap-y-2'>
                                                                                         <div>
                                                                                                 <CardTitle className='text-xl'>{submission.assignment}</CardTitle>
                                                                                                 <CardDescription className='text-base'>

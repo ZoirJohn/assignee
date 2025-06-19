@@ -169,7 +169,7 @@ export default function StudentDashboard() {
                                                         {assignments.map((assignment) => (
                                                                 <Card key={assignment.id}>
                                                                         <CardHeader className='!pb-0'>
-                                                                                <div className='flex items-start justify-between'>
+                                                                                <div className='flex items-start justify-between max-[400px]:flex-col-reverse max-[400px]:gap-2'>
                                                                                         <div>
                                                                                                 <CardTitle className='text-xl'>{assignment.title}</CardTitle>
                                                                                                 <CardDescription className='text-base'>{assignment.subject}</CardDescription>
