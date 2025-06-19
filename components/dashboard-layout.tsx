@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { BookOpen, Home, User, FileText, LogOut, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 
 interface DashboardLayoutProps {
         children: React.ReactNode
@@ -97,6 +97,7 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                                 open={isMobileMenuOpen}
                                 onOpenChange={setIsMobileMenuOpen}
                         >
+                                <SheetTitle />
                                 <SheetTrigger asChild>
                                         <Button
                                                 variant='ghost'
@@ -136,7 +137,7 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                                         </div>
                                 </div>
 
-                                <main className='flex-1 p-6 lg:p-8'>{children}</main>
+                                <main className='flex-1 p-6 lg:p-8 max-[400px]:p-1'>{children}</main>
                         </div>
                 </div>
         )

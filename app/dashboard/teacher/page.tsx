@@ -70,6 +70,13 @@ const chatMessages = [
                 message: 'Is there a specific format you prefer for citations?',
                 timestamp: '2:33 PM',
         },
+        {
+                id: 4,
+                sender: 'teacher',
+                name: 'You',
+                message: 'Yes there is a specific format you can use. Please refer to the assignment guidelines for more information.',
+                timestamp: '2:32 PM',
+        },
 ]
 
 export default function TeacherDashboard() {
@@ -115,21 +122,21 @@ export default function TeacherDashboard() {
                                         <TabsList>
                                                 <TabsTrigger
                                                         value='assignments'
-                                                        className='flex items-center gap-2'
+                                                        className='flex items-center gap-2 max-[400px]:px-2'
                                                 >
                                                         <FileText className='w-4 h-4' />
                                                         Assignments
                                                 </TabsTrigger>
                                                 <TabsTrigger
                                                         value='chat'
-                                                        className='flex items-center gap-2'
+                                                        className='flex items-center gap-2 max-[400px]:px-2'
                                                 >
                                                         <MessageSquare className='w-4 h-4' />
                                                         Chat
                                                 </TabsTrigger>
                                                 <TabsTrigger
                                                         value='feedback'
-                                                        className='flex items-center gap-2'
+                                                        className='flex items-center gap-2 max-[400px]:px-2'
                                                 >
                                                         <Star className='w-4 h-4' />
                                                         Feedback
@@ -143,8 +150,8 @@ export default function TeacherDashboard() {
                                                 <div className='grid gap-4'>
                                                         {submissions.map((submission) => (
                                                                 <Card key={submission.id}>
-                                                                        <CardHeader>
-                                                                                <div className='flex items-start justify-between'>
+                                                                        <CardHeader className='!pb-0'>
+                                                                                <div className='flex items-start justify-between max-sm:flex-col max-sm:gap-y-2'>
                                                                                         <div>
                                                                                                 <CardTitle className='text-xl'>{submission.assignment}</CardTitle>
                                                                                                 <CardDescription className='text-base'>
@@ -178,7 +185,7 @@ export default function TeacherDashboard() {
                                                                                 </div>
                                                                         </CardHeader>
                                                                         <CardContent>
-                                                                                <div className='flex items-center justify-between'>
+                                                                                <div className='flex items-center justify-between flex-wrap gap-4'>
                                                                                         <div className='flex items-center text-sm text-gray-500'>
                                                                                                 <Clock className='w-4 h-4 mr-1' />
                                                                                                 Submitted: {submission.submittedAt}
@@ -278,12 +285,12 @@ export default function TeacherDashboard() {
                                                 className='space-y-4'
                                         >
                                                 <Card className='h-96'>
-                                                        <CardHeader>
+                                                        <CardHeader className='max-[400px]:!pb-0'>
                                                                 <CardTitle>Student Messages</CardTitle>
                                                                 <CardDescription>Communicate with your students</CardDescription>
                                                         </CardHeader>
                                                         <CardContent className='flex flex-col h-full'>
-                                                                <ScrollArea className='flex-1 mb-4'>
+                                                                <ScrollArea className='flex-1 mb-9 max-[400px]:mb-3 !h-20'>
                                                                         <div className='space-y-4'>
                                                                                 {chatMessages.map((msg) => (
                                                                                         <div

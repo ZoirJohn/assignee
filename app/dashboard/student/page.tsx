@@ -168,7 +168,7 @@ export default function StudentDashboard() {
                                                 <div className='grid gap-4'>
                                                         {assignments.map((assignment) => (
                                                                 <Card key={assignment.id}>
-                                                                        <CardHeader>
+                                                                        <CardHeader className='!pb-0'>
                                                                                 <div className='flex items-start justify-between'>
                                                                                         <div>
                                                                                                 <CardTitle className='text-xl'>{assignment.title}</CardTitle>
@@ -192,13 +192,13 @@ export default function StudentDashboard() {
                                                                         </CardHeader>
                                                                         <CardContent>
                                                                                 <p className='text-gray-600 mb-4'>{assignment.description}</p>
-                                                                                <div className='flex items-center justify-between'>
+                                                                                <div className='flex items-center justify-between flex-wrap gap-4'>
                                                                                         <div className='flex items-center text-sm text-gray-500'>
                                                                                                 <Clock className='w-4 h-4 mr-1' />
                                                                                                 Due: {assignment.dueDate}
                                                                                         </div>
                                                                                         {assignment.status === 'pending' && (
-                                                                                                <div className='flex items-center space-x-2'>
+                                                                                                <div className='flex items-center gap-2'>
                                                                                                         <Input
                                                                                                                 type='file'
                                                                                                                 onChange={handleFileChange}
@@ -232,13 +232,13 @@ export default function StudentDashboard() {
                                                 value='chat'
                                                 className='space-y-4'
                                         >
-                                                <Card className='h-96'>
-                                                        <CardHeader>
+                                                <Card className='h-96 '>
+                                                        <CardHeader className='max-[400px]:!pb-0'>
                                                                 <CardTitle>Chat with Teachers</CardTitle>
                                                                 <CardDescription>Get help and feedback from your instructors</CardDescription>
                                                         </CardHeader>
                                                         <CardContent className='flex flex-col h-full'>
-                                                                <ScrollArea className='flex-1 mb-4'>
+                                                                <ScrollArea className='flex-1 mb-9 max-[400px]:mb-3 !h-20 max-[332px]:mb-8'>
                                                                         <div className='space-y-4'>
                                                                                 {chatMessages.map((msg) => (
                                                                                         <div
@@ -304,13 +304,13 @@ export default function StudentDashboard() {
                                                                         {grades.map((grade, index) => (
                                                                                 <div
                                                                                         key={index}
-                                                                                        className='flex items-center justify-between p-4 border rounded-lg'
+                                                                                        className='flex items-center justify-between p-4 border rounded-lg max-[400px]:flex-col max-[400px]:items-start'
                                                                                 >
                                                                                         <div>
                                                                                                 <h4 className='font-semibold'>{grade.assignment}</h4>
                                                                                                 <p className='text-sm text-gray-600'>{grade.subject}</p>
                                                                                         </div>
-                                                                                        <div className='text-right'>
+                                                                                        <div className='text-right self-end'>
                                                                                                 <div className='text-2xl font-bold text-blue-600'>{grade.grade}</div>
                                                                                                 <p className='text-sm text-gray-500'>{grade.date}</p>
                                                                                         </div>
