@@ -7,6 +7,9 @@ const inter = Open_Sans({ subsets: ['latin'] })
 export const metadata: Metadata = {
         title: 'Assignee - Smart Assignment Management',
         description: 'Streamline your assignment workflow with AI-powered grading and seamless communication',
+        icons: {
+                icon: '/favicon.svg',
+        },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -168,8 +168,8 @@ export default function StudentDashboard() {
                                                 <div className='grid gap-4'>
                                                         {assignments.map((assignment) => (
                                                                 <Card key={assignment.id}>
-                                                                        <CardHeader>
-                                                                                <div className='flex items-start justify-between'>
+                                                                        <CardHeader className='!pb-0'>
+                                                                                <div className='flex items-start justify-between max-[400px]:gap-1'>
                                                                                         <div>
                                                                                                 <CardTitle className='text-xl'>{assignment.title}</CardTitle>
                                                                                                 <CardDescription className='text-base'>{assignment.subject}</CardDescription>
@@ -304,13 +304,13 @@ export default function StudentDashboard() {
                                                                         {grades.map((grade, index) => (
                                                                                 <div
                                                                                         key={index}
-                                                                                        className='flex items-center justify-between p-4 border rounded-lg'
+                                                                                        className='flex items-center justify-between p-4 border rounded-lg max-[400px]:flex-col max-[400px]:items-start'
                                                                                 >
                                                                                         <div>
                                                                                                 <h4 className='font-semibold'>{grade.assignment}</h4>
                                                                                                 <p className='text-sm text-gray-600'>{grade.subject}</p>
                                                                                         </div>
-                                                                                        <div className='text-right'>
+                                                                                        <div className='text-right max-[400px]:self-end'>
                                                                                                 <div className='text-2xl font-bold text-blue-600'>{grade.grade}</div>
                                                                                                 <p className='text-sm text-gray-500'>{grade.date}</p>
                                                                                         </div>
