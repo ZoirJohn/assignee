@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { BookOpen, Calendar, MessageSquare, FileText, Star, LogOut, Menu, X, User } from 'lucide-react'
+import { BookOpen, Home, User, FileText, LogOut, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 
 interface DashboardLayoutProps {
         children: React.ReactNode
@@ -14,15 +14,15 @@ interface DashboardLayoutProps {
 }
 
 const studentLinks = [
-        { href: '/dashboard/student', label: 'Deadlines', icon: Calendar },
-        { href: '/dashboard/student', label: 'Chat', icon: MessageSquare },
-        { href: '/dashboard/student', label: 'Transcript', icon: FileText },
+        { href: '/dashboard/student', label: 'Dashboard', icon: Home },
+        { href: '/dashboard/student/profile', label: 'Profile', icon: User },
+        { href: '/dashboard/student/transcript', label: 'Transcript', icon: FileText },
 ]
 
 const teacherLinks = [
-        { href: '/dashboard/teacher', label: 'Assignments', icon: FileText },
-        { href: '/dashboard/teacher', label: 'Chat', icon: MessageSquare },
-        { href: '/dashboard/teacher', label: 'Feedback', icon: Star },
+        { href: '/dashboard/teacher', label: 'Dashboard', icon: Home },
+        { href: '/dashboard/teacher/profile', label: 'Profile', icon: User },
+        { href: '/dashboard/teacher/transcript', label: 'Transcript', icon: FileText },
 ]
 
 export default function DashboardLayout({ children, userType, userName }: DashboardLayoutProps) {
@@ -97,7 +97,6 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                                 open={isMobileMenuOpen}
                                 onOpenChange={setIsMobileMenuOpen}
                         >
-                                <SheetTitle />
                                 <SheetTrigger asChild>
                                         <Button
                                                 variant='ghost'
@@ -137,7 +136,7 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                                         </div>
                                 </div>
 
-                                <main className='flex-1 p-1 lg:p-8'>{children}</main>
+                                <main className='flex-1 p-6 lg:p-8'>{children}</main>
                         </div>
                 </div>
         )
