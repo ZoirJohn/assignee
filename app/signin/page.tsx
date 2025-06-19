@@ -27,8 +27,6 @@ export default function SignInPage() {
 
         const onSubmit = (values: z.infer<typeof signInSchema>) => {
                 console.log('Sign in:', values)
-                // Here you would typically handle authentication
-                // For demo purposes, redirect based on email domain
                 if (values.email.includes('teacher')) {
                         window.location.href = '/dashboard/teacher'
                 } else {
