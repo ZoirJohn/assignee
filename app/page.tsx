@@ -79,7 +79,7 @@ export default function LandingPage() {
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
               Streamline Your
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-                {' '}Assignment{' '}
+                Assignment
               </span>
               Workflow
             </h1>

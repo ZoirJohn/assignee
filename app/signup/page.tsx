@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { signup } from '../actions/auth'
 
 const baseSchema = z.object({
         fullName: z.string().min(2, 'Full name must be at least 2 characters'),
@@ -84,10 +85,7 @@ export default function SignUpPage() {
                                                         className='space-y-4'
                                                 >
                                                         <Form {...studentForm}>
-                                                                <form
-                                                                        onSubmit={studentForm.handleSubmit(onStudentSubmit)}
-                                                                        className='space-y-4'
-                                                                >
+                                                                <form className='space-y-4'>
                                                                         <FormField
                                                                                 control={studentForm.control}
                                                                                 name='fullName'
@@ -183,6 +181,7 @@ export default function SignUpPage() {
                                                                         <Button
                                                                                 type='submit'
                                                                                 className='w-full'
+                                                                                formAction={signup}
                                                                         >
                                                                                 Create Student Account
                                                                         </Button>
@@ -221,10 +220,7 @@ export default function SignUpPage() {
                                                         className='space-y-4'
                                                 >
                                                         <Form {...teacherForm}>
-                                                                <form
-                                                                        onSubmit={teacherForm.handleSubmit(onTeacherSubmit)}
-                                                                        className='space-y-4'
-                                                                >
+                                                                <form className='space-y-4'>
                                                                         <FormField
                                                                                 control={teacherForm.control}
                                                                                 name='fullName'
@@ -298,6 +294,7 @@ export default function SignUpPage() {
                                                                         <Button
                                                                                 type='submit'
                                                                                 className='w-full'
+                                                                                formAction={signup}
                                                                         >
                                                                                 Create Teacher Account
                                                                         </Button>
@@ -333,7 +330,7 @@ export default function SignUpPage() {
                                         </Tabs>
 
                                         <div className='text-center text-sm text-gray-600 mt-6'>
-                                                Already have an account?{' '}
+                                                Already have an account?
                                                 <Link
                                                         href='/signin'
                                                         className='text-blue-600 hover:underline'

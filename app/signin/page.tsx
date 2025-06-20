@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { signin } from '../actions/auth'
 
 const signInSchema = z.object({
         email: z.string().email('Invalid email address'),
@@ -24,15 +25,6 @@ export default function SignInPage() {
                         password: '',
                 },
         })
-
-        const onSubmit = (values: z.infer<typeof signInSchema>) => {
-                console.log('Sign in:', values)
-                if (values.email.includes('teacher')) {
-                        window.location.href = '/dashboard/teacher'
-                } else {
-                        window.location.href = '/dashboard/student'
-                }
-        }
 
         return (
                 <div className='min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4'>
@@ -50,7 +42,6 @@ export default function SignInPage() {
                                 <CardContent>
                                         <Form {...form}>
                                                 <form
-                                                        onSubmit={form.handleSubmit(onSubmit)}
                                                         className='space-y-4'
                                                         name='signin'
                                                 >
@@ -113,6 +104,7 @@ export default function SignInPage() {
                                                         <Button
                                                                 type='submit'
                                                                 className='w-full'
+                                                                formAction={signin}
                                                         >
                                                                 Sign In
                                                         </Button>
