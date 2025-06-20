@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import DashboardLayout from '@/components/dashboard-layout'
+import Image from 'next/image'
 
 export default function TeacherProfile() {
         const [fullName, setFullName] = useState('Dr. Smith')
@@ -49,7 +50,7 @@ export default function TeacherProfile() {
                                                         <div className='flex items-center space-x-4'>
                                                                 <Avatar className='w-20 h-20'>
                                                                         {previewUrl ? (
-                                                                                <img
+                                                                                <Image
                                                                                         src={previewUrl}
                                                                                         alt='Profile'
                                                                                         className='w-full h-full object-cover rounded-full'

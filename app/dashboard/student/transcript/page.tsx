@@ -159,7 +159,7 @@ export default function StudentTranscript() {
                                                                                 variant='outline'
                                                                                 className='mr-2'
                                                                         >
-                                                                                Dean's List - Fall 2024
+                                                                                Dean&apos;s List - Fall 2024
                                                                         </Badge>
                                                                         <Badge variant='outline'>Honor Roll - Spring 2024</Badge>
                                                                 </div>

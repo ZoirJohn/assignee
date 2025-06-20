@@ -349,7 +349,7 @@ export default function TeacherDashboard() {
                                                 <Card>
                                                         <CardHeader>
                                                                 <CardTitle>Recent Feedback Given</CardTitle>
-                                                                <CardDescription>Track the feedback you've provided to students</CardDescription>
+                                                                <CardDescription>Track the feedback you&apos;ve provided to students</CardDescription>
                                                         </CardHeader>
                                                         <CardContent>
                                                                 <div className='space-y-4'>

@@ -234,7 +234,7 @@ export default function LandingPage() {
                                                                                                 />
                                                                                         ))}
                                                                                 </div>
-                                                                                <CardDescription className='text-base italic'>"{testimonial.content}"</CardDescription>
+                                                                                <CardDescription className='text-base italic'>&quot;{testimonial.content}&qout;</CardDescription>
                                                                         </CardHeader>
                                                                         <CardContent>
                                                                                 <div className='flex items-center space-x-3'>
