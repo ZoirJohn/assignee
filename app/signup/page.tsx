@@ -9,7 +9,6 @@ import { BookOpen, Mail, Lock, User, Hash, Chrome, Instagram } from 'lucide-reac
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -19,13 +18,17 @@ const baseSchema = z.object({
         fullName: z.string().min(2, 'Full name must be at least 2 characters'),
         email: z.string().email('Invalid email address'),
         password: z.string().min(8, 'Password must be at least 8 characters'),
+        role: z.enum(['student', 'teacher']),
 })
 
 const studentSchema = baseSchema.extend({
+        role: z.literal('student'),
         teacherId: z.string().min(1, 'Teacher ID is required'),
 })
 
-const teacherSchema = baseSchema
+const teacherSchema = baseSchema.extend({
+        role: z.literal('teacher'),
+})
 
 export default function SignUpPage() {
         const [userType, setUserType] = useState<'student' | 'teacher'>('student')
