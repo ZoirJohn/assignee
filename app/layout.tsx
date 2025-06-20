@@ -1,3 +1,4 @@
+import { createClient } from '@/utils/supabase/server'
 import './globals.css'
 import type { Metadata } from 'next'
 import { Open_Sans } from 'next/font/google'
@@ -12,13 +13,18 @@ export const metadata: Metadata = {
         },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
         return (
                 <html
                         lang='en'
                         className='select-none'
                 >
-                        <body className={inter.className} suppressHydrationWarning>{children}</body>
+                        <body
+                                className={inter.className}
+                                suppressHydrationWarning
+                        >
+                                {children}
+                        </body>
                 </html>
         )
 }

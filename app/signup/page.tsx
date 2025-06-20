@@ -40,6 +40,7 @@ export default function SignUpPage() {
                         email: '',
                         password: '',
                         teacherId: '',
+                        role: 'student',
                 },
         })
 
@@ -49,6 +50,7 @@ export default function SignUpPage() {
                         fullName: '',
                         email: '',
                         password: '',
+                        role: 'teacher',
                 },
         })
 
