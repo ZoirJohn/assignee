@@ -63,8 +63,8 @@ export default function SignUpPage() {
                                                         <Image
                                                                 src='/favicon.svg'
                                                                 alt='logo'
-                                                                width={28}
-                                                                height={28}
+                                                                width={20}
+                                                                height={20}
                                                         />
                                                 </div>
                                                 <span className='text-xl font-bold text-gray-900'>Assignee</span>
@@ -180,6 +180,20 @@ export default function SignUpPage() {
                                                                                 )}
                                                                         />
 
+                                                                        <FormField
+                                                                                control={teacherForm.control}
+                                                                                name='role'
+                                                                                render={({ field }) => (
+                                                                                        <FormControl>
+                                                                                                <Input
+                                                                                                        type='hidden'
+                                                                                                        value='student'
+                                                                                                        name='role'
+                                                                                                ></Input>
+                                                                                        </FormControl>
+                                                                                )}
+                                                                        ></FormField>
+
                                                                         <Button
                                                                                 type='submit'
                                                                                 className='w-full'
@@ -189,15 +203,6 @@ export default function SignUpPage() {
                                                                         </Button>
                                                                 </form>
                                                         </Form>
-
-                                                        <div className='relative'>
-                                                                <div className='absolute inset-0 flex items-center'>
-                                                                        <Separator className='w-full' />
-                                                                </div>
-                                                                <div className='relative flex justify-center text-xs uppercase'>
-                                                                        <span className='bg-white px-2 text-muted-foreground'>Or continue with</span>
-                                                                </div>
-                                                        </div>
                                                 </TabsContent>
 
                                                 <TabsContent
@@ -275,7 +280,19 @@ export default function SignUpPage() {
                                                                                         </FormItem>
                                                                                 )}
                                                                         />
-
+                                                                        <FormField
+                                                                                control={teacherForm.control}
+                                                                                name='role'
+                                                                                render={({ field }) => (
+                                                                                        <FormControl>
+                                                                                                <Input
+                                                                                                        type='hidden'
+                                                                                                        value='teacher'
+                                                                                                        name='role'
+                                                                                                ></Input>
+                                                                                        </FormControl>
+                                                                                )}
+                                                                        ></FormField>
                                                                         <Button
                                                                                 type='submit'
                                                                                 className='w-full'
@@ -285,15 +302,6 @@ export default function SignUpPage() {
                                                                         </Button>
                                                                 </form>
                                                         </Form>
-
-                                                        <div className='relative'>
-                                                                <div className='absolute inset-0 flex items-center'>
-                                                                        <Separator className='w-full' />
-                                                                </div>
-                                                                <div className='relative flex justify-center text-xs uppercase'>
-                                                                        <span className='bg-white px-2 text-muted-foreground'>Or continue with</span>
-                                                                </div>
-                                                        </div>
                                                 </TabsContent>
                                         </Tabs>
 

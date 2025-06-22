@@ -117,20 +117,11 @@ export default function SignInPage() {
                                                 </form>
                                         </Form>
 
-                                        <div className='relative mt-6'>
-                                                <div className='absolute inset-0 flex items-center'>
-                                                        <Separator className='w-full' />
-                                                </div>
-                                                <div className='relative flex justify-center text-xs uppercase'>
-                                                        <span className='bg-white px-2 text-muted-foreground'>Or continue with</span>
-                                                </div>
-                                        </div>
-
                                         <div className='text-center text-sm text-gray-600 mt-6'>
-                                                Don&apos;t have an account?
+                                                Don&apos;t have an account? 
                                                 <Link
                                                         href='/signup'
-                                                        className='text-blue-600 hover:underline'
+                                                        className='text-blue-600 hover:underline ml-1'
                                                 >
                                                         Sign up
                                                 </Link>
