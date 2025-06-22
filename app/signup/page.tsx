@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import Link from 'next/link'
-import { BookOpen, Mail, Lock, User, Hash, Chrome, Instagram } from 'lucide-react'
+import { Mail, Lock, User, Hash } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { signup } from '../actions/auth'
+import Image from 'next/image'
 
 const baseSchema = z.object({
         fullName: z.string().min(2, 'Full name must be at least 2 characters'),
@@ -53,22 +54,18 @@ export default function SignUpPage() {
                         role: 'teacher',
                 },
         })
-
-        const onStudentSubmit = (values: z.infer<typeof studentSchema>) => {
-                console.log('Student signup:', values)
-        }
-
-        const onTeacherSubmit = (values: z.infer<typeof teacherSchema>) => {
-                console.log('Teacher signup:', values)
-        }
-
         return (
                 <div className='min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4'>
                         <Card className='w-full max-w-md'>
                                 <CardHeader className='text-center'>
                                         <div className='flex items-center justify-center space-x-2 mb-4'>
                                                 <div className='w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center'>
-                                                        <BookOpen className='w-5 h-5 text-white' />
+                                                        <Image
+                                                                src='/favicon.svg'
+                                                                alt='logo'
+                                                                width={28}
+                                                                height={28}
+                                                        />
                                                 </div>
                                                 <span className='text-xl font-bold text-gray-900'>Assignee</span>
                                         </div>
@@ -201,23 +198,6 @@ export default function SignUpPage() {
                                                                         <span className='bg-white px-2 text-muted-foreground'>Or continue with</span>
                                                                 </div>
                                                         </div>
-
-                                                        <div className='grid grid-cols-2 gap-3'>
-                                                                <Button
-                                                                        variant='outline'
-                                                                        className='w-full'
-                                                                >
-                                                                        <Chrome className='mr-2 h-4 w-4' />
-                                                                        Google
-                                                                </Button>
-                                                                <Button
-                                                                        variant='outline'
-                                                                        className='w-full'
-                                                                >
-                                                                        <Instagram className='mr-2 h-4 w-4' />
-                                                                        Instagram
-                                                                </Button>
-                                                        </div>
                                                 </TabsContent>
 
                                                 <TabsContent
@@ -313,23 +293,6 @@ export default function SignUpPage() {
                                                                 <div className='relative flex justify-center text-xs uppercase'>
                                                                         <span className='bg-white px-2 text-muted-foreground'>Or continue with</span>
                                                                 </div>
-                                                        </div>
-
-                                                        <div className='grid grid-cols-2 gap-3'>
-                                                                <Button
-                                                                        variant='outline'
-                                                                        className='w-full'
-                                                                >
-                                                                        <Chrome className='mr-2 h-4 w-4' />
-                                                                        Google
-                                                                </Button>
-                                                                <Button
-                                                                        variant='outline'
-                                                                        className='w-full'
-                                                                >
-                                                                        <Instagram className='mr-2 h-4 w-4' />
-                                                                        Instagram
-                                                                </Button>
                                                         </div>
                                                 </TabsContent>
                                         </Tabs>

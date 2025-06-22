@@ -2,10 +2,12 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { BookOpen, Home, User, FileText, LogOut, Menu, X } from 'lucide-react'
+import { Home, User, FileText, LogOut, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import Image from 'next/image'
+import { createClient } from '@/utils/supabase/client'
 
 interface DashboardLayoutProps {
         children: React.ReactNode
@@ -29,13 +31,21 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
         const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
         const links = userType === 'student' ? studentLinks : teacherLinks
-
+        const supabase = createClient()
+        const handleSignOut = async () => {
+                await supabase.auth.signOut()
+        }
         const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
                 <div className={`${mobile ? 'w-full' : 'w-64'} bg-white border-r border-gray-200 flex flex-col`}>
                         <div className='p-6 border-b border-gray-200'>
                                 <div className='flex items-center space-x-2 mb-4'>
                                         <div className='w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center'>
-                                                <BookOpen className='w-5 h-5 text-white' />
+                                                <Image
+                                                        src='/favicon.svg'
+                                                        alt='logo'
+                                                        width={20}
+                                                        height={20}
+                                                />
                                         </div>
                                         <span className='text-xl font-bold text-gray-900'>Assignee</span>
                                 </div>
@@ -78,10 +88,10 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                                         className='w-full justify-start text-gray-700 hover:text-red-600 hover:bg-red-50'
                                         asChild
                                 >
-                                        <Link href='/'>
+                                        <button onClick={handleSignOut}>
                                                 <LogOut className='w-5 h-5 mr-3' />
                                                 Sign Out
-                                        </Link>
+                                        </button>
                                 </Button>
                         </div>
                 </div>
@@ -120,7 +130,12 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                                         <div className='flex items-center justify-between'>
                                                 <div className='flex items-center space-x-2'>
                                                         <div className='w-6 h-6 bg-blue-600 rounded flex items-center justify-center'>
-                                                                <BookOpen className='w-4 h-4 text-white' />
+                                                                <Image
+                                                                        src='/favicon.svg'
+                                                                        alt='logo'
+                                                                        width={16}
+                                                                        height={16}
+                                                                />
                                                         </div>
                                                         <span className='font-bold text-gray-900'>Assignee</span>
                                                 </div>

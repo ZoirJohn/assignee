@@ -1,11 +1,12 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { ArrowRight, BookOpen, Users, Clock, Star, CheckCircle, User, MessageSquare } from 'lucide-react'
+import { ArrowRight,  Users, Clock, Star, CheckCircle, User, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import Image from 'next/image'
 
 const fadeInUp = {
         initial: { opacity: 0, y: 60 },
@@ -29,7 +30,12 @@ export default function LandingPage() {
                                 <div className='container mx-auto px-4 py-4 flex items-center justify-between'>
                                         <div className='flex items-center space-x-2'>
                                                 <div className='w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center'>
-                                                        <BookOpen className='w-5 h-5 text-white' />
+                                                        <Image
+                                                                src='/favicon.svg'
+                                                                alt='logo'
+                                                                width={20}
+                                                                height={20}
+                                                        />
                                                 </div>
                                                 <span className='text-xl font-bold text-gray-900'>Assignee</span>
                                         </div>
@@ -84,7 +90,7 @@ export default function LandingPage() {
                                                 </Badge>
                                                 <h1 className='text-4xl md:text-6xl font-bold text-gray-900 mb-6'>
                                                         Streamline Your
-                                                        <span className='text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600'>Assignment</span>
+                                                        <span className='text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600'> Assignment </span>
                                                         Workflow
                                                 </h1>
                                                 <p className='text-xl text-gray-600 mb-8 max-w-2xl mx-auto'>
@@ -315,7 +321,12 @@ export default function LandingPage() {
                                 <div className='container mx-auto px-4 text-center'>
                                         <div className='flex items-center justify-center space-x-2 mb-8'>
                                                 <div className='w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center'>
-                                                        <BookOpen className='w-5 h-5' />
+                                                        <Image
+                                                                src='/favicon.svg'
+                                                                alt='logo'
+                                                                width={20}
+                                                                height={20}
+                                                        />
                                                 </div>
                                                 <span className='text-xl font-bold'>Assignee</span>
                                         </div>

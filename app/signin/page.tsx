@@ -4,13 +4,14 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import Link from 'next/link'
-import { BookOpen, Mail, Lock, Chrome, Instagram } from 'lucide-react'
+import {  Mail, Lock, Chrome, Instagram } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { signin } from '../actions/auth'
+import Image from 'next/image'
 
 const signInSchema = z.object({
         email: z.string().email('Invalid email address'),
@@ -32,7 +33,12 @@ export default function SignInPage() {
                                 <CardHeader className='text-center'>
                                         <div className='flex items-center justify-center space-x-2 mb-4'>
                                                 <div className='w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center'>
-                                                        <BookOpen className='w-5 h-5 text-white' />
+                                                        <Image
+                                                                src='/favicon.svg'
+                                                                alt='logo'
+                                                                width={20}
+                                                                height={20}
+                                                        />
                                                 </div>
                                                 <span className='text-xl font-bold text-gray-900'>Assignee</span>
                                         </div>
@@ -118,23 +124,6 @@ export default function SignInPage() {
                                                 <div className='relative flex justify-center text-xs uppercase'>
                                                         <span className='bg-white px-2 text-muted-foreground'>Or continue with</span>
                                                 </div>
-                                        </div>
-
-                                        <div className='grid grid-cols-2 gap-3 mt-6'>
-                                                <Button
-                                                        variant='outline'
-                                                        className='w-full'
-                                                >
-                                                        <Chrome className='mr-2 h-4 w-4' />
-                                                        Google
-                                                </Button>
-                                                <Button
-                                                        variant='outline'
-                                                        className='w-full'
-                                                >
-                                                        <Instagram className='mr-2 h-4 w-4' />
-                                                        Instagram
-                                                </Button>
                                         </div>
 
                                         <div className='text-center text-sm text-gray-600 mt-6'>
