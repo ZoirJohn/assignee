@@ -19,8 +19,18 @@ export async function signin(formData: FormData) {
                 redirect('/error')
         }
 
+        const {
+                data: { user },
+        } = await supabase.auth.getUser()
+
         revalidatePath('/', 'layout')
-        redirect('/')
+        if (user?.user_metadata.role == 'student') {
+                redirect('/dashboard/student')
+        } else if (user?.user_metadata.role == 'teacher') {
+                redirect('/dashboard/teacher')
+        } else {
+                redirect('/')
+        }
 }
 
 export async function signup(formData: FormData) {
@@ -43,4 +53,17 @@ export async function signup(formData: FormData) {
 
         revalidatePath('/', 'layout')
         redirect('/confirm')
+}
+
+export async function signout() {
+        const supabase = await createClient()
+
+        const { error } = await supabase.auth.signOut()
+
+        if (error) {
+                throw new Error('Error has occured:', error)
+        }
+
+        revalidatePath('dashboard')
+        redirect('/')
 }

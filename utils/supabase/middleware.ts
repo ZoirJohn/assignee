@@ -32,23 +32,23 @@ export async function updateSession(request: NextRequest) {
 
         const routeCheck = isNotSignIn && isNotSignUp && isNotConfirm && isNotHome
 
-        // if (!user && routeCheck) {
-        //         const url = request.nextUrl.clone()
-        //         url.pathname = '/'
-        //         return NextResponse.redirect(url)
-        // }
+        if (!user && routeCheck) {
+                const url = request.nextUrl.clone()
+                url.pathname = '/'
+                return NextResponse.redirect(url)
+        }
 
-        // if (user && routeCheck && user.user_metadata.role == 'teacher' && !request.nextUrl.pathname.startsWith('/dashboard/teacher')) {
-        //         const url = request.nextUrl.clone()
-        //         url.pathname = '/dashboard/teacher'
-        //         return NextResponse.redirect(url)
-        // }
+        if (user && routeCheck && user.user_metadata.role == 'teacher' && !request.nextUrl.pathname.startsWith('/dashboard/teacher')) {
+                const url = request.nextUrl.clone()
+                url.pathname = '/dashboard/teacher'
+                return NextResponse.redirect(url)
+        }
 
-        // if (user && routeCheck && user.user_metadata.role == 'student' && !request.nextUrl.pathname.startsWith('/dashboard/student')) {
-        //         const url = request.nextUrl.clone()
-        //         url.pathname = '/dashboard/student'
-        //         return NextResponse.redirect(url)
-        // }
+        if (user && routeCheck && user.user_metadata.role == 'student' && !request.nextUrl.pathname.startsWith('/dashboard/student')) {
+                const url = request.nextUrl.clone()
+                url.pathname = '/dashboard/student'
+                return NextResponse.redirect(url)
+        }
 
         return supabaseResponse
 }
