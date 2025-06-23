@@ -1,5 +1,4 @@
 'use client'
-
 import { useState } from 'react'
 import Link from 'next/link'
 import { Home, User, FileText, LogOut, Menu, X } from 'lucide-react'
@@ -11,7 +10,7 @@ import { createClient } from '@/utils/supabase/client'
 
 interface DashboardLayoutProps {
         children: React.ReactNode
-        userType: 'student' | 'teacher' | 'Unknown'
+        userType: 'student' | 'teacher'
         userName: string
 }
 
