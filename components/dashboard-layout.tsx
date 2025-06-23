@@ -11,7 +11,7 @@ import { createClient } from '@/utils/supabase/client'
 
 interface DashboardLayoutProps {
         children: React.ReactNode
-        userType: 'student' | 'teacher'
+        userType: 'student' | 'teacher' | 'Unknown'
         userName: string
 }
 
@@ -29,8 +29,8 @@ const teacherLinks = [
 
 export default function DashboardLayout({ children, userType, userName }: DashboardLayoutProps) {
         const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-
-        const links = userType === 'student' ? studentLinks : teacherLinks
+        console.log(userType)
+        const links = userType === 'student' ? studentLinks : userType === 'teacher' ? teacherLinks : []
         const supabase = createClient()
         const handleSignOut = async () => {
                 await supabase.auth.signOut()

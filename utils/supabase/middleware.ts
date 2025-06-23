@@ -25,45 +25,30 @@ export async function updateSession(request: NextRequest) {
                 data: { user },
         } = await supabase.auth.getUser()
 
-        if (
-                !user &&
-                !request.nextUrl.pathname.startsWith('/signin') &&
-                !request.nextUrl.pathname.startsWith('/signup') &&
-                !request.nextUrl.pathname.startsWith('/confirm') &&
-                request.nextUrl.pathname != '/'
-        ) {
-                const url = request.nextUrl.clone()
-                url.pathname = '/'
-                return NextResponse.redirect(url)
-        }
+        const isNotHome = request.nextUrl.pathname != '/'
+        const isNotSignIn = !request.nextUrl.pathname.startsWith('/signin')
+        const isNotSignUp = !request.nextUrl.pathname.startsWith('/signup')
+        const isNotConfirm = !request.nextUrl.pathname.startsWith('/confirm')
 
-        if (
-                user &&
-                user.user_metadata.role == 'teacher' &&
-                !request.nextUrl.pathname.startsWith('/signin') &&
-                !request.nextUrl.pathname.startsWith('/signup') &&
-                !request.nextUrl.pathname.startsWith('/confirm') &&
-                !request.nextUrl.pathname.startsWith('/dashboard/teacher') &&
-                request.nextUrl.pathname != '/'
-        ) {
-                const url = request.nextUrl.clone()
-                url.pathname = '/dashboard/teacher'
-                return NextResponse.redirect(url)
-        }
+        const routeCheck = isNotSignIn && isNotSignUp && isNotConfirm && isNotHome
 
-        if (
-                user &&
-                user.user_metadata.role == 'student' &&
-                !request.nextUrl.pathname.startsWith('/signin') &&
-                !request.nextUrl.pathname.startsWith('/signup') &&
-                !request.nextUrl.pathname.startsWith('/confirm') &&
-                !request.nextUrl.pathname.startsWith('/dashboard/student') &&
-                request.nextUrl.pathname != '/'
-        ) {
-                const url = request.nextUrl.clone()
-                url.pathname = '/dashboard/student'
-                return NextResponse.redirect(url)
-        }
+        // if (!user && routeCheck) {
+        //         const url = request.nextUrl.clone()
+        //         url.pathname = '/'
+        //         return NextResponse.redirect(url)
+        // }
+
+        // if (user && routeCheck && user.user_metadata.role == 'teacher' && !request.nextUrl.pathname.startsWith('/dashboard/teacher')) {
+        //         const url = request.nextUrl.clone()
+        //         url.pathname = '/dashboard/teacher'
+        //         return NextResponse.redirect(url)
+        // }
+
+        // if (user && routeCheck && user.user_metadata.role == 'student' && !request.nextUrl.pathname.startsWith('/dashboard/student')) {
+        //         const url = request.nextUrl.clone()
+        //         url.pathname = '/dashboard/student'
+        //         return NextResponse.redirect(url)
+        // }
 
         return supabaseResponse
 }
