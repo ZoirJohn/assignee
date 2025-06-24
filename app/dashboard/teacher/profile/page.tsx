@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { ChangeEvent, MouseEvent, useEffect, useState } from 'react'
 import { Camera, Mail, User, Save, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,14 +9,27 @@ import { Label } from '@/components/ui/label'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import DashboardLayout from '@/components/dashboard-layout'
 import Image from 'next/image'
+import { createClient } from '@/utils/supabase/client'
+
+type ProfileForm = {
+        fullName: string
+        role: 'student' | 'teacher' | ''
+        teacher_id: string | null
+        email: string
+}
 
 export default function TeacherProfile() {
-        const [fullName, setFullName] = useState('Dr. Smith')
-        const [email, setEmail] = useState('dr.smith@university.edu')
+        const supabase = createClient()
+        const [profile, setProfile] = useState<ProfileForm>({
+                fullName: '',
+                role: '',
+                teacher_id: null,
+                email: '',
+        })
         const [profileImage, setProfileImage] = useState<File | null>(null)
         const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
-        const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
                 const file = event.target.files?.[0]
                 if (file) {
                         setProfileImage(file)
@@ -24,10 +37,20 @@ export default function TeacherProfile() {
                         setPreviewUrl(url)
                 }
         }
+        const handleSave = (event: MouseEvent<HTMLButtonElement>) => {}
+        useEffect(() => {
+                const getUser = async () => {
+                        return (await supabase.auth.getUser()).data.user
+                }
+                const fetchProfile = async () => {
+                        const userData = await getUser()
+                        const { data } = await supabase.from('profiles').select('*').eq('id', userData?.id).single()
 
-        const handleSave = () => {
-                console.log('Saving profile:', { fullName, email, profileImage })
-        }
+                        if (data) setProfile(data)
+                }
+
+                fetchProfile()
+        }, [])
 
         return (
                 <DashboardLayout
@@ -57,7 +80,7 @@ export default function TeacherProfile() {
                                                                                 />
                                                                         ) : (
                                                                                 <AvatarFallback className='text-2xl'>
-                                                                                        {fullName
+                                                                                        {profile.fullName
                                                                                                 .split(' ')
                                                                                                 .map((n) => n[0])
                                                                                                 .join('')}
@@ -97,8 +120,8 @@ export default function TeacherProfile() {
                                                                         <User className='absolute left-3 top-3 h-4 w-4 text-gray-400' />
                                                                         <Input
                                                                                 id='fullName'
-                                                                                value={fullName}
-                                                                                onChange={(e) => setFullName(e.target.value)}
+                                                                                value={profile.fullName}
+                                                                                onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
                                                                                 className='pl-10'
                                                                         />
                                                                 </div>
@@ -111,8 +134,7 @@ export default function TeacherProfile() {
                                                                         <Input
                                                                                 id='email'
                                                                                 type='email'
-                                                                                value={email}
-                                                                                onChange={(e) => setEmail(e.target.value)}
+                                                                                value={profile.email}
                                                                                 className='pl-10'
                                                                         />
                                                                 </div>
@@ -147,7 +169,8 @@ export default function TeacherProfile() {
                                                 </CardContent>
                                         </Card>
 
-                                        <Card>
+                                        {/* Closed for further development */}
+                                        {/* <Card>
                                                 <CardHeader>
                                                         <CardTitle>Teaching Information</CardTitle>
                                                         <CardDescription>Your teaching credentials and subjects</CardDescription>
@@ -172,7 +195,7 @@ export default function TeacherProfile() {
                                                                 </div>
                                                         </div>
                                                 </CardContent>
-                                        </Card>
+                                        </Card> */}
 
                                         <div className='flex justify-end'>
                                                 <Button

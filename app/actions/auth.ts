@@ -40,8 +40,12 @@ export async function signup(formData: FormData) {
         const password = formData.get('password') as string
         const fullName = formData.get('fullName') as string
         const role = formData.get('role') as string
+        const teacherId = formData.get('teacherId')
 
-        const { error } = await supabase.auth.signUp({
+        const {
+                data: { user },
+                error,
+        } = await supabase.auth.signUp({
                 email,
                 password,
                 options: { data: { role, fullName } },
@@ -49,6 +53,14 @@ export async function signup(formData: FormData) {
 
         if (error) {
                 redirect('/error')
+        }
+        if (user) {
+                await supabase.from('profiles').insert({
+                        id: user.id,
+                        full_name: fullName,
+                        role,
+                        teacher_id: role === 'student' ? teacherId : null,
+                })
         }
 
         revalidatePath('/', 'layout')
