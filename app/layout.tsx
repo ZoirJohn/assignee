@@ -14,6 +14,14 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+        const supabase = await createClient()
+        const userId = (await supabase.auth.getUser()).data.user?.id
+        const { error } = await supabase.from('profiles').insert({
+                id: userId,
+                full_name: 'Bul Bul',
+                role: 'student',
+                teacher_id: null,
+        })
         return (
                 <html
                         lang='en'
