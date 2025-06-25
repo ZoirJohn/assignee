@@ -8,13 +8,9 @@ import { createClient } from '@/utils/supabase/server'
 export async function signin(formData: FormData) {
         const supabase = await createClient()
 
-        const data = {
-                email: formData.get('email') as string,
-                password: formData.get('password') as string,
-        }
-
-        const { error } = await supabase.auth.signInWithPassword(data)
-
+        const email = formData.get('email') as string
+        const password = formData.get('password') as string
+        const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) {
                 redirect('/error')
         }
@@ -22,15 +18,19 @@ export async function signin(formData: FormData) {
                 data: { user },
         } = await supabase.auth.getUser()
 
-        const { error: insertionError } = await supabase.from('profiles').insert({
-                id: user?.id,
-                full_name: user?.user_metadata.fullName,
-                role: user?.user_metadata.role,
-                teacher_id: user?.user_metadata.role == 'student' ? user?.user_metadata.teacherId : null,
-        })
-        if (insertionError) {
-                redirect('/error')
+        const { data: profiles } = await supabase.from('profiles').select('*').eq('id', user?.id)
+        if (!profiles?.length) {
+                const { error: insertionError } = await supabase.from('profiles').insert({
+                        id: user?.id,
+                        full_name: user?.user_metadata.fullName,
+                        role: user?.user_metadata.role,
+                        teacher_id: user?.user_metadata.role == 'student' ? user?.user_metadata.teacherId : null,
+                })
+                if (insertionError) {
+                        console.error(insertionError)
+                }
         }
+
         revalidatePath('/', 'layout')
         if (user?.user_metadata.role == 'student') {
                 redirect('/dashboard/student')
@@ -55,7 +55,7 @@ export async function signup(formData: FormData) {
         } = await supabase.auth.signUp({
                 email,
                 password,
-                options: { data: { role, fullName } },
+                options: { data: { role, fullName, teacherId } },
         })
 
         if (error) {

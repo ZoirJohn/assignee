@@ -33,7 +33,10 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
         const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
                 <div className={`${mobile ? 'w-full' : 'w-64'} bg-white border-r border-gray-200 flex flex-col`}>
                         <div className='p-6 border-b border-gray-200'>
-                                <div className='flex items-center space-x-2 mb-4'>
+                                <Link
+                                        href='/'
+                                        className='flex items-center space-x-2 mb-4'
+                                >
                                         <div className='w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center'>
                                                 <Image
                                                         src='/favicon.svg'
@@ -43,7 +46,7 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                                                 />
                                         </div>
                                         <span className='text-xl font-bold text-gray-900'>Assignee</span>
-                                </div>
+                                </Link>
                                 <div className='flex items-center space-x-3'>
                                         <Avatar>
                                                 <AvatarFallback>

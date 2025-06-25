@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { ArrowRight,  Users, Clock, Star, CheckCircle, User, MessageSquare } from 'lucide-react'
+import { ArrowRight, Users, Clock, Star, CheckCircle, User, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -28,7 +28,10 @@ export default function LandingPage() {
                 <div className='min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50'>
                         <header className='sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200'>
                                 <div className='container mx-auto px-4 py-4 flex items-center justify-between'>
-                                        <div className='flex items-center space-x-2'>
+                                        <Link
+                                                href='/'
+                                                className='flex items-center space-x-2'
+                                        >
                                                 <div className='w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center'>
                                                         <Image
                                                                 src='/favicon.svg'
@@ -38,7 +41,7 @@ export default function LandingPage() {
                                                         />
                                                 </div>
                                                 <span className='text-xl font-bold text-gray-900'>Assignee</span>
-                                        </div>
+                                        </Link>
                                         <div className='flex items-center space-x-3'>
                                                 <Button
                                                         variant='ghost'
@@ -319,17 +322,19 @@ export default function LandingPage() {
 
                         <footer className='bg-gray-900 text-white py-12'>
                                 <div className='container mx-auto px-4 text-center'>
-                                        <div className='flex items-center justify-center space-x-2 mb-8'>
-                                                <div className='w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center'>
-                                                        <Image
-                                                                src='/favicon.svg'
-                                                                alt='logo'
-                                                                width={20}
-                                                                height={20}
-                                                        />
+                                        <Link href='/'>
+                                                <div className='flex items-center justify-center space-x-2 mb-8'>
+                                                        <div className='w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center'>
+                                                                <Image
+                                                                        src='/favicon.svg'
+                                                                        alt='logo'
+                                                                        width={20}
+                                                                        height={20}
+                                                                />
+                                                        </div>
+                                                        <span className='text-xl font-bold'>Assignee</span>
                                                 </div>
-                                                <span className='text-xl font-bold'>Assignee</span>
-                                        </div>
+                                        </Link>
                                         <nav className='flex justify-center space-x-8 mb-8'>
                                                 <a
                                                         href='#advantages'

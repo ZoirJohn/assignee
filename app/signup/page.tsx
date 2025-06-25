@@ -59,15 +59,20 @@ export default function SignUpPage() {
                         <Card className='w-full max-w-md'>
                                 <CardHeader className='text-center'>
                                         <div className='flex items-center justify-center space-x-2 mb-4'>
-                                                <div className='w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center'>
-                                                        <Image
-                                                                src='/favicon.svg'
-                                                                alt='logo'
-                                                                width={20}
-                                                                height={20}
-                                                        />
-                                                </div>
-                                                <span className='text-xl font-bold text-gray-900'>Assignee</span>
+                                                <Link
+                                                        href='/'
+                                                        className='flex items-center'
+                                                >
+                                                        <div className='w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center'>
+                                                                <Image
+                                                                        src='/favicon.svg'
+                                                                        alt='logo'
+                                                                        width={20}
+                                                                        height={20}
+                                                                />
+                                                        </div>
+                                                        <span className='text-xl font-bold text-gray-900 ml-2'>Assignee</span>
+                                                </Link>
                                         </div>
                                         <CardTitle className='text-2xl'>Create Your Account</CardTitle>
                                         <CardDescription>Join thousands of educators and students using Assignee</CardDescription>

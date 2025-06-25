@@ -62,15 +62,20 @@ export default function ConfirmEmailPage() {
                                                 variants={fadeInUp}
                                                 className='flex items-center justify-center space-x-2 mb-8'
                                         >
-                                                <div className='w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center'>
-                                                        <Image
-                                                                src='/favicon.svg'
-                                                                alt='logo'
-                                                                width={20}
-                                                                height={20}
-                                                        />
-                                                </div>
-                                                <span className='text-2xl font-bold text-gray-900'>Assignee</span>
+                                                <Link
+                                                        href='/'
+                                                        className='flex items-center'
+                                                >
+                                                        <div className='w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center'>
+                                                                <Image
+                                                                        src='/favicon.svg'
+                                                                        alt='logo'
+                                                                        width={20}
+                                                                        height={20}
+                                                                />
+                                                        </div>
+                                                        <span className='text-2xl font-bold text-gray-900 ml-2'>Assignee</span>
+                                                </Link>
                                         </motion.div>
 
                                         <motion.div variants={fadeInUp}>
