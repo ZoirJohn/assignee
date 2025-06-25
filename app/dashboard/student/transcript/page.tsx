@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import DashboardLayout from '@/components/dashboard-layout'
 
 const transcriptData = [
         {
@@ -42,10 +41,6 @@ export default function StudentTranscript() {
         const totalAssignments = transcriptData.reduce((sum, semester) => sum + semester.subjects.reduce((subSum, subject) => subSum + subject.assignments, 0), 0)
 
         return (
-                <DashboardLayout
-                        userType='student'
-                        userName='John Doe'
-                >
                         <div className='space-y-6'>
                                 <div className='flex items-center justify-between max-[400px]:flex-col max-[400px]:gap-2'>
                                         <div>
@@ -168,6 +163,5 @@ export default function StudentTranscript() {
                                         </CardContent>
                                 </Card>
                         </div>
-                </DashboardLayout>
         )
 }

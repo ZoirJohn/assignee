@@ -10,7 +10,7 @@ import { signout } from '@/app/actions/auth'
 
 interface DashboardLayoutProps {
         children: React.ReactNode
-        userType: 'student' | 'teacher'
+        userType: 'student' | 'teacher' | ''
         userName: string
 }
 

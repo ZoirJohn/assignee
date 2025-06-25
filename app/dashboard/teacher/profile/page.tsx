@@ -11,33 +11,41 @@ import DashboardLayout from '@/components/dashboard-layout'
 import Image from 'next/image'
 import { createClient } from '@/utils/supabase/client'
 
-type ProfileForm = {
-        fullName: string
+export type ProfileForm = {
+        full_name: string
         role: 'student' | 'teacher' | ''
         teacher_id: string | null
         email: string
+        id: string
 }
 
 export default function TeacherProfile() {
         const supabase = createClient()
         const [profile, setProfile] = useState<ProfileForm>({
-                fullName: '',
+                full_name: '',
                 role: '',
                 teacher_id: null,
                 email: '',
+                id: '',
         })
-        const [profileImage, setProfileImage] = useState<File | null>(null)
+        const [profileImage, setProfileImage] = useState<string | null>(null)
         const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+        const [copied, setCopied] = useState<boolean>(false)
 
         const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
                 const file = event.target.files?.[0]
                 if (file) {
-                        setProfileImage(file)
+                        setProfileImage(file as unknown as string)
                         const url = URL.createObjectURL(file)
                         setPreviewUrl(url)
                 }
         }
         const handleSave = (event: MouseEvent<HTMLButtonElement>) => {}
+        const handleCopy = () => {
+                navigator.clipboard.writeText(profile.id)
+                setCopied(true)
+        }
+
         useEffect(() => {
                 const getUser = async () => {
                         return (await supabase.auth.getUser()).data.user
@@ -46,16 +54,23 @@ export default function TeacherProfile() {
                         const userData = await getUser()
                         const { data } = await supabase.from('profiles').select('*').eq('id', userData?.id).single()
 
-                        if (data) setProfile(data)
+                        if (data) setProfile({ ...data, email: userData?.user_metadata.email, id: userData?.id })
                 }
 
                 fetchProfile()
         }, [])
-
+        useEffect(() => {
+                const timeout = setTimeout(() => {
+                        setCopied(false)
+                }, 2000)
+                return () => {
+                        clearTimeout(timeout)
+                }
+        }, [copied])
         return (
                 <DashboardLayout
-                        userType='teacher'
-                        userName='Dr. Smith'
+                        userType={profile.role}
+                        userName={profile.full_name}
                 >
                         <div className='space-y-6'>
                                 <div>
@@ -77,10 +92,12 @@ export default function TeacherProfile() {
                                                                                         src={previewUrl}
                                                                                         alt='Profile'
                                                                                         className='w-full h-full object-cover rounded-full'
+                                                                                        width={30}
+                                                                                        height={30}
                                                                                 />
                                                                         ) : (
                                                                                 <AvatarFallback className='text-2xl'>
-                                                                                        {profile.fullName
+                                                                                        {profile.full_name
                                                                                                 .split(' ')
                                                                                                 .map((n) => n[0])
                                                                                                 .join('')}
@@ -90,11 +107,13 @@ export default function TeacherProfile() {
                                                                 <div className='space-y-2'>
                                                                         <Input
                                                                                 type='file'
-                                                                                accept='image/*'
                                                                                 onChange={handleImageChange}
                                                                                 className='hidden'
                                                                                 id='profile-image'
+                                                                                width={30}
+                                                                                height={30}
                                                                         />
+
                                                                         <Button
                                                                                 variant='outline'
                                                                                 onClick={() => document.getElementById('profile-image')?.click()}
@@ -120,9 +139,9 @@ export default function TeacherProfile() {
                                                                         <User className='absolute left-3 top-3 h-4 w-4 text-gray-400' />
                                                                         <Input
                                                                                 id='fullName'
-                                                                                value={profile.fullName}
-                                                                                onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
+                                                                                value={profile.full_name}
                                                                                 className='pl-10'
+                                                                                readOnly
                                                                         />
                                                                 </div>
                                                         </div>
@@ -136,6 +155,7 @@ export default function TeacherProfile() {
                                                                                 type='email'
                                                                                 value={profile.email}
                                                                                 className='pl-10'
+                                                                                readOnly
                                                                         />
                                                                 </div>
                                                         </div>
@@ -157,13 +177,19 @@ export default function TeacherProfile() {
                                                                         <Label className='text-sm font-medium text-gray-500'>Member Since</Label>
                                                                         <p className='text-sm font-semibold text-gray-900'>January 2025</p>
                                                                 </div>
-                                                                <div>
+                                                                <div className='relative'>
                                                                         <Label className='text-sm font-medium text-gray-500'>Teacher ID</Label>
-                                                                        <p className='text-sm font-semibold text-gray-900'>#TCH-2025-001</p>
-                                                                </div>
-                                                                <div>
-                                                                        <Label className='text-sm font-medium text-gray-500'>Status</Label>
-                                                                        <p className='text-sm font-semibold text-green-600'>Active</p>
+                                                                        <Input
+                                                                                className='text-sm font-semibold text-gray-900'
+                                                                                value={profile.id}
+                                                                                readOnly
+                                                                                onClick={handleCopy}
+                                                                        />
+                                                                        {copied && (
+                                                                                <div className='absolute top-1/2 -right-20 mt-1 mr-1 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded shadow'>
+                                                                                        Copied!
+                                                                                </div>
+                                                                        )}
                                                                 </div>
                                                         </div>
                                                 </CardContent>
