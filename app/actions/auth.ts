@@ -54,19 +54,6 @@ export async function signup(formData: FormData) {
                 redirect('/error')
         }
 
-        if (user) {
-                const { error } = await supabase.from('profiles').insert({
-                        id: user.id,
-                        full_name: user.user_metadata.fullName,
-                        role: user.user_metadata.role,
-                        teacher_id: user.user_metadata.role === 'student' ? teacherId : null,
-                })
-                if (error) {
-                        console.error('Failed to add', error)
-                        redirect('/insert')
-                }
-        }
-
         revalidatePath('/', 'layout')
         redirect('/confirm')
 }
@@ -83,9 +70,3 @@ export async function signout() {
         revalidatePath('dashboard')
         redirect('/')
 }
-// await supabase.from('profiles').insert({
-// id: 'ebd02e7d-b302-4d3a-a102-42ad3f53a212',
-//         full_name: 'Bul Bul',
-//         role: 'student',
-//         teacher_id: null,
-// })
