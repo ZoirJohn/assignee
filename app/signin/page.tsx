@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import Link from 'next/link'
-import {  Mail, Lock, Chrome, Instagram } from 'lucide-react'
+import { Mail, Lock, Chrome, Instagram } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -65,6 +65,7 @@ export default function SignInPage() {
                                                                                                         className='pl-10'
                                                                                                         {...field}
                                                                                                         id='email'
+                                                                                                        autoComplete='email'
                                                                                                 />
                                                                                         </div>
                                                                                 </FormControl>
@@ -88,6 +89,7 @@ export default function SignInPage() {
                                                                                                         className='pl-10'
                                                                                                         {...field}
                                                                                                         id='password'
+                                                                                                        autoComplete='current-password'
                                                                                                 />
                                                                                         </div>
                                                                                 </FormControl>
@@ -118,7 +120,7 @@ export default function SignInPage() {
                                         </Form>
 
                                         <div className='text-center text-sm text-gray-600 mt-6'>
-                                                Don&apos;t have an account? 
+                                                Don&apos;t have an account?
                                                 <Link
                                                         href='/signup'
                                                         className='text-blue-600 hover:underline ml-1'

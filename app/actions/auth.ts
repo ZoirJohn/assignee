@@ -18,11 +18,19 @@ export async function signin(formData: FormData) {
         if (error) {
                 redirect('/error')
         }
-
         const {
                 data: { user },
         } = await supabase.auth.getUser()
 
+        const { error: insertionError } = await supabase.from('profiles').insert({
+                id: user?.id,
+                full_name: user?.user_metadata.fullName,
+                role: user?.user_metadata.role,
+                teacher_id: user?.user_metadata.role == 'student' ? user?.user_metadata.teacherId : null,
+        })
+        if (insertionError) {
+                redirect('/error')
+        }
         revalidatePath('/', 'layout')
         if (user?.user_metadata.role == 'student') {
                 redirect('/dashboard/student')
