@@ -1,5 +1,4 @@
 'use client'
-
 import { FileText, Download, Calendar, TrendingUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -144,7 +143,7 @@ export default function StudentTranscript() {
                                                 <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                                                         <div>
                                                                 <h4 className='font-semibold text-gray-900 mb-2'>Current Status</h4>
-                                                                <Badge className='bg-green-100 text-green-800'>Good Standing</Badge>
+                                                                <Badge className='bg-green-100 text-green-800 hover:bg-green-100'>Good Standing</Badge>
                                                                 <p className='text-sm text-gray-600 mt-2'>Maintaining satisfactory academic progress</p>
                                                         </div>
                                                         <div>

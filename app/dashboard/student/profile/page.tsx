@@ -1,28 +1,53 @@
 'use client'
-
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Camera, Mail, User, Save } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { ProfileForm } from '../../teacher/profile/page'
+import { createClient } from '@/utils/supabase/client'
 import Image from 'next/image'
 
 export default function StudentProfile() {
-        const [profile, setProfile] = useState({ full_name: '', email: '' })
-        const [profileImage, setProfileImage] = useState<File | null>(null)
+        const supabase = createClient()
+        const [profile, setProfile] = useState<ProfileForm>({ full_name: '', email: '', id: '', role: '', teacher_id: '', created_at: '' })
         const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+        const [copied, setCopied] = useState<boolean>(false)
         const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
                 const file = event.target.files?.[0]
                 if (file) {
-                        setProfileImage(file)
                         const url = URL.createObjectURL(file)
                         setPreviewUrl(url)
                 }
         }
-
         const handleSave = () => {}
+        const handleCopy = () => {
+                navigator.clipboard.writeText(profile.id)
+                setCopied(true)
+        }
+        useEffect(() => {
+                const getUser = async () => {
+                        return (await supabase.auth.getUser()).data.user
+                }
+                const fetchProfile = async () => {
+                        const userData = await getUser()
+                        const { data } = await supabase.from('profiles').select('*').eq('id', userData?.id).single()
+
+                        if (data) setProfile({ ...data, email: userData?.user_metadata.email, id: userData?.id })
+                }
+
+                fetchProfile()
+        }, [])
+        useEffect(() => {
+                const timeout = setTimeout(() => {
+                        setCopied(false)
+                }, 2000)
+                return () => {
+                        clearTimeout(timeout)
+                }
+        }, [copied])
         return (
                 <div className='space-y-6'>
                         <div>
@@ -44,6 +69,8 @@ export default function StudentProfile() {
                                                                                 src={previewUrl}
                                                                                 alt='Profile'
                                                                                 className='w-full h-full object-cover rounded-full'
+                                                                                width={30}
+                                                                                height={30}
                                                                         />
                                                                 ) : (
                                                                         <AvatarFallback className='text-2xl'>
@@ -123,15 +150,21 @@ export default function StudentProfile() {
                                                         </div>
                                                         <div>
                                                                 <Label className='text-sm font-medium text-gray-500'>Member Since</Label>
-                                                                <p className='text-sm font-semibold text-gray-900'>January 2025</p>
+                                                                <p className='text-sm font-semibold text-gray-900'>{new Date(profile.created_at).toLocaleString()}</p>
                                                         </div>
-                                                        <div>
+                                                        <div className='relative'>
                                                                 <Label className='text-sm font-medium text-gray-500'>Student ID</Label>
-                                                                <p className='text-sm font-semibold text-gray-900'>#STU-2025-001</p>
-                                                        </div>
-                                                        <div>
-                                                                <Label className='text-sm font-medium text-gray-500'>Status</Label>
-                                                                <p className='text-sm font-semibold text-green-600'>Active</p>
+                                                                <Input
+                                                                        className='text-sm font-semibold text-gray-900'
+                                                                        value={profile.id}
+                                                                        readOnly
+                                                                        onClick={handleCopy}
+                                                                />
+                                                                {copied && (
+                                                                        <div className='absolute top-1/2 -right-20 mt-1 mr-1 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded shadow'>
+                                                                                Copied!
+                                                                        </div>
+                                                                )}
                                                         </div>
                                                 </div>
                                         </CardContent>

@@ -50,159 +50,152 @@ export default function TeacherTranscript() {
         const averageCompletion = teachingData.reduce((sum, semester) => sum + semester.averageCompletion, 0) / teachingData.length
 
         return (
-                <DashboardLayout
-                        userType='teacher'
-                        userName='Dr. Smith'
-                >
-                        <div className='space-y-6'>
-                                <div className='flex items-center justify-between'>
-                                        <div>
-                                                <h1 className='text-3xl font-bold text-gray-900'>Teaching Record</h1>
-                                                <p className='text-gray-600'>Your complete teaching history and class performance metrics</p>
-                                        </div>
-                                        <Button
-                                                variant='outline'
-                                                className='flex items-center'
-                                        >
-                                                <Download className='w-4 h-4 mr-2' />
-                                                Export Report
-                                        </Button>
+                <div className='space-y-6'>
+                        <div className='flex items-center justify-between'>
+                                <div>
+                                        <h1 className='text-3xl font-bold text-gray-900'>Teaching Record</h1>
+                                        <p className='text-gray-600'>Your complete teaching history and class performance metrics</p>
                                 </div>
+                                <Button
+                                        variant='outline'
+                                        className='flex items-center'
+                                >
+                                        <Download className='w-4 h-4 mr-2' />
+                                        Export Report
+                                </Button>
+                        </div>
 
-                                <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-                                        <Card>
-                                                <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                                                        <CardTitle className='text-sm font-medium'>Total Students Taught</CardTitle>
-                                                        <Users className='h-4 w-4 text-muted-foreground' />
-                                                </CardHeader>
-                                                <CardContent>
-                                                        <div className='text-2xl font-bold text-blue-600'>{totalStudents}</div>
-                                                        <p className='text-xs text-muted-foreground'>Across all semesters</p>
-                                                </CardContent>
-                                        </Card>
-
-                                        <Card>
-                                                <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                                                        <CardTitle className='text-sm font-medium'>Assignments Created</CardTitle>
-                                                        <FileText className='h-4 w-4 text-muted-foreground' />
-                                                </CardHeader>
-                                                <CardContent>
-                                                        <div className='text-2xl font-bold'>{totalAssignments}</div>
-                                                        <p className='text-xs text-muted-foreground'>Total assignments given</p>
-                                                </CardContent>
-                                        </Card>
-
-                                        <Card>
-                                                <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                                                        <CardTitle className='text-sm font-medium'>Average Completion</CardTitle>
-                                                        <TrendingUp className='h-4 w-4 text-muted-foreground' />
-                                                </CardHeader>
-                                                <CardContent>
-                                                        <div className='text-2xl font-bold text-green-600'>{averageCompletion.toFixed(1)}%</div>
-                                                        <p className='text-xs text-muted-foreground'>Student completion rate</p>
-                                                </CardContent>
-                                        </Card>
-                                </div>
-
-                                <div className='space-y-6'>
-                                        {teachingData.map((semester, index) => (
-                                                <Card key={index}>
-                                                        <CardHeader>
-                                                                <div className='flex items-center justify-between'>
-                                                                        <div>
-                                                                                <CardTitle className='text-xl'>{semester.semester}</CardTitle>
-                                                                                <CardDescription>
-                                                                                        {semester.subjects.length} subjects • {semester.totalStudents} students
-                                                                                </CardDescription>
-                                                                        </div>
-                                                                        <Badge
-                                                                                variant='outline'
-                                                                                className='bg-blue-50 text-blue-700'
-                                                                        >
-                                                                                {semester.averageCompletion.toFixed(1)}% completion
-                                                                        </Badge>
-                                                                </div>
-                                                        </CardHeader>
-                                                        <CardContent>
-                                                                <div className='space-y-4'>
-                                                                        {semester.subjects.map((subject, subIndex) => (
-                                                                                <div key={subIndex}>
-                                                                                        <div className='flex items-center justify-between p-4 border rounded-lg'>
-                                                                                                <div className='flex-1'>
-                                                                                                        <h4 className='font-semibold text-gray-900'>{subject.name}</h4>
-                                                                                                        <p className='text-sm text-gray-600'>
-                                                                                                                {subject.students} students • {subject.assignments} assignments
-                                                                                                        </p>
-                                                                                                </div>
-                                                                                                <div className='flex items-center space-x-3'>
-                                                                                                        <div className='text-right'>
-                                                                                                                <div className='flex items-center space-x-2 mb-1'>
-                                                                                                                        <Badge className={getGradeColor(subject.averageGrade)}>
-                                                                                                                                Avg: {subject.averageGrade}
-                                                                                                                        </Badge>
-                                                                                                                        <Badge className={getCompletionColor(subject.completion)}>
-                                                                                                                                {subject.completion}%
-                                                                                                                        </Badge>
-                                                                                                                </div>
-                                                                                                                <p className='text-xs text-gray-500'>Class performance</p>
-                                                                                                        </div>
-                                                                                                </div>
-                                                                                        </div>
-                                                                                        {subIndex < semester.subjects.length - 1 && <Separator className='my-2' />}
-                                                                                </div>
-                                                                        ))}
-                                                                </div>
-                                                        </CardContent>
-                                                </Card>
-                                        ))}
-                                </div>
-
+                        <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
                                 <Card>
-                                        <CardHeader>
-                                                <CardTitle>Teaching Performance</CardTitle>
-                                                <CardDescription>Your teaching metrics and achievements</CardDescription>
+                                        <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                                                <CardTitle className='text-sm font-medium'>Total Students Taught</CardTitle>
+                                                <Users className='h-4 w-4 text-muted-foreground' />
                                         </CardHeader>
                                         <CardContent>
-                                                <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                                                        <div>
-                                                                <h4 className='font-semibold text-gray-900 mb-2'>Performance Metrics</h4>
-                                                                <div className='space-y-2'>
-                                                                        <div className='flex justify-between'>
-                                                                                <span className='text-sm text-gray-600'>Student Satisfaction</span>
-                                                                                <Badge className='bg-green-100 text-green-800'>4.8/5.0</Badge>
-                                                                        </div>
-                                                                        <div className='flex justify-between'>
-                                                                                <span className='text-sm text-gray-600'>Assignment Quality</span>
-                                                                                <Badge className='bg-green-100 text-green-800'>Excellent</Badge>
-                                                                        </div>
-                                                                        <div className='flex justify-between'>
-                                                                                <span className='text-sm text-gray-600'>Response Time</span>
-                                                                                <Badge className='bg-blue-100 text-blue-800'>&lt; 24 hours</Badge>
-                                                                        </div>
-                                                                </div>
-                                                        </div>
-                                                        <div>
-                                                                <h4 className='font-semibold text-gray-900 mb-2'>Recognition</h4>
-                                                                <div className='space-y-1'>
-                                                                        <Badge
-                                                                                variant='outline'
-                                                                                className='mr-2 mb-1'
-                                                                        >
-                                                                                Teacher of the Month - Dec 2024
-                                                                        </Badge>
-                                                                        <Badge
-                                                                                variant='outline'
-                                                                                className='mr-2 mb-1'
-                                                                        >
-                                                                                Excellence in Education - 2024
-                                                                        </Badge>
-                                                                        <Badge variant='outline'>Outstanding Feedback - Fall 2024</Badge>
-                                                                </div>
-                                                        </div>
-                                                </div>
+                                                <div className='text-2xl font-bold text-blue-600'>{totalStudents}</div>
+                                                <p className='text-xs text-muted-foreground'>Across all semesters</p>
+                                        </CardContent>
+                                </Card>
+
+                                <Card>
+                                        <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                                                <CardTitle className='text-sm font-medium'>Assignments Created</CardTitle>
+                                                <FileText className='h-4 w-4 text-muted-foreground' />
+                                        </CardHeader>
+                                        <CardContent>
+                                                <div className='text-2xl font-bold'>{totalAssignments}</div>
+                                                <p className='text-xs text-muted-foreground'>Total assignments given</p>
+                                        </CardContent>
+                                </Card>
+
+                                <Card>
+                                        <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                                                <CardTitle className='text-sm font-medium'>Average Completion</CardTitle>
+                                                <TrendingUp className='h-4 w-4 text-muted-foreground' />
+                                        </CardHeader>
+                                        <CardContent>
+                                                <div className='text-2xl font-bold text-green-600'>{averageCompletion.toFixed(1)}%</div>
+                                                <p className='text-xs text-muted-foreground'>Student completion rate</p>
                                         </CardContent>
                                 </Card>
                         </div>
-                </DashboardLayout>
+
+                        <div className='space-y-6'>
+                                {teachingData.map((semester, index) => (
+                                        <Card key={index}>
+                                                <CardHeader>
+                                                        <div className='flex items-center justify-between'>
+                                                                <div>
+                                                                        <CardTitle className='text-xl'>{semester.semester}</CardTitle>
+                                                                        <CardDescription>
+                                                                                {semester.subjects.length} subjects • {semester.totalStudents} students
+                                                                        </CardDescription>
+                                                                </div>
+                                                                <Badge
+                                                                        variant='outline'
+                                                                        className='bg-blue-50 text-blue-700'
+                                                                >
+                                                                        {semester.averageCompletion.toFixed(1)}% completion
+                                                                </Badge>
+                                                        </div>
+                                                </CardHeader>
+                                                <CardContent>
+                                                        <div className='space-y-4'>
+                                                                {semester.subjects.map((subject, subIndex) => (
+                                                                        <div key={subIndex}>
+                                                                                <div className='flex items-center justify-between p-4 border rounded-lg'>
+                                                                                        <div className='flex-1'>
+                                                                                                <h4 className='font-semibold text-gray-900'>{subject.name}</h4>
+                                                                                                <p className='text-sm text-gray-600'>
+                                                                                                        {subject.students} students • {subject.assignments} assignments
+                                                                                                </p>
+                                                                                        </div>
+                                                                                        <div className='flex items-center space-x-3'>
+                                                                                                <div className='text-right'>
+                                                                                                        <div className='flex items-center space-x-2 mb-1'>
+                                                                                                                <Badge className={getGradeColor(subject.averageGrade)}>
+                                                                                                                        Avg: {subject.averageGrade}
+                                                                                                                </Badge>
+                                                                                                                <Badge className={getCompletionColor(subject.completion)}>{subject.completion}%</Badge>
+                                                                                                        </div>
+                                                                                                        <p className='text-xs text-gray-500'>Class performance</p>
+                                                                                                </div>
+                                                                                        </div>
+                                                                                </div>
+                                                                                {subIndex < semester.subjects.length - 1 && <Separator className='my-2' />}
+                                                                        </div>
+                                                                ))}
+                                                        </div>
+                                                </CardContent>
+                                        </Card>
+                                ))}
+                        </div>
+
+                        <Card>
+                                <CardHeader>
+                                        <CardTitle>Teaching Performance</CardTitle>
+                                        <CardDescription>Your teaching metrics and achievements</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                                                <div>
+                                                        <h4 className='font-semibold text-gray-900 mb-2'>Performance Metrics</h4>
+                                                        <div className='space-y-2'>
+                                                                <div className='flex justify-between'>
+                                                                        <span className='text-sm text-gray-600'>Student Satisfaction</span>
+                                                                        <Badge className='bg-green-100 text-green-800'>4.8/5.0</Badge>
+                                                                </div>
+                                                                <div className='flex justify-between'>
+                                                                        <span className='text-sm text-gray-600'>Assignment Quality</span>
+                                                                        <Badge className='bg-green-100 text-green-800'>Excellent</Badge>
+                                                                </div>
+                                                                <div className='flex justify-between'>
+                                                                        <span className='text-sm text-gray-600'>Response Time</span>
+                                                                        <Badge className='bg-blue-100 text-blue-800'>&lt; 24 hours</Badge>
+                                                                </div>
+                                                        </div>
+                                                </div>
+                                                <div>
+                                                        <h4 className='font-semibold text-gray-900 mb-2'>Recognition</h4>
+                                                        <div className='space-y-1'>
+                                                                <Badge
+                                                                        variant='outline'
+                                                                        className='mr-2 mb-1'
+                                                                >
+                                                                        Teacher of the Month - Dec 2024
+                                                                </Badge>
+                                                                <Badge
+                                                                        variant='outline'
+                                                                        className='mr-2 mb-1'
+                                                                >
+                                                                        Excellence in Education - 2024
+                                                                </Badge>
+                                                                <Badge variant='outline'>Outstanding Feedback - Fall 2024</Badge>
+                                                        </div>
+                                                </div>
+                                        </div>
+                                </CardContent>
+                        </Card>
+                </div>
         )
 }

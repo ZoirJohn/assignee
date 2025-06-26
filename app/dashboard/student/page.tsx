@@ -1,8 +1,6 @@
-import DashboardLayout from '@/components/dashboard-layout'
 import StudentTabs from '@/components/student-tabs'
 import { Calendar, MessageSquare, FileText } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { createClient } from '@/utils/supabase/server'
 
 export default async function StudentDashboard() {
         return (

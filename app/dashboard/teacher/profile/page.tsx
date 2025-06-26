@@ -17,6 +17,7 @@ export type ProfileForm = {
         teacher_id: string | null
         email: string
         id: string
+        created_at: string
 }
 
 export default function TeacherProfile() {
@@ -27,6 +28,7 @@ export default function TeacherProfile() {
                 teacher_id: null,
                 email: '',
                 id: '',
+                created_at: '',
         })
         const [profileImage, setProfileImage] = useState<string | null>(null)
         const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -68,135 +70,131 @@ export default function TeacherProfile() {
                 }
         }, [copied])
         return (
-                <DashboardLayout
-                        userType={profile.role}
-                        userName={profile.full_name}
-                >
-                        <div className='space-y-6'>
-                                <div>
-                                        <h1 className='text-3xl font-bold text-gray-900'>Profile Settings</h1>
-                                        <p className='text-gray-600'>Manage your account information and preferences</p>
-                                </div>
+                <div className='space-y-6'>
+                        <div>
+                                <h1 className='text-3xl font-bold text-gray-900'>Profile Settings</h1>
+                                <p className='text-gray-600'>Manage your account information and preferences</p>
+                        </div>
 
-                                <div className='grid gap-6 max-w-2xl'>
-                                        <Card>
-                                                <CardHeader>
-                                                        <CardTitle>Profile Picture</CardTitle>
-                                                        <CardDescription>Upload a profile picture to personalize your account</CardDescription>
-                                                </CardHeader>
-                                                <CardContent className='space-y-4'>
-                                                        <div className='flex items-center space-x-4'>
-                                                                <Avatar className='w-20 h-20'>
-                                                                        {previewUrl ? (
-                                                                                <Image
-                                                                                        src={previewUrl}
-                                                                                        alt='Profile'
-                                                                                        className='w-full h-full object-cover rounded-full'
-                                                                                        width={30}
-                                                                                        height={30}
-                                                                                />
-                                                                        ) : (
-                                                                                <AvatarFallback className='text-2xl'>
-                                                                                        {profile.full_name
-                                                                                                .split(' ')
-                                                                                                .map((n) => n[0])
-                                                                                                .join('')}
-                                                                                </AvatarFallback>
-                                                                        )}
-                                                                </Avatar>
-                                                                <div className='space-y-2'>
-                                                                        <Input
-                                                                                type='file'
-                                                                                onChange={handleImageChange}
-                                                                                className='hidden'
-                                                                                id='profile-image'
+                        <div className='grid gap-6 max-w-2xl'>
+                                <Card>
+                                        <CardHeader>
+                                                <CardTitle>Profile Picture</CardTitle>
+                                                <CardDescription>Upload a profile picture to personalize your account</CardDescription>
+                                        </CardHeader>
+                                        <CardContent className='space-y-4'>
+                                                <div className='flex items-center space-x-4'>
+                                                        <Avatar className='w-20 h-20'>
+                                                                {previewUrl ? (
+                                                                        <Image
+                                                                                src={previewUrl}
+                                                                                alt='Profile'
+                                                                                className='w-full h-full object-cover rounded-full'
                                                                                 width={30}
                                                                                 height={30}
                                                                         />
-
-                                                                        <Button
-                                                                                variant='outline'
-                                                                                onClick={() => document.getElementById('profile-image')?.click()}
-                                                                        >
-                                                                                <Camera className='w-4 h-4 mr-2' />
-                                                                                Change Picture
-                                                                        </Button>
-                                                                        <p className='text-xs text-gray-500'>JPG, PNG or GIF. Max size 2MB.</p>
-                                                                </div>
-                                                        </div>
-                                                </CardContent>
-                                        </Card>
-
-                                        <Card>
-                                                <CardHeader>
-                                                        <CardTitle>Personal Information</CardTitle>
-                                                        <CardDescription>Update your personal details and contact information</CardDescription>
-                                                </CardHeader>
-                                                <CardContent className='space-y-4'>
+                                                                ) : (
+                                                                        <AvatarFallback className='text-2xl'>
+                                                                                {profile.full_name
+                                                                                        .split(' ')
+                                                                                        .map((n) => n[0])
+                                                                                        .join('')}
+                                                                        </AvatarFallback>
+                                                                )}
+                                                        </Avatar>
                                                         <div className='space-y-2'>
-                                                                <Label htmlFor='fullName'>Full Name</Label>
-                                                                <div className='relative'>
-                                                                        <User className='absolute left-3 top-3 h-4 w-4 text-gray-400' />
-                                                                        <Input
-                                                                                id='fullName'
-                                                                                value={profile.full_name}
-                                                                                className='pl-10'
-                                                                                readOnly
-                                                                        />
-                                                                </div>
-                                                        </div>
+                                                                <Input
+                                                                        type='file'
+                                                                        onChange={handleImageChange}
+                                                                        className='hidden'
+                                                                        id='profile-image'
+                                                                        width={30}
+                                                                        height={30}
+                                                                />
 
-                                                        <div className='space-y-2'>
-                                                                <Label htmlFor='email'>Email Address</Label>
-                                                                <div className='relative'>
-                                                                        <Mail className='absolute left-3 top-3 h-4 w-4 text-gray-400' />
-                                                                        <Input
-                                                                                id='email'
-                                                                                type='email'
-                                                                                value={profile.email}
-                                                                                className='pl-10'
-                                                                                readOnly
-                                                                        />
-                                                                </div>
+                                                                <Button
+                                                                        variant='outline'
+                                                                        onClick={() => document.getElementById('profile-image')?.click()}
+                                                                >
+                                                                        <Camera className='w-4 h-4 mr-2' />
+                                                                        Change Picture
+                                                                </Button>
+                                                                <p className='text-xs text-gray-500'>JPG, PNG or GIF. Max size 2MB.</p>
                                                         </div>
-                                                </CardContent>
-                                        </Card>
+                                                </div>
+                                        </CardContent>
+                                </Card>
 
-                                        <Card>
-                                                <CardHeader>
-                                                        <CardTitle>Account Information</CardTitle>
-                                                        <CardDescription>View your account details and status</CardDescription>
-                                                </CardHeader>
-                                                <CardContent className='space-y-4'>
-                                                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                                                                <div>
-                                                                        <Label className='text-sm font-medium text-gray-500'>Account Type</Label>
-                                                                        <p className='text-sm font-semibold text-gray-900 capitalize'>Teacher</p>
-                                                                </div>
-                                                                <div>
-                                                                        <Label className='text-sm font-medium text-gray-500'>Member Since</Label>
-                                                                        <p className='text-sm font-semibold text-gray-900'>January 2025</p>
-                                                                </div>
-                                                                <div className='relative'>
-                                                                        <Label className='text-sm font-medium text-gray-500'>Teacher ID</Label>
-                                                                        <Input
-                                                                                className='text-sm font-semibold text-gray-900'
-                                                                                value={profile.id}
-                                                                                readOnly
-                                                                                onClick={handleCopy}
-                                                                        />
-                                                                        {copied && (
-                                                                                <div className='absolute top-1/2 -right-20 mt-1 mr-1 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded shadow'>
-                                                                                        Copied!
-                                                                                </div>
-                                                                        )}
-                                                                </div>
+                                <Card>
+                                        <CardHeader>
+                                                <CardTitle>Personal Information</CardTitle>
+                                                <CardDescription>Update your personal details and contact information</CardDescription>
+                                        </CardHeader>
+                                        <CardContent className='space-y-4'>
+                                                <div className='space-y-2'>
+                                                        <Label htmlFor='fullName'>Full Name</Label>
+                                                        <div className='relative'>
+                                                                <User className='absolute left-3 top-3 h-4 w-4 text-gray-400' />
+                                                                <Input
+                                                                        id='fullName'
+                                                                        value={profile.full_name}
+                                                                        className='pl-10'
+                                                                        readOnly
+                                                                />
                                                         </div>
-                                                </CardContent>
-                                        </Card>
+                                                </div>
 
-                                        {/* Closed for further development */}
-                                        {/* <Card>
+                                                <div className='space-y-2'>
+                                                        <Label htmlFor='email'>Email Address</Label>
+                                                        <div className='relative'>
+                                                                <Mail className='absolute left-3 top-3 h-4 w-4 text-gray-400' />
+                                                                <Input
+                                                                        id='email'
+                                                                        type='email'
+                                                                        value={profile.email}
+                                                                        className='pl-10'
+                                                                        readOnly
+                                                                />
+                                                        </div>
+                                                </div>
+                                        </CardContent>
+                                </Card>
+
+                                <Card>
+                                        <CardHeader>
+                                                <CardTitle>Account Information</CardTitle>
+                                                <CardDescription>View your account details and status</CardDescription>
+                                        </CardHeader>
+                                        <CardContent className='space-y-4'>
+                                                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                                                        <div>
+                                                                <Label className='text-sm font-medium text-gray-500'>Account Type</Label>
+                                                                <p className='text-sm font-semibold text-gray-900'>{new Date(profile.created_at).toLocaleString()}</p>
+                                                        </div>
+                                                        <div>
+                                                                <Label className='text-sm font-medium text-gray-500'>Member Since</Label>
+                                                                <p className='text-sm font-semibold text-gray-900'>January 2025</p>
+                                                        </div>
+                                                        <div className='relative'>
+                                                                <Label className='text-sm font-medium text-gray-500'>Teacher ID</Label>
+                                                                <Input
+                                                                        className='text-sm font-semibold text-gray-900'
+                                                                        value={profile.id}
+                                                                        readOnly
+                                                                        onClick={handleCopy}
+                                                                />
+                                                                {copied && (
+                                                                        <div className='absolute top-1/2 -right-20 mt-1 mr-1 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded shadow'>
+                                                                                Copied!
+                                                                        </div>
+                                                                )}
+                                                        </div>
+                                                </div>
+                                        </CardContent>
+                                </Card>
+
+                                {/* Closed for further development */}
+                                {/* <Card>
                                                 <CardHeader>
                                                         <CardTitle>Teaching Information</CardTitle>
                                                         <CardDescription>Your teaching credentials and subjects</CardDescription>
@@ -223,17 +221,16 @@ export default function TeacherProfile() {
                                                 </CardContent>
                                         </Card> */}
 
-                                        <div className='flex justify-end'>
-                                                <Button
-                                                        onClick={handleSave}
-                                                        className='flex items-center'
-                                                >
-                                                        <Save className='w-4 h-4 mr-2' />
-                                                        Save Changes
-                                                </Button>
-                                        </div>
+                                <div className='flex justify-end'>
+                                        <Button
+                                                onClick={handleSave}
+                                                className='flex items-center'
+                                        >
+                                                <Save className='w-4 h-4 mr-2' />
+                                                Save Changes
+                                        </Button>
                                 </div>
                         </div>
-                </DashboardLayout>
+                </div>
         )
 }
