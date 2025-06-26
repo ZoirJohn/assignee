@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import DashboardLayout from '@/components/dashboard-layout'
 import Image from 'next/image'
 import { createClient } from '@/utils/supabase/client'
 
@@ -18,6 +17,7 @@ export type ProfileForm = {
         email: string
         id: string
         created_at: string
+        avatar_url: string
 }
 
 export default function TeacherProfile() {
@@ -29,21 +29,40 @@ export default function TeacherProfile() {
                 email: '',
                 id: '',
                 created_at: '',
+                avatar_url: '',
         })
-        const [profileImage, setProfileImage] = useState<string | null>(null)
         const [previewUrl, setPreviewUrl] = useState<string | null>(null)
         const [copied, setCopied] = useState<boolean>(false)
 
         const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
                 const file = event.target.files?.[0]
                 if (file) {
-                        setProfileImage(file as unknown as string)
                         const url = URL.createObjectURL(file)
                         setPreviewUrl(url)
                 }
         }
-        const handleSave = (event: MouseEvent<HTMLButtonElement>) => {}
-        const handleCopy = () => {
+        async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+                const file = e.target.files?.[0]
+                if (!file) return
+
+                const fileExt = file.name.split('.').pop()
+                const fileName = `${profile.id}.${fileExt}`
+                const filePath = `${fileName}`
+
+                const { data, error } = await supabase.storage.from('avatars').upload(filePath, file, {
+                        upsert: true,
+                        cacheControl: '3600',
+                })
+                if (!error) {
+                        const {
+                                data: { publicUrl },
+                        } = supabase.storage.from('avatars').getPublicUrl(filePath)
+                        if (publicUrl) {
+                                await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', profile.id)
+                        }
+                }
+        }
+        const handleIdCopy = () => {
                 navigator.clipboard.writeText(profile.id)
                 setCopied(true)
         }
@@ -55,7 +74,6 @@ export default function TeacherProfile() {
                 const fetchProfile = async () => {
                         const userData = await getUser()
                         const { data } = await supabase.from('profiles').select('*').eq('id', userData?.id).single()
-
                         if (data) setProfile({ ...data, email: userData?.user_metadata.email, id: userData?.id })
                 }
 
@@ -88,7 +106,15 @@ export default function TeacherProfile() {
                                                                 {previewUrl ? (
                                                                         <Image
                                                                                 src={previewUrl}
-                                                                                alt='Profile'
+                                                                                alt='preview'
+                                                                                className='w-full h-full object-cover rounded-full'
+                                                                                width={30}
+                                                                                height={30}
+                                                                        />
+                                                                ) : profile.avatar_url ? (
+                                                                        <Image
+                                                                                src={profile.avatar_url}
+                                                                                alt='profile'
                                                                                 className='w-full h-full object-cover rounded-full'
                                                                                 width={30}
                                                                                 height={30}
@@ -105,11 +131,13 @@ export default function TeacherProfile() {
                                                         <div className='space-y-2'>
                                                                 <Input
                                                                         type='file'
-                                                                        onChange={handleImageChange}
+                                                                        accept='image/*'
+                                                                        onChange={(e) => {
+                                                                                handleImageChange(e)
+                                                                                handleAvatarChange(e)
+                                                                        }}
                                                                         className='hidden'
                                                                         id='profile-image'
-                                                                        width={30}
-                                                                        height={30}
                                                                 />
 
                                                                 <Button
@@ -181,7 +209,7 @@ export default function TeacherProfile() {
                                                                         className='text-sm font-semibold text-gray-900'
                                                                         value={profile.id}
                                                                         readOnly
-                                                                        onClick={handleCopy}
+                                                                        onClick={handleIdCopy}
                                                                 />
                                                                 {copied && (
                                                                         <div className='absolute top-1/2 -right-20 mt-1 mr-1 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded shadow'>
@@ -222,10 +250,7 @@ export default function TeacherProfile() {
                                         </Card> */}
 
                                 <div className='flex justify-end'>
-                                        <Button
-                                                onClick={handleSave}
-                                                className='flex items-center'
-                                        >
+                                        <Button className='flex items-center'>
                                                 <Save className='w-4 h-4 mr-2' />
                                                 Save Changes
                                         </Button>
