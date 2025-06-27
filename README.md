@@ -48,11 +48,6 @@ assignee/
 │   │   ├── dashboard/      # Protected dashboard routes
 │   │   │   ├── student/
 │   │   │   └── teacher/
-│   │   ├── api/           # API routes
-│   │   │   ├── auth/
-│   │   │   ├── assignments/
-│   │   │   ├── ai-grading/
-│   │   │   └── image-processing/
 │   │   └── page.tsx       # Landing page
 │   ├── components/
 │   │   ├── ui/            # Reusable UI components
