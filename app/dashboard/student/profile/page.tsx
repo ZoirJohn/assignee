@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { Camera, Mail, User, Save } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,21 +12,53 @@ import Image from 'next/image'
 
 export default function StudentProfile() {
         const supabase = createClient()
-        const [profile, setProfile] = useState<ProfileForm>({ full_name: '', email: '', id: '', role: '', teacher_id: '', created_at: '' })
+        const [profile, setProfile] = useState<ProfileForm>({
+                full_name: '',
+                role: '',
+                teacher_id: null,
+                email: '',
+                id: '',
+                created_at: '',
+                avatar_url: '',
+        })
         const [previewUrl, setPreviewUrl] = useState<string | null>(null)
         const [copied, setCopied] = useState<boolean>(false)
-        const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+
+        const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
                 const file = event.target.files?.[0]
                 if (file) {
                         const url = URL.createObjectURL(file)
                         setPreviewUrl(url)
                 }
         }
-        const handleSave = () => {}
-        const handleCopy = () => {
+        
+        async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+                const file = e.target.files?.[0]
+                if (!file) return
+
+                const fileExt = file.name.split('.').pop()
+                const fileName = `${profile.id}.${fileExt}`
+                const filePath = `${fileName}`
+
+                const { data, error } = await supabase.storage.from('avatars').upload(filePath, file, {
+                        upsert: true,
+                        cacheControl: '3600',
+                })
+                if (!error) {
+                        const {
+                                data: { publicUrl },
+                        } = supabase.storage.from('avatars').getPublicUrl(filePath)
+                        if (publicUrl) {
+                                await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', profile.id)
+                        }
+                }
+        }
+
+        const handleIdCopy = () => {
                 navigator.clipboard.writeText(profile.id)
                 setCopied(true)
         }
+
         useEffect(() => {
                 const getUser = async () => {
                         return (await supabase.auth.getUser()).data.user
@@ -34,7 +66,6 @@ export default function StudentProfile() {
                 const fetchProfile = async () => {
                         const userData = await getUser()
                         const { data } = await supabase.from('profiles').select('*').eq('id', userData?.id).single()
-
                         if (data) setProfile({ ...data, email: userData?.user_metadata.email, id: userData?.id })
                 }
 
@@ -158,7 +189,7 @@ export default function StudentProfile() {
                                                                         className='text-sm font-semibold text-gray-900'
                                                                         value={profile.id}
                                                                         readOnly
-                                                                        onClick={handleCopy}
+                                                                        onClick={handleIdCopy}
                                                                 />
                                                                 {copied && (
                                                                         <div className='absolute top-1/2 -right-20 mt-1 mr-1 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded shadow'>
@@ -171,10 +202,7 @@ export default function StudentProfile() {
                                 </Card>
 
                                 <div className='flex justify-end'>
-                                        <Button
-                                                onClick={handleSave}
-                                                className='flex items-center'
-                                        >
+                                        <Button className='flex items-center'>
                                                 <Save className='w-4 h-4 mr-2' />
                                                 Save Changes
                                         </Button>

@@ -30,9 +30,10 @@ export async function updateSession(request: NextRequest) {
         const isNotSignUp = !request.nextUrl.pathname.startsWith('/signup')
         const isNotConfirm = !request.nextUrl.pathname.startsWith('/confirm')
 
-        const routeCheck = isNotSignIn && isNotSignUp && isNotConfirm && isNotHome
+        const routeCheck = isNotSignIn || isNotSignUp || isNotConfirm || isNotHome
+        const isDashboard = request.nextUrl.pathname.startsWith('/dashboard')
 
-        if (!user && routeCheck) {
+        if (!user && isDashboard) {
                 const url = request.nextUrl.clone()
                 url.pathname = '/'
                 return NextResponse.redirect(url)
