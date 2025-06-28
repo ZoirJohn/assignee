@@ -47,7 +47,7 @@ const submissions = [
                 status: 'pending',
         },
 ]
-const userId=12
+const userId = 12
 const chatMessages = [
         {
                 id: 'msg1',
@@ -94,7 +94,7 @@ export function TeacherTabs() {
         const supabase = createClient()
         const [messages, setMessages] = useState<ChatMessage[]>([])
         const [message, setMessage] = useState('')
-        const [studentId, setStudentId] = useState<string | null>(null)
+        const [studentId, setStudentId] = useState<{ id: any; full_name: any; email: any }[]>()
         const [userId, setUserId] = useState<string | null>(null)
 
         const handleGradeSubmission = (submissionId: number) => {
@@ -122,12 +122,28 @@ export function TeacherTabs() {
         }
 
         useEffect(() => {
-                const fetchUser = async () => {
-                        const { data } = await supabase.auth.getUser()
-                        setUserId(data?.user?.id || null)
+                const fetchUserAndStudents = async () => {
+                        const { data: userData } = await supabase.auth.getUser()
+                        const teacherId = userData?.user?.id
+
+                        if (!teacherId) return
+
+                        setUserId(teacherId)
+
+                        const { data: students, error } = await supabase.from('profiles').select('id, full_name').eq('teacher_id', teacherId)
+
+                        if (error) {
+                                console.error('Error fetching students:', error.message)
+                                return
+                        }
+
+                        console.log('Students under this teacher:', students)
+
                 }
-                fetchUser()
+
+                fetchUserAndStudents()
         }, [])
+
         useEffect(() => {
                 if (!userId || !studentId) return
                 const loadMessages = async () => {
@@ -152,7 +168,8 @@ export function TeacherTabs() {
                         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
                                 const newMessage = payload.new as ChatMessage
                                 const isBetweenTheseUsers =
-                                        (newMessage.sender_id === userId && newMessage.receiver_id === studentId) || (newMessage.sender_id === studentId && newMessage.receiver_id === userId)
+                                        (newMessage.sender_id === userId && newMessage.receiver_id === studentId[0].id) ||
+                                        (newMessage.sender_id === studentId[0].id && newMessage.receiver_id === userId)
 
                                 if (isBetweenTheseUsers) {
                                         setMessages((prev) => [...prev, newMessage])
@@ -307,9 +324,22 @@ export function TeacherTabs() {
                                 className='space-y-4'
                         >
                                 <Card className='h-96'>
-                                        <CardHeader className='max-[400px]:!pb-0'>
-                                                <CardTitle>Student Messages</CardTitle>
-                                                <CardDescription>Communicate with your students</CardDescription>
+                                        <CardHeader className='max-[400px]:!pb-0 flex-row justify-between items-center'>
+                                                <div>
+                                                        <CardTitle>Student Messages</CardTitle>
+                                                        <CardDescription>Communicate with your students</CardDescription>
+                                                </div>
+                                                <div className='flex gap-4'>
+                                                        <Avatar>
+                                                                <AvatarFallback>ZZ</AvatarFallback>
+                                                        </Avatar>
+                                                        <Avatar>
+                                                                <AvatarFallback>ZZ</AvatarFallback>
+                                                        </Avatar>
+                                                        <Avatar>
+                                                                <AvatarFallback>ZZ</AvatarFallback>
+                                                        </Avatar>
+                                                </div>
                                         </CardHeader>
                                         <CardContent className='flex flex-col h-full'>
                                                 <ScrollArea className='flex-1 mb-9 max-[400px]:mb-3 !h-20'>
