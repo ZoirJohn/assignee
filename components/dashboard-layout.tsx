@@ -31,7 +31,7 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
         const links = userType === 'student' ? studentLinks : userType === 'teacher' ? teacherLinks : []
 
         const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
-                <div className={`${mobile ? 'w-full' : 'w-64'} bg-white border-r border-gray-200 flex flex-col`}>
+                <div className={`${mobile ? 'w-full' : 'w-64'} bg-white border-r border-gray-200 flex flex-col h-full`}>
                         <div className='p-6 border-b border-gray-200'>
                                 <Link
                                         href='/'
@@ -66,7 +66,7 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                         <nav className='flex-1 p-4'>
                                 <ul className='space-y-2'>
                                         {links.map((link) => (
-                                                <li key={link.label}>
+                                                <li key={link.label}>   
                                                         <Link
                                                                 href={link.href}
                                                                 className='flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors'

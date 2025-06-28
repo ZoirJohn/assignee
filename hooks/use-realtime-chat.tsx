@@ -1,7 +1,6 @@
 'use client'
-
 import { createClient } from '@/utils/supabase/client'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 type UseRealtimeChatProps = {
         roomName: string
@@ -20,14 +19,23 @@ export type ChatMessage = {
 const EVENT_MESSAGE_TYPE = 'message'
 
 export function useRealtimeChat({ roomName, username }: UseRealtimeChatProps) {
-        const supabase = createClient()
+        const supabase = useMemo(() => createClient(), [])
         const [messages, setMessages] = useState<ChatMessage[]>([])
         const [channel, setChannel] = useState<ReturnType<typeof supabase.channel> | null>(null)
         const [isConnected, setIsConnected] = useState(false)
+        const initialized = useRef(false)
 
         useEffect(() => {
-                const newChannel = supabase.channel(roomName)
-
+                if (initialized.current) return
+                initialized.current = true
+                console.log(initialized)
+                const newChannel = supabase.channel(roomName, {
+                        config: {
+                                broadcast: {
+                                        self: true,
+                                },
+                        },
+                })
                 newChannel
                         .on('broadcast', { event: EVENT_MESSAGE_TYPE }, (payload) => {
                                 setMessages((current) => [...current, payload.payload as ChatMessage])
