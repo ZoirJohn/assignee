@@ -46,45 +46,7 @@ const submissions = [
                 status: 'pending',
         },
 ]
-const userId = 12
-const chatMessages = [
-        {
-                id: 'msg1',
-                sender_id: 'support456',
-                context: 'Hello! How can I help you today?',
-                created_at: '2025-06-28T10:00:00Z',
-        },
-        {
-                id: 'msg2',
-                sender_id: userId,
-                context: "Hi! I'm having trouble with my account login.",
-                created_at: '2025-06-28T10:01:30Z',
-        },
-        {
-                id: 'msg3',
-                sender_id: 'support456',
-                context: "I'd be happy to help you with that. Can you tell me what error message you're seeing?",
-                created_at: '2025-06-28T10:02:15Z',
-        },
-        {
-                id: 'msg4',
-                sender_id: userId,
-                context: "It says 'Invalid credentials' but I'm sure my password is correct.",
-                created_at: '2025-06-28T10:03:45Z',
-        },
-        {
-                id: 'msg5',
-                sender_id: 'support456',
-                context: 'Let me check your account status. Have you tried resetting your password recently?',
-                created_at: '2025-06-28T10:04:20Z',
-        },
-        {
-                id: 'msg6',
-                sender_id: userId,
-                context: "No, I haven't tried that yet. Should I do that now?",
-                created_at: '2025-06-28T10:05:10Z',
-        },
-]
+
 export function TeacherTabs() {
         const supabase = createClient()
         const [selectedSubmission, setSelectedSubmission] = useState<any>(null)
@@ -92,9 +54,10 @@ export function TeacherTabs() {
         const [feedback, setFeedback] = useState('')
         const [messages, setMessages] = useState<any[]>([])
         const [students, setStudents] = useState<any>()
-        const [newMessage, setNewMessage] = useState<string>()
+        const [newMessage, setNewMessage] = useState<string>('')
         const [selectedUserId, setSelectedUserId] = useState<string>()
-        const [userId, setUserId] = useState<string>()
+        const [userData, setUserData] = useState<any>({})
+        const [userId, setUserId] = useState<any>()
 
         const handleGradeSubmission = (submissionId: number) => {
                 setSelectedSubmission(null)
@@ -113,11 +76,21 @@ export function TeacherTabs() {
                         receiver_id: selectedUserId,
                         content: newMessage,
                 })
+                setNewMessage('')
         }
-
+        useEffect(() => {
+                async function fetchUser() {
+                        const {
+                                data: { user },
+                        } = await supabase.auth.getUser()
+                        setUserId(user?.id)
+                        setUserData(user)
+                }
+                fetchUser()
+        }, [])
         useEffect(() => {
                 const channel = supabase
-                        .channel('realtime:messages')
+                        .channel('messages-realtime')
                         .on(
                                 'postgres_changes',
                                 {
@@ -136,20 +109,22 @@ export function TeacherTabs() {
         }, [])
         useEffect(() => {
                 async function fetchStudents() {
-                        const idForFetching = (await supabase.auth.getUser()).data.user?.id
-                        const { data: students } = await supabase.from('profiles').select('id, full_name').eq('teacher_id', idForFetching)
-
-                        setStudents(students)
+                        const { data: students } = await supabase.from('profiles').select('id, full_name').eq('teacher_id', userId)
+                        if (students?.length) {
+                                setStudents(students)
+                                setSelectedUserId(students[0].id)
+                        }
                 }
-                fetchStudents()
-        }, [])
+                if (userId) {
+                        fetchStudents()
+                }
+        }, [userId])
         useEffect(() => {
                 const fetchMessages = async () => {
-                        const user = (await supabase.auth.getUser()).data.user
                         const { data } = await supabase
                                 .from('messages')
                                 .select('*')
-                                .or(`and(sender_id.eq.${user?.id},receiver_id.eq.${selectedUserId}),and(sender_id.eq.${selectedUserId},receiver_id.eq.${user?.id})`)
+                                .or(`and(sender_id.eq.${userId},receiver_id.eq.${selectedUserId}),and(sender_id.eq.${selectedUserId},receiver_id.eq.${userId})`)
                                 .order('created_at', { ascending: true })
 
                         setMessages(data || [])
@@ -157,8 +132,6 @@ export function TeacherTabs() {
 
                 if (selectedUserId) fetchMessages()
         }, [selectedUserId])
-                        console.log(students)
-
         return (
                 <>
                         <TabsContent
@@ -321,23 +294,23 @@ export function TeacherTabs() {
                                         <CardContent className='flex flex-col h-full'>
                                                 <ScrollArea className='flex-1 mb-9 max-[400px]:mb-3 !h-20'>
                                                         <div className='space-y-4'>
-                                                                {chatMessages.map((msg) => (
+                                                                {messages.map(({ id, sender_id, created_at, content }) => (
                                                                         <div
-                                                                                key={msg.id}
-                                                                                className={`flex ${msg.sender_id === userId ? 'justify-end' : 'justify-start'}`}
+                                                                                key={id}
+                                                                                className={`flex ${sender_id === userId ? 'justify-end' : 'justify-start'}`}
                                                                         >
                                                                                 <div
                                                                                         className={`flex items-start space-x-2 max-w-xs ${
-                                                                                                msg.sender_id === userId ? 'flex-row-reverse space-x-reverse' : ''
+                                                                                                sender_id === userId ? 'flex-row-reverse space-x-reverse' : ''
                                                                                         }`}
                                                                                 >
                                                                                         <Avatar className='w-8 h-8'>
-                                                                                                <AvatarFallback>{msg.sender_id === userId ? 'T' : 'S'}</AvatarFallback>
+                                                                                                <AvatarFallback>{sender_id === userId ? 'T' : 'S'}</AvatarFallback>
                                                                                         </Avatar>
-                                                                                        <div className={`p-3 rounded-lg ${msg.sender_id === userId ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}>
-                                                                                                <p className='text-sm'>{msg.context}</p>
-                                                                                                <p className={`text-xs mt-1 ${msg.sender_id === userId ? 'text-blue-100' : 'text-gray-500'}`}>
-                                                                                                        {new Date(msg.created_at).toLocaleTimeString()}
+                                                                                        <div className={`p-3 rounded-lg ${sender_id === userId ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}>
+                                                                                                <p className='text-sm'>{content}</p>
+                                                                                                <p className={`text-xs mt-1 ${sender_id === userId ? 'text-blue-100' : 'text-gray-500'}`}>
+                                                                                                        {new Date(created_at).toLocaleTimeString()}
                                                                                                 </p>
                                                                                         </div>
                                                                                 </div>
