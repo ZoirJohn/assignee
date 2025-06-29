@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { TabsContent } from '@/components/ui/tabs'
 import { createClient } from '@/utils/supabase/client'
 import { TMessage, TStudent } from '@/definitions'
+import { cn } from '@/lib/utils'
 
 const submissions = [
         {
@@ -58,34 +59,34 @@ export function TeacherTabs() {
         const [messages, setMessages] = useState<TMessage[]>([])
         const [students, setStudents] = useState<TStudent[]>([])
         const [newMessage, setNewMessage] = useState<string>('')
-        const [currentUserId, setCurrentUserId] = useState<string>()
-        const [userId, setUserId] = useState<any>()
-
+        const [currentUserId, setCurrentUserId] = useState<string>('')
+        const [userId, setUserId] = useState<string>('')
+        const [disabled, setDisabled] = useState<boolean>()
         const handleGradeSubmission = (submissionId: number) => {
                 setSelectedSubmission(null)
                 setGradeOverride('')
                 setFeedback('')
         }
-
         const openSubmissionReview = (submission: any) => {
                 setSelectedSubmission(submission)
                 setGradeOverride(submission.aiGrade)
         }
-
         const handleSendMessage = async () => {
+                setDisabled(true)
                 await supabase.from('messages').insert({
                         sender_id: userId,
                         receiver_id: currentUserId,
                         content: newMessage,
                 })
                 setNewMessage('')
+                setDisabled(false)
         }
         useEffect(() => {
                 async function fetchUser() {
                         const {
                                 data: { user },
                         } = await supabase.auth.getUser()
-                        setUserId(user?.id)
+                        setUserId(user?.id!)
                 }
                 fetchUser()
         }, [])
@@ -107,6 +108,7 @@ export function TeacherTabs() {
                                         }
 
                                         if (eventType === 'DELETE') {
+                                                console.log(newRow, oldRow)
                                                 setMessages((prev) => prev.filter((messages) => messages.id !== oldRow.id))
                                         }
                                 }
@@ -140,8 +142,8 @@ export function TeacherTabs() {
                 }
 
                 if (currentUserId) fetchMessages()
-        }, [currentUserId])
-        console.log(messages)
+                setDisabled(students.length == 0)
+        }, [currentUserId, userId])
         return (
                 <>
                         <TabsContent
@@ -290,15 +292,16 @@ export function TeacherTabs() {
                                                         <CardDescription>Communicate with your students</CardDescription>
                                                 </div>
                                                 <div className='flex gap-4'>
-                                                        <Avatar>
-                                                                <AvatarFallback>ZZ</AvatarFallback>
-                                                        </Avatar>
-                                                        <Avatar>
-                                                                <AvatarFallback>ZZ</AvatarFallback>
-                                                        </Avatar>
-                                                        <Avatar>
-                                                                <AvatarFallback>ZZ</AvatarFallback>
-                                                        </Avatar>
+                                                        {students.map((student, id) => (
+                                                                <Avatar key={id}>
+                                                                        <AvatarFallback className={cn({ 'bg-slate-500': student.id == currentUserId })}>
+                                                                                {student.full_name
+                                                                                        .split(' ')
+                                                                                        .map((n) => n[0])
+                                                                                        .join('')}
+                                                                        </AvatarFallback>
+                                                                </Avatar>
+                                                        ))}
                                                 </div>
                                         </CardHeader>
                                         <CardContent className='flex flex-col h-full'>
@@ -320,7 +323,11 @@ export function TeacherTabs() {
                                                                                         <div className={`p-3 rounded-lg ${sender_id === userId ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}>
                                                                                                 <p className='text-sm'>{content}</p>
                                                                                                 <p className={`text-xs mt-1 ${sender_id === userId ? 'text-blue-100' : 'text-gray-500'}`}>
-                                                                                                        {new Date(created_at).toLocaleTimeString()}
+                                                                                                        {new Date(created_at).toLocaleTimeString([], {
+                                                                                                                hour: '2-digit',
+                                                                                                                minute: '2-digit',
+                                                                                                                hour12: true,
+                                                                                                        })}
                                                                                                 </p>
                                                                                         </div>
                                                                                 </div>
@@ -334,12 +341,12 @@ export function TeacherTabs() {
                                                                 value={newMessage}
                                                                 onChange={(e) => setNewMessage(e.target.value)}
                                                                 onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                                                                disabled={students.length == 0}
+                                                                disabled={disabled}
                                                         />
                                                         <Button
                                                                 size='sm'
                                                                 onClick={handleSendMessage}
-                                                                disabled={students.length == 0}
+                                                                disabled={disabled}
                                                         >
                                                                 <Send className='w-4 h-4' />
                                                         </Button>
