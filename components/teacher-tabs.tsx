@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { TabsContent } from '@/components/ui/tabs'
 import { createClient } from '@/utils/supabase/client'
+import { TMessage, TStudent } from '@/definitions'
 
 const submissions = [
         {
@@ -49,14 +50,15 @@ const submissions = [
 
 export function TeacherTabs() {
         const supabase = createClient()
+
         const [selectedSubmission, setSelectedSubmission] = useState<any>(null)
         const [gradeOverride, setGradeOverride] = useState('')
         const [feedback, setFeedback] = useState('')
-        const [messages, setMessages] = useState<any[]>([])
-        const [students, setStudents] = useState<any>()
+
+        const [messages, setMessages] = useState<TMessage[]>([])
+        const [students, setStudents] = useState<TStudent[]>([])
         const [newMessage, setNewMessage] = useState<string>('')
-        const [selectedUserId, setSelectedUserId] = useState<string>()
-        const [userData, setUserData] = useState<any>({})
+        const [currentUserId, setCurrentUserId] = useState<string>()
         const [userId, setUserId] = useState<any>()
 
         const handleGradeSubmission = (submissionId: number) => {
@@ -73,7 +75,7 @@ export function TeacherTabs() {
         const handleSendMessage = async () => {
                 await supabase.from('messages').insert({
                         sender_id: userId,
-                        receiver_id: selectedUserId,
+                        receiver_id: currentUserId,
                         content: newMessage,
                 })
                 setNewMessage('')
@@ -84,22 +86,29 @@ export function TeacherTabs() {
                                 data: { user },
                         } = await supabase.auth.getUser()
                         setUserId(user?.id)
-                        setUserData(user)
                 }
                 fetchUser()
         }, [])
         useEffect(() => {
                 const channel = supabase
-                        .channel('messages-realtime')
+                        .channel('messages')
                         .on(
                                 'postgres_changes',
                                 {
-                                        event: 'INSERT',
+                                        event: '*',
                                         schema: 'public',
                                         table: 'messages',
                                 },
                                 (payload) => {
-                                        setMessages((prev) => [...prev, payload.new])
+                                        const { eventType, new: newRow, old: oldRow } = payload
+
+                                        if (eventType === 'INSERT') {
+                                                setMessages((prev) => [...prev, newRow] as TMessage[])
+                                        }
+
+                                        if (eventType === 'DELETE') {
+                                                setMessages((prev) => prev.filter((messages) => messages.id !== oldRow.id))
+                                        }
                                 }
                         )
                         .subscribe()
@@ -112,7 +121,7 @@ export function TeacherTabs() {
                         const { data: students } = await supabase.from('profiles').select('id, full_name').eq('teacher_id', userId)
                         if (students?.length) {
                                 setStudents(students)
-                                setSelectedUserId(students[0].id)
+                                setCurrentUserId(students[0].id)
                         }
                 }
                 if (userId) {
@@ -121,17 +130,18 @@ export function TeacherTabs() {
         }, [userId])
         useEffect(() => {
                 const fetchMessages = async () => {
-                        const { data } = await supabase
+                        const { data: messages } = await supabase
                                 .from('messages')
                                 .select('*')
-                                .or(`and(sender_id.eq.${userId},receiver_id.eq.${selectedUserId}),and(sender_id.eq.${selectedUserId},receiver_id.eq.${userId})`)
+                                .or(`and(sender_id.eq.${userId},receiver_id.eq.${currentUserId}),and(sender_id.eq.${currentUserId},receiver_id.eq.${userId})`)
                                 .order('created_at', { ascending: true })
 
-                        setMessages(data || [])
+                        setMessages(messages as TMessage[])
                 }
 
-                if (selectedUserId) fetchMessages()
-        }, [selectedUserId])
+                if (currentUserId) fetchMessages()
+        }, [currentUserId])
+        console.log(messages)
         return (
                 <>
                         <TabsContent
@@ -324,10 +334,12 @@ export function TeacherTabs() {
                                                                 value={newMessage}
                                                                 onChange={(e) => setNewMessage(e.target.value)}
                                                                 onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                                                                disabled={students.length == 0}
                                                         />
                                                         <Button
                                                                 size='sm'
                                                                 onClick={handleSendMessage}
+                                                                disabled={students.length == 0}
                                                         >
                                                                 <Send className='w-4 h-4' />
                                                         </Button>
