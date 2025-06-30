@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Clock, Upload, Send, AlertCircle, CheckCircle, XCircle } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -9,6 +9,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TabsContent } from '@/components/ui/tabs'
+import { createClient } from '@/lib/supabase/client'
+import { TMessage } from '@/definitions'
+import { useChatScroll } from '@/hooks/use-chat-scroll'
+import { ScrollAreaViewport } from '@radix-ui/react-scroll-area'
 
 const assignments = [
         {
@@ -46,30 +50,6 @@ const assignments = [
         },
 ]
 
-const chatMessages = [
-        {
-                id: 1,
-                sender: 'teacher',
-                name: 'Dr. Smith',
-                message: 'Good work on your last assignment! I have some feedback for you.',
-                timestamp: '10:30 AM',
-        },
-        {
-                id: 2,
-                sender: 'student',
-                name: 'You',
-                message: 'Thank you! I would love to hear your feedback.',
-                timestamp: '10:32 AM',
-        },
-        {
-                id: 3,
-                sender: 'teacher',
-                name: 'Dr. Smith',
-                message: 'Your analysis was thorough, but try to include more recent sources next time.',
-                timestamp: '10:35 AM',
-        },
-]
-
 const grades = [
         { subject: 'Environmental Science', assignment: 'Essay: Renewable Energy', grade: 'A', date: '2025-01-10' },
         { subject: 'Calculus', assignment: 'Problem Set #4', grade: 'B+', date: '2025-01-08' },
@@ -78,8 +58,15 @@ const grades = [
 ]
 
 export default function StudentTabs() {
+        const supabase = createClient()
         const [selectedFile, setSelectedFile] = useState<File | null>(null)
-        const [message, setMessage] = useState('')
+        const [messages, setMessages] = useState<TMessage[]>([])
+        const [newMessage, setNewMessage] = useState<string>('')
+        const [userId, setUserId] = useState<string>('')
+        const [currentUserId, setCurrentUserId] = useState<string>('')
+        const [disabled, setDisabled] = useState<boolean>(false)
+        const [status, setStatus] = useState(false)
+
         const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
                 const file = event.target.files?.[0]
                 if (file) {
@@ -87,11 +74,15 @@ export default function StudentTabs() {
                 }
         }
 
-        const handleSendMessage = () => {
-                if (message.trim()) {
-                        console.log('Sending message:', message)
-                        setMessage('')
-                }
+        const handleSendMessage = async () => {
+                setDisabled(true)
+                await supabase.from('messages').insert({
+                        sender_id: userId,
+                        receiver_id: currentUserId,
+                        content: newMessage,
+                })
+                setNewMessage('')
+                setDisabled(false)
         }
 
         const getStatusColor = (status: string) => {
@@ -119,6 +110,58 @@ export default function StudentTabs() {
                                 return <AlertCircle className='w-4 h-4' />
                 }
         }
+        useEffect(() => {
+                async function fetchUser() {
+                        const {
+                                data: { user },
+                        } = await supabase.auth.getUser()
+                        setCurrentUserId(user?.user_metadata.teacherId)
+                        setUserId(user?.id!)
+                }
+                fetchUser()
+        }, [])
+        useEffect(() => {
+                const channel = supabase
+                        .channel('realtime-chat:teacher-student')
+                        .on(
+                                'postgres_changes',
+                                {
+                                        event: '*',
+                                        schema: 'public',
+                                        table: 'messages',
+                                },
+                                (payload) => {
+                                        const { eventType: event, new: newRow, old: oldRow } = payload
+                                        if (event == 'INSERT') {
+                                                setMessages((prev) => [...prev, newRow] as TMessage[])
+                                        }
+                                        if (event == 'DELETE') {
+                                                setMessages((prev) => prev.filter((messages) => messages.id !== oldRow.id))
+                                        }
+                                }
+                        )
+                        .subscribe((status) => console.log(status))
+
+                return () => {
+                        supabase.removeChannel(channel)
+                }
+        }, [])
+        useEffect(() => {
+                const fetchMessages = async () => {
+                        const { data: messages } = await supabase
+                                .from('messages')
+                                .select('*')
+                                .or(`and(sender_id.eq.${userId},receiver_id.eq.${currentUserId}),and(sender_id.eq.${currentUserId},receiver_id.eq.${userId})`)
+                                .order('created_at', { ascending: true })
+                        setMessages(messages as TMessage[])
+                }
+
+                if (currentUserId) fetchMessages()
+        }, [currentUserId, userId])
+        const messagesEndRef = useRef<HTMLDivElement>(null)
+        useEffect(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }, [messages])
         return (
                 <>
                         <TabsContent
@@ -200,35 +243,43 @@ export default function StudentTabs() {
                                         <CardContent className='flex flex-col h-full'>
                                                 <ScrollArea className='flex-1 mb-9 max-[400px]:mb-3 !h-20 max-[332px]:mb-8'>
                                                         <div className='space-y-4'>
-                                                                {chatMessages.map((msg) => (
+                                                                {messages.map(({ id, sender_id, content, created_at }) => (
                                                                         <div
-                                                                                key={msg.id}
-                                                                                className={`flex ${msg.sender === 'student' ? 'justify-end' : 'justify-start'}`}
+                                                                                key={id}
+                                                                                className={`flex ${sender_id === userId ? 'justify-end' : 'justify-start'}`}
                                                                         >
                                                                                 <div
                                                                                         className={`flex items-start space-x-2 max-w-xs ${
-                                                                                                msg.sender === 'student' ? 'flex-row-reverse space-x-reverse' : ''
+                                                                                                sender_id === 'student' ? 'flex-row-reverse space-x-reverse' : ''
                                                                                         }`}
                                                                                 >
                                                                                         <Avatar className='w-8 h-8'>
-                                                                                                <AvatarFallback>{msg.sender === 'teacher' ? 'T' : 'S'}</AvatarFallback>
+                                                                                                <AvatarFallback>{sender_id !== userId ? 'T' : 'S'}</AvatarFallback>
                                                                                         </Avatar>
-                                                                                        <div className={`p-3 rounded-lg ${msg.sender === 'student' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}>
-                                                                                                <p className='text-sm'>{msg.message}</p>
-                                                                                                <p className={`text-xs mt-1 ${msg.sender === 'student' ? 'text-blue-100' : 'text-gray-500'}`}>
-                                                                                                        {msg.timestamp}
+                                                                                        <div className={`p-3 rounded-lg ${sender_id === userId ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}>
+                                                                                                <p className='text-sm'>{content}</p>
+                                                                                                <p className={`text-xs mt-1 ${sender_id === userId ? 'text-blue-100' : 'text-gray-500'}`}>
+                                                                                                        {new Date(created_at).toLocaleTimeString([], {
+                                                                                                                hour: '2-digit',
+                                                                                                                minute: '2-digit',
+                                                                                                                second: undefined,
+                                                                                                        })}
                                                                                                 </p>
                                                                                         </div>
                                                                                 </div>
                                                                         </div>
                                                                 ))}
+                                                                <div
+                                                                        ref={messagesEndRef}
+                                                                        className='h-0'
+                                                                />
                                                         </div>
                                                 </ScrollArea>
                                                 <div className='flex items-center space-x-2'>
                                                         <Input
                                                                 placeholder='Type your message...'
-                                                                value={message}
-                                                                onChange={(e) => setMessage(e.target.value)}
+                                                                value={newMessage}
+                                                                onChange={(e) => setNewMessage(e.target.value)}
                                                                 onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                                                         />
                                                         <Button

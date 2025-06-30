@@ -89,7 +89,13 @@ export default function LandingPage() {
                                                         variant='secondary'
                                                         className='mb-4'
                                                 >
-                                                        AI-Powered Assignment Management
+                                                        Powered by
+                                                        <Link
+                                                                href='https://bolt.dev'
+                                                                className='ml-1'
+                                                        >
+                                                                bolt.dev
+                                                        </Link>
                                                 </Badge>
                                                 <h1 className='text-4xl md:text-6xl font-bold text-gray-900 mb-6'>
                                                         Streamline Your

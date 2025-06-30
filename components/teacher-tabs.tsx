@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Clock, Send, Eye, CheckCircle } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -14,74 +14,6 @@ import { createClient } from '@/lib/supabase/client'
 import { TAssignment, TMessage, TStudent } from '@/definitions'
 import { cn } from '@/lib/utils'
 
-const submissions: TAssignment[] = [
-        {
-                id: '550e8400-e29b-41d4-a716-446655440000',
-                teacher_id: 'teacher-uuid-1',
-                student_id: 'student-uuid-1',
-                title: 'Climate Change Impact Analysis',
-                description: 'Write a 1000-word essay analyzing the global impact of climate change',
-                image_url: '/assignments/essay1.jpg',
-                extracted_text: 'Climate change is one of the most pressing issues facing our planet today...',
-                ai_grade: 4,
-                feedback: 'excellent',
-                additional_comments: 'Excellent analysis with well-supported arguments',
-                status: 'graded',
-                deadline: new Date('2024-03-30'),
-                created_at: new Date('2024-03-15'),
-                updated_at: new Date('2024-03-15'),
-                submitted_at: new Date('2024-03-20'),
-                graded_at: undefined,
-                max_grade: 5,
-                min_grade: 2,
-                subject: 'Environmental Science',
-                assignment_type: 'essay',
-                is_active: true,
-        },
-        // {
-        //         id: '550e8400-e29b-41d4-a716-446655440001',
-        //         teacher_id: 'teacher-uuid-1',
-        //         student_id: 'student-uuid-2',
-        //         title: 'Calculus Midterm Exam',
-        //         description: 'Comprehensive exam covering derivatives, integrals, and their applications',
-        //         image_url: '/assignments/math1.jpg',
-        //         extracted_text: 'Problem 1: Calculate the derivative of f(x) = 3x^2 + 2x - 1...',
-        //         ai_grade: 85,
-        //         feedback: '',
-        //         status: 'submitted',
-        //         deadline: new Date('2024-03-25'),
-        //         created_at: new Date('2024-03-20'),
-        //         updated_at: new Date('2024-03-20'),
-        //         submitted_at: new Date('2024-03-23'),
-        //         graded_at: new Date('2024-03-23'),
-        //         max_grade: 100,
-        //         subject: 'Mathematics',
-        //         assignment_type: 'exam',
-        //         is_active: true,
-        // },
-        // {
-        //         id: '550e8400-e29b-41d4-a716-446655440002',
-        //         teacher_id: 'teacher-uuid-1',
-        //         student_id: 'student-uuid-3',
-        //         title: 'World War II Research Paper',
-        //         description: 'Research paper analyzing the major causes of World War II',
-        //         image_url: '/assignments/history1.jpg',
-        //         extracted_text: 'The causes of World War II were complex and interconnected...',
-        //         ai_grade: 95,
-        //         feedback: 'Outstanding research with excellent primary sources',
-        //         status: 'graded',
-        //         deadline: new Date('2024-03-20'),
-        //         created_at: new Date('2024-03-10'),
-        //         updated_at: new Date('2024-03-10'),
-        //         submitted_at: new Date('2024-03-18'),
-        //         graded_at: new Date('2024-03-19'),
-        //         max_grade: 100,
-        //         subject: 'History',
-        //         assignment_type: 'project',
-        //         is_active: true,
-        // },
-]
-
 export function TeacherTabs() {
         const supabase = createClient()
 
@@ -94,8 +26,9 @@ export function TeacherTabs() {
         const [students, setStudents] = useState<TStudent[]>([])
         const [newMessage, setNewMessage] = useState<string>('')
         const [currentUserId, setCurrentUserId] = useState<string>('')
-        const [userId, setUserId] = useState<string>('')
+        const [userId, setUserId] = useState<string>()
         const [disabled, setDisabled] = useState<boolean>()
+        const messagesEndRef = useRef<HTMLDivElement>(null)
 
         const handleGradeSubmission = (submissionId: string) => {
                 setSelectedSubmission(null)
@@ -103,9 +36,11 @@ export function TeacherTabs() {
                 setAdditionalComments('')
         }
         const openSubmissionReview = (submission: TAssignment) => {
-                setSelectedSubmission(submission)
-                setGradeOverride(submission.ai_grade || 0)
-                setAdditionalComments(submission.additional_comments || '')
+                if (selectedSubmission) {
+                        setSelectedSubmission(null)
+                } else {
+                        setSelectedSubmission(submission)
+                }
         }
         const handleSendMessage = async () => {
                 setDisabled(true)
@@ -128,7 +63,7 @@ export function TeacherTabs() {
         }, [])
         useEffect(() => {
                 const channel = supabase
-                        .channel('messages')
+                        .channel('realtime-chat:teacher-student')
                         .on(
                                 'postgres_changes',
                                 {
@@ -138,13 +73,11 @@ export function TeacherTabs() {
                                 },
                                 (payload) => {
                                         const { eventType, new: newRow, old: oldRow } = payload
-
                                         if (eventType === 'INSERT') {
                                                 setMessages((prev) => [...prev, newRow] as TMessage[])
                                         }
 
                                         if (eventType === 'DELETE') {
-                                                console.log(newRow, oldRow)
                                                 setMessages((prev) => prev.filter((messages) => messages.id !== oldRow.id))
                                         }
                                 }
@@ -180,6 +113,16 @@ export function TeacherTabs() {
                 if (currentUserId) fetchMessages()
                 setDisabled(students.length == 0)
         }, [currentUserId, userId])
+        useEffect(() => {
+                const fetchAssignments = async () => {
+                        const { data, error } = await supabase.from('assignments').select('*').eq('teacher_id', userId)
+                        setAssignments((prev) => [...(data as TAssignment[])])
+                }
+                if (userId) fetchAssignments()
+        }, [userId])
+        useEffect(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }, [messages])
         return (
                 <>
                         <TabsContent
@@ -187,7 +130,7 @@ export function TeacherTabs() {
                                 className='space-y-4'
                         >
                                 <div className='grid gap-4'>
-                                        {submissions.map(({ title, id, student_id, subject, status, ai_grade, graded_at, submitted_at, created_at, ...others }) => (
+                                        {assigments.map(({ title, id, student_id, subject, status, ai_grade, graded_at, submitted_at, created_at, ...others }) => (
                                                 <Card key={id}>
                                                         <CardHeader className='!pb-0'>
                                                                 <div className='flex items-start justify-between max-sm:flex-col-reverse max-sm:gap-y-2'>
@@ -403,7 +346,7 @@ export function TeacherTabs() {
                                                 </div>
                                         </CardHeader>
                                         <CardContent className='flex flex-col h-full'>
-                                                <ScrollArea className='flex-1 mb-9 max-[400px]:mb-3 !h-20'>
+                                                <ScrollArea className='flex-1 mb-9 max-[400px]:mb-3 !h-20 max-[332px]:mb-8'>
                                                         <div className='space-y-4'>
                                                                 {messages.map(({ id, sender_id, created_at, content }) => (
                                                                         <div
@@ -431,6 +374,10 @@ export function TeacherTabs() {
                                                                                 </div>
                                                                         </div>
                                                                 ))}
+                                                                <div
+                                                                        ref={messagesEndRef}
+                                                                        className='h-0'
+                                                                />
                                                         </div>
                                                 </ScrollArea>
                                                 <div className='flex items-center space-x-2'>
@@ -464,9 +411,8 @@ export function TeacherTabs() {
                                         </CardHeader>
                                         <CardContent>
                                                 <div className='space-y-4'>
-                                                        {submissions
-                                                                .filter((s) => s.status === 'graded')
-                                                                .map(({ id, student_id, title, ai_grade, feedback, max_grade }) => (
+                                                        {assigments.length ? (
+                                                                assigments.map(({ id, student_id, title, ai_grade, feedback, max_grade }) => (
                                                                         <div
                                                                                 key={id}
                                                                                 className='flex items-center justify-between p-4 border rounded-lg'
@@ -489,7 +435,10 @@ export function TeacherTabs() {
                                                                                         </div>
                                                                                 </div>
                                                                         </div>
-                                                                ))}
+                                                                ))
+                                                        ) : (
+                                                                <h1 className='text-gray-600'>No assignments found</h1>
+                                                        )}
                                                 </div>
                                         </CardContent>
                                 </Card>
