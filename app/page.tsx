@@ -40,7 +40,7 @@ export default function LandingPage() {
                                                                 height={20}
                                                         />
                                                 </div>
-                                                <span className='text-xl font-bold text-gray-900'>Assignee</span>
+                                                <span className='text-xl font-bold text-gray-900 max-sm:hidden'>Assignee</span>
                                         </Link>
                                         <div className='flex items-center space-x-3'>
                                                 <Button

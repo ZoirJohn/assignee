@@ -11,66 +11,98 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { TabsContent } from '@/components/ui/tabs'
 import { createClient } from '@/utils/supabase/client'
-import { TMessage, TStudent } from '@/definitions'
+import { TAssignment, TMessage, TStudent } from '@/definitions'
 import { cn } from '@/lib/utils'
 
-const submissions = [
+const submissions: TAssignment[] = [
         {
-                id: 1,
-                studentName: 'Alice Johnson',
-                assignment: 'Climate Change Essay',
-                subject: 'Environmental Science',
-                submittedAt: '2025-01-15 14:30',
-                aiGrade: 'B+',
-                extractedText: 'Climate change represents one of the most pressing challenges of our time...',
-                status: 'pending',
-        },
-        {
-                id: 2,
-                studentName: 'Bob Chen',
-                assignment: 'Math Problem Set #5',
-                subject: 'Calculus',
-                submittedAt: '2025-01-14 16:45',
-                aiGrade: 'A-',
-                extractedText: 'Problem 1: Find the derivative of f(x) = 3x² + 2x - 1...',
+                id: '550e8400-e29b-41d4-a716-446655440000',
+                teacher_id: 'teacher-uuid-1',
+                student_id: 'student-uuid-1',
+                title: 'Climate Change Impact Analysis',
+                description: 'Write a 1000-word essay analyzing the global impact of climate change',
+                image_url: '/assignments/essay1.jpg',
+                extracted_text: 'Climate change is one of the most pressing issues facing our planet today...',
+                ai_grade: 92,
+                feedback: 'Excellent analysis with well-supported arguments',
                 status: 'graded',
-                finalGrade: 'A',
-                feedback: 'excellent',
+                deadline: new Date('2024-03-30'),
+                created_at: new Date('2024-03-15'),
+                updated_at: new Date('2024-03-15'),
+                submitted_at: new Date('2024-03-20'),
+                graded_at: new Date('2024-03-22'),
+                max_grade: 100,
+                subject: 'Environmental Science',
+                assignment_type: 'essay',
+                is_active: true,
         },
-        {
-                id: 3,
-                studentName: 'Carol Davis',
-                assignment: 'History Research Paper',
-                subject: 'World History',
-                submittedAt: '2025-01-13 10:20',
-                aiGrade: 'B',
-                extractedText: 'The causes of World War II can be traced back to several key factors...',
-                status: 'pending',
-        },
+        // {
+        //         id: '550e8400-e29b-41d4-a716-446655440001',
+        //         teacher_id: 'teacher-uuid-1',
+        //         student_id: 'student-uuid-2',
+        //         title: 'Calculus Midterm Exam',
+        //         description: 'Comprehensive exam covering derivatives, integrals, and their applications',
+        //         image_url: '/assignments/math1.jpg',
+        //         extracted_text: 'Problem 1: Calculate the derivative of f(x) = 3x^2 + 2x - 1...',
+        //         ai_grade: 85,
+        //         feedback: '',
+        //         status: 'submitted',
+        //         deadline: new Date('2024-03-25'),
+        //         created_at: new Date('2024-03-20'),
+        //         updated_at: new Date('2024-03-20'),
+        //         submitted_at: new Date('2024-03-23'),
+        //         graded_at: new Date('2024-03-23'),
+        //         max_grade: 100,
+        //         subject: 'Mathematics',
+        //         assignment_type: 'exam',
+        //         is_active: true,
+        // },
+        // {
+        //         id: '550e8400-e29b-41d4-a716-446655440002',
+        //         teacher_id: 'teacher-uuid-1',
+        //         student_id: 'student-uuid-3',
+        //         title: 'World War II Research Paper',
+        //         description: 'Research paper analyzing the major causes of World War II',
+        //         image_url: '/assignments/history1.jpg',
+        //         extracted_text: 'The causes of World War II were complex and interconnected...',
+        //         ai_grade: 95,
+        //         feedback: 'Outstanding research with excellent primary sources',
+        //         status: 'graded',
+        //         deadline: new Date('2024-03-20'),
+        //         created_at: new Date('2024-03-10'),
+        //         updated_at: new Date('2024-03-10'),
+        //         submitted_at: new Date('2024-03-18'),
+        //         graded_at: new Date('2024-03-19'),
+        //         max_grade: 100,
+        //         subject: 'History',
+        //         assignment_type: 'project',
+        //         is_active: true,
+        // },
 ]
 
 export function TeacherTabs() {
         const supabase = createClient()
 
-        const [selectedSubmission, setSelectedSubmission] = useState<any>(null)
-        const [gradeOverride, setGradeOverride] = useState('')
+        const [selectedSubmission, setSelectedSubmission] = useState<TAssignment | null>(null)
+        const [gradeOverride, setGradeOverride] = useState<number>(0)
         const [feedback, setFeedback] = useState('')
 
         const [messages, setMessages] = useState<TMessage[]>([])
+        const [assigments, setAssignments] = useState<TAssignment[]>([])
         const [students, setStudents] = useState<TStudent[]>([])
         const [newMessage, setNewMessage] = useState<string>('')
         const [currentUserId, setCurrentUserId] = useState<string>('')
         const [userId, setUserId] = useState<string>('')
         const [disabled, setDisabled] = useState<boolean>()
-  
-        const handleGradeSubmission = (submissionId: number) => {
+
+        const handleGradeSubmission = (submissionId: string) => {
                 setSelectedSubmission(null)
-                setGradeOverride('')
+                setGradeOverride(0)
                 setFeedback('')
         }
-        const openSubmissionReview = (submission: any) => {
+        const openSubmissionReview = (submission: TAssignment) => {
                 setSelectedSubmission(submission)
-                setGradeOverride(submission.aiGrade)
+                setGradeOverride(submission.ai_grade || 0)
         }
         const handleSendMessage = async () => {
                 setDisabled(true)
@@ -152,19 +184,19 @@ export function TeacherTabs() {
                                 className='space-y-4'
                         >
                                 <div className='grid gap-4'>
-                                        {submissions.map((submission) => (
-                                                <Card key={submission.id}>
+                                        {submissions.map(({ title, id, student_id, subject, status, ai_grade, graded_at, submitted_at, created_at, ...others }) => (
+                                                <Card key={id}>
                                                         <CardHeader className='!pb-0'>
                                                                 <div className='flex items-start justify-between max-sm:flex-col-reverse max-sm:gap-y-2'>
                                                                         <div>
-                                                                                <CardTitle className='text-xl'>{submission.assignment}</CardTitle>
+                                                                                <CardTitle className='text-xl'>{title}</CardTitle>
                                                                                 <CardDescription className='text-base'>
-                                                                                        by {submission.studentName} • {submission.subject}
+                                                                                        by Student {student_id} • {subject || 'No Subject'}
                                                                                 </CardDescription>
                                                                         </div>
                                                                         <div className='flex items-center space-x-2'>
-                                                                                <Badge variant={submission.status === 'graded' ? 'default' : 'secondary'}>
-                                                                                        {submission.status === 'graded' ? (
+                                                                                <Badge variant={status === 'graded' ? 'default' : 'secondary'}>
+                                                                                        {status === 'graded' ? (
                                                                                                 <>
                                                                                                         <CheckCircle className='w-3 h-3 mr-1' />
                                                                                                         Graded
@@ -172,7 +204,7 @@ export function TeacherTabs() {
                                                                                         ) : (
                                                                                                 <>
                                                                                                         <Clock className='w-3 h-3 mr-1' />
-                                                                                                        Pending
+                                                                                                        {status === 'submitted' ? 'Submitted' : 'Pending'}
                                                                                                 </>
                                                                                         )}
                                                                                 </Badge>
@@ -180,9 +212,9 @@ export function TeacherTabs() {
                                                                                         variant='outline'
                                                                                         className='bg-blue-50 text-blue-700'
                                                                                 >
-                                                                                        AI: {submission.aiGrade}
+                                                                                        AI Score: {ai_grade}/100
                                                                                 </Badge>
-                                                                                {submission.finalGrade && <Badge className='bg-green-100 text-green-800'>Final: {submission.finalGrade}</Badge>}
+                                                                                {graded_at && <Badge className='bg-green-100 text-green-800'>Graded: {new Date(graded_at).toLocaleDateString()}</Badge>}
                                                                         </div>
                                                                 </div>
                                                         </CardHeader>
@@ -190,21 +222,49 @@ export function TeacherTabs() {
                                                                 <div className='flex items-center justify-between flex-wrap gap-4'>
                                                                         <div className='flex items-center text-sm text-gray-500'>
                                                                                 <Clock className='w-4 h-4 mr-1' />
-                                                                                Submitted: {submission.submittedAt}
+                                                                                {submitted_at
+                                                                                        ? `Submitted: ${new Date(submitted_at).toLocaleDateString()}`
+                                                                                        : `Created: ${new Date(created_at).toLocaleDateString()}`}
                                                                         </div>
                                                                         <div className='flex items-center space-x-2'>
                                                                                 <Button
                                                                                         variant='outline'
                                                                                         size='sm'
-                                                                                        onClick={() => openSubmissionReview(submission)}
+                                                                                        onClick={() =>
+                                                                                                openSubmissionReview({
+                                                                                                        title,
+                                                                                                        id,
+                                                                                                        student_id,
+                                                                                                        subject,
+                                                                                                        status,
+                                                                                                        ai_grade,
+                                                                                                        graded_at,
+                                                                                                        submitted_at,
+                                                                                                        created_at,
+                                                                                                        ...others,
+                                                                                                })
+                                                                                        }
                                                                                 >
                                                                                         <Eye className='w-4 h-4 mr-2' />
                                                                                         Review
                                                                                 </Button>
-                                                                                {submission.status === 'pending' && (
+                                                                                {status === 'pending' && (
                                                                                         <Button
                                                                                                 size='sm'
-                                                                                                onClick={() => openSubmissionReview(submission)}
+                                                                                                onClick={() =>
+                                                                                                        openSubmissionReview({
+                                                                                                                title,
+                                                                                                                id,
+                                                                                                                student_id,
+                                                                                                                subject,
+                                                                                                                status,
+                                                                                                                ai_grade,
+                                                                                                                graded_at,
+                                                                                                                submitted_at,
+                                                                                                                created_at,
+                                                                                                                ...others,
+                                                                                                        })
+                                                                                                }
                                                                                         >
                                                                                                 Grade Now
                                                                                         </Button>
@@ -219,14 +279,14 @@ export function TeacherTabs() {
                                 {selectedSubmission && (
                                         <Card className='border-2 border-blue-200 bg-blue-50/30'>
                                                 <CardHeader>
-                                                        <CardTitle>Review: {selectedSubmission.assignment}</CardTitle>
-                                                        <CardDescription>Student: {selectedSubmission.studentName}</CardDescription>
+                                                        <CardTitle>Review: {selectedSubmission.title}</CardTitle>
+                                                        <CardDescription>Student ID: {selectedSubmission.student_id}</CardDescription>
                                                 </CardHeader>
                                                 <CardContent className='space-y-4'>
                                                         <div>
                                                                 <h4 className='font-semibold mb-2'>Extracted Text:</h4>
                                                                 <div className='bg-gray-50 p-4 rounded-lg max-h-32 overflow-y-auto'>
-                                                                        <p className='text-sm'>{selectedSubmission.extractedText}</p>
+                                                                        <p className='text-sm'>{selectedSubmission.extracted_text}</p>
                                                                 </div>
                                                         </div>
 
@@ -234,11 +294,14 @@ export function TeacherTabs() {
                                                                 <div>
                                                                         <label className='block text-sm font-medium mb-2'>Grade</label>
                                                                         <Input
+                                                                                type='number'
+                                                                                min={0}
+                                                                                max={100}
                                                                                 value={gradeOverride}
-                                                                                onChange={(e) => setGradeOverride(e.target.value)}
-                                                                                placeholder='Enter grade (e.g., A, B+, 85)'
+                                                                                onChange={(e) => setGradeOverride(parseInt(e.target.value, 10))}
+                                                                                placeholder='Enter grade (0-100)'
                                                                         />
-                                                                        <p className='text-xs text-gray-500 mt-1'>AI suggested: {selectedSubmission.aiGrade}</p>
+                                                                        <p className='text-xs text-gray-500 mt-1'>AI Score: {selectedSubmission.ai_grade}/100</p>
                                                                 </div>
 
                                                                 <div>
@@ -289,8 +352,17 @@ export function TeacherTabs() {
                                 <Card className='h-96'>
                                         <CardHeader className='max-[400px]:!pb-0 flex-row justify-between items-center'>
                                                 <div>
-                                                        <CardTitle>Student Messages</CardTitle>
-                                                        <CardDescription>Communicate with your students</CardDescription>
+                                                        {students.length ? (
+                                                                <>
+                                                                        <CardTitle>Student Messages</CardTitle>
+                                                                        <CardDescription>Communicate with your students</CardDescription>
+                                                                </>
+                                                        ) : (
+                                                                <>
+                                                                        <CardTitle>Please wait until your students arrive</CardTitle>
+                                                                        <CardDescription>Let them register here</CardDescription>
+                                                                </>
+                                                        )}
                                                 </div>
                                                 <div className='flex gap-4'>
                                                         {students.map((student, id) => (
@@ -375,17 +447,17 @@ export function TeacherTabs() {
                                                                                 className='flex items-center justify-between p-4 border rounded-lg'
                                                                         >
                                                                                 <div>
-                                                                                        <h4 className='font-semibold'>{submission.studentName}</h4>
-                                                                                        <p className='text-sm text-gray-600'>{submission.assignment}</p>
+                                                                                        <h4 className='font-semibold'>Student {submission.student_id}</h4>
+                                                                                        <p className='text-sm text-gray-600'>{submission.title}</p>
                                                                                 </div>
                                                                                 <div className='text-right'>
                                                                                         <div className='flex items-center space-x-2'>
-                                                                                                <Badge className='bg-green-100 text-green-800'>{submission.finalGrade}</Badge>
+                                                                                                <Badge className='bg-green-100 text-green-800'>{submission.ai_grade}/100</Badge>
                                                                                                 <Badge
                                                                                                         variant='outline'
                                                                                                         className='capitalize'
                                                                                                 >
-                                                                                                        {submission.feedback}
+                                                                                                        {submission.feedback || 'No feedback yet'}
                                                                                                 </Badge>
                                                                                         </div>
                                                                                 </div>
