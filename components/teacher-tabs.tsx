@@ -62,6 +62,7 @@ export function TeacherTabs() {
         const [currentUserId, setCurrentUserId] = useState<string>('')
         const [userId, setUserId] = useState<string>('')
         const [disabled, setDisabled] = useState<boolean>()
+  
         const handleGradeSubmission = (submissionId: number) => {
                 setSelectedSubmission(null)
                 setGradeOverride('')

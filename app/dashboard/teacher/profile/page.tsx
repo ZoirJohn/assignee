@@ -33,6 +33,8 @@ export default function TeacherProfile() {
         })
         const [previewUrl, setPreviewUrl] = useState<string | null>(null)
         const [copied, setCopied] = useState<boolean>(false)
+        const [id, setId] = useState<string>()
+        const [email, setEmail] = useState<string>()
 
         const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
                 const file = event.target.files?.[0]
@@ -66,19 +68,28 @@ export default function TeacherProfile() {
                 navigator.clipboard.writeText(profile.id)
                 setCopied(true)
         }
-
         useEffect(() => {
-                const getUser = async () => {
-                        return (await supabase.auth.getUser()).data.user
-                }
-                const fetchProfile = async () => {
-                        const userData = await getUser()
-                        const { data } = await supabase.from('profiles').select('*').eq('id', userData?.id).single()
-                        if (data) setProfile({ ...data, email: userData?.user_metadata.email, id: userData?.id })
+                const fetchUser = async () => {
+                        const {
+                                data: { user },
+                        } = await supabase.auth.getUser()
+                        if (user) {
+                                setEmail(user?.email)
+                                setId(user?.id)
+                        }
                 }
 
-                fetchProfile()
+                fetchUser()
         }, [])
+        useEffect(() => {
+                const fetchProfile = async () => {
+                        const { data } = await supabase.from('profiles').select('*').single()
+                        if (data) setProfile({ ...data, email: email, id: id })
+                }
+                if (id && email) {
+                        fetchProfile()
+                }
+        }, [id, email])
         useEffect(() => {
                 const timeout = setTimeout(() => {
                         setCopied(false)
