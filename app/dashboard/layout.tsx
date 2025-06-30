@@ -1,5 +1,5 @@
 import DashboardLayoutSidebar from '@/components/dashboard-layout'
-import { createClient } from '@/utils/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { ReactNode } from 'react'
 
 export default async function DashboardLayoutMain({ children }: { children: ReactNode }) {

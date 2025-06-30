@@ -23,16 +23,18 @@ export type TAssignment = {
         image_url: string
         extracted_text: string
         ai_grade: number
-        feedback: string
+        feedback: 'excellent' | 'good' | 'okay' | 'poor' | ''
         status: 'pending' | 'submitted' | 'graded' | 'returned'
         deadline: Date
         created_at: Date
         updated_at: Date
         submitted_at: Date
-        graded_at: Date
+        graded_at: Date | undefined
         max_grade: number
         subject: string
         assignment_type: 'homework' | 'quiz' | 'exam' | 'project' | 'lab' | 'essay'
         is_active: boolean
         teacher_grade?: string
+        min_grade: number
+        additional_comments?: string
 }

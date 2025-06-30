@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ProfileForm } from '../../teacher/profile/page'
-import { createClient } from '@/utils/supabase/client'
+import { createClient } from '@/lib/supabase/client'
 import Image from 'next/image'
 
 export default function StudentProfile() {
@@ -31,7 +31,7 @@ export default function StudentProfile() {
                         setPreviewUrl(url)
                 }
         }
-        
+
         async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
                 const file = e.target.files?.[0]
                 if (!file) return

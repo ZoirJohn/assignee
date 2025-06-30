@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { TabsContent } from '@/components/ui/tabs'
-import { createClient } from '@/utils/supabase/client'
+import { createClient } from '@/lib/supabase/client'
 import { TAssignment, TMessage, TStudent } from '@/definitions'
 import { cn } from '@/lib/utils'
 
@@ -23,15 +23,17 @@ const submissions: TAssignment[] = [
                 description: 'Write a 1000-word essay analyzing the global impact of climate change',
                 image_url: '/assignments/essay1.jpg',
                 extracted_text: 'Climate change is one of the most pressing issues facing our planet today...',
-                ai_grade: 92,
-                feedback: 'Excellent analysis with well-supported arguments',
+                ai_grade: 4,
+                feedback: 'excellent',
+                additional_comments: 'Excellent analysis with well-supported arguments',
                 status: 'graded',
                 deadline: new Date('2024-03-30'),
                 created_at: new Date('2024-03-15'),
                 updated_at: new Date('2024-03-15'),
                 submitted_at: new Date('2024-03-20'),
-                graded_at: new Date('2024-03-22'),
-                max_grade: 100,
+                graded_at: undefined,
+                max_grade: 5,
+                min_grade: 2,
                 subject: 'Environmental Science',
                 assignment_type: 'essay',
                 is_active: true,
@@ -85,7 +87,7 @@ export function TeacherTabs() {
 
         const [selectedSubmission, setSelectedSubmission] = useState<TAssignment | null>(null)
         const [gradeOverride, setGradeOverride] = useState<number>(0)
-        const [feedback, setFeedback] = useState('')
+        const [additionalComments, setAdditionalComments] = useState('')
 
         const [messages, setMessages] = useState<TMessage[]>([])
         const [assigments, setAssignments] = useState<TAssignment[]>([])
@@ -98,11 +100,12 @@ export function TeacherTabs() {
         const handleGradeSubmission = (submissionId: string) => {
                 setSelectedSubmission(null)
                 setGradeOverride(0)
-                setFeedback('')
+                setAdditionalComments('')
         }
         const openSubmissionReview = (submission: TAssignment) => {
                 setSelectedSubmission(submission)
                 setGradeOverride(submission.ai_grade || 0)
+                setAdditionalComments(submission.additional_comments || '')
         }
         const handleSendMessage = async () => {
                 setDisabled(true)
@@ -195,7 +198,10 @@ export function TeacherTabs() {
                                                                                 </CardDescription>
                                                                         </div>
                                                                         <div className='flex items-center space-x-2'>
-                                                                                <Badge variant={status === 'graded' ? 'default' : 'secondary'}>
+                                                                                <Badge
+                                                                                        className='hover:bg-black'
+                                                                                        variant={status === 'graded' ? 'default' : 'secondary'}
+                                                                                >
                                                                                         {status === 'graded' ? (
                                                                                                 <>
                                                                                                         <CheckCircle className='w-3 h-3 mr-1' />
@@ -212,9 +218,13 @@ export function TeacherTabs() {
                                                                                         variant='outline'
                                                                                         className='bg-blue-50 text-blue-700'
                                                                                 >
-                                                                                        AI Score: {ai_grade}/100
+                                                                                        AI Score: {ai_grade}/{others.max_grade}
                                                                                 </Badge>
-                                                                                {graded_at && <Badge className='bg-green-100 text-green-800'>Graded: {new Date(graded_at).toLocaleDateString()}</Badge>}
+                                                                                {graded_at && (
+                                                                                        <Badge className='bg-green-100 text-green-800 hover:bg-green-100'>
+                                                                                                Graded: {new Date(graded_at).toLocaleDateString()}
+                                                                                        </Badge>
+                                                                                )}
                                                                         </div>
                                                                 </div>
                                                         </CardHeader>
@@ -295,20 +305,27 @@ export function TeacherTabs() {
                                                                         <label className='block text-sm font-medium mb-2'>Grade</label>
                                                                         <Input
                                                                                 type='number'
-                                                                                min={0}
-                                                                                max={100}
+                                                                                min={selectedSubmission.min_grade}
+                                                                                max={selectedSubmission.max_grade}
                                                                                 value={gradeOverride}
                                                                                 onChange={(e) => setGradeOverride(parseInt(e.target.value, 10))}
                                                                                 placeholder='Enter grade (0-100)'
                                                                         />
-                                                                        <p className='text-xs text-gray-500 mt-1'>AI Score: {selectedSubmission.ai_grade}/100</p>
+                                                                        <p className='text-xs text-gray-500 mt-1'>
+                                                                                AI Score: {selectedSubmission.ai_grade}/{selectedSubmission.max_grade}
+                                                                        </p>
                                                                 </div>
 
                                                                 <div>
                                                                         <label className='block text-sm font-medium mb-2'>Feedback Level</label>
                                                                         <Select
-                                                                                value={feedback}
-                                                                                onValueChange={setFeedback}
+                                                                                value={selectedSubmission.feedback}
+                                                                                onValueChange={(value) => {
+                                                                                        if (selectedSubmission) {
+                                                                                                setSelectedSubmission({ ...selectedSubmission, feedback: value as TAssignment['feedback'] })
+                                                                                        }
+                                                                                }}
+                                                                                disabled={selectedSubmission.graded_at == undefined}
                                                                         >
                                                                                 <SelectTrigger>
                                                                                         <SelectValue placeholder='Select feedback' />
@@ -328,11 +345,19 @@ export function TeacherTabs() {
                                                                 <Textarea
                                                                         placeholder='Add specific feedback for the student...'
                                                                         className='min-h-20'
+                                                                        readOnly={selectedSubmission.graded_at == undefined}
+                                                                        value={additionalComments}
+                                                                        onChange={(e) => setAdditionalComments(e.target.value)}
                                                                 />
                                                         </div>
 
                                                         <div className='flex items-center space-x-2'>
-                                                                <Button onClick={() => handleGradeSubmission(selectedSubmission.id)}>Confirm Grade</Button>
+                                                                <Button
+                                                                        onClick={() => handleGradeSubmission(selectedSubmission.id)}
+                                                                        disabled={selectedSubmission.graded_at == undefined}
+                                                                >
+                                                                        Confirm Grade
+                                                                </Button>
                                                                 <Button
                                                                         variant='outline'
                                                                         onClick={() => setSelectedSubmission(null)}
@@ -441,23 +466,25 @@ export function TeacherTabs() {
                                                 <div className='space-y-4'>
                                                         {submissions
                                                                 .filter((s) => s.status === 'graded')
-                                                                .map((submission) => (
+                                                                .map(({ id, student_id, title, ai_grade, feedback, max_grade }) => (
                                                                         <div
-                                                                                key={submission.id}
+                                                                                key={id}
                                                                                 className='flex items-center justify-between p-4 border rounded-lg'
                                                                         >
                                                                                 <div>
-                                                                                        <h4 className='font-semibold'>Student {submission.student_id}</h4>
-                                                                                        <p className='text-sm text-gray-600'>{submission.title}</p>
+                                                                                        <h4 className='font-semibold'>Student {student_id}</h4>
+                                                                                        <p className='text-sm text-gray-600'>{title}</p>
                                                                                 </div>
                                                                                 <div className='text-right'>
                                                                                         <div className='flex items-center space-x-2'>
-                                                                                                <Badge className='bg-green-100 text-green-800'>{submission.ai_grade}/100</Badge>
+                                                                                                <Badge className='bg-green-100 text-green-800 hover:bg-green-100'>
+                                                                                                        {ai_grade}/{max_grade}
+                                                                                                </Badge>
                                                                                                 <Badge
                                                                                                         variant='outline'
                                                                                                         className='capitalize'
                                                                                                 >
-                                                                                                        {submission.feedback || 'No feedback yet'}
+                                                                                                        {feedback || 'No feedback yet'}
                                                                                                 </Badge>
                                                                                         </div>
                                                                                 </div>
