@@ -1,10 +1,18 @@
 import './globals.css'
-import type { Metadata } from 'next'
-import { Open_Sans } from 'next/font/google'
 import Image from 'next/image'
 import Link from 'next/link'
+import localFont from 'next/font/local'
+import type { Metadata } from 'next'
 
-const inter = Open_Sans({ subsets: ['latin'] })
+const satoshi = localFont({
+        src: [
+                { path: '../public/fonts/Satoshi-Regular.otf', style: 'normal', weight: '400' },
+                { path: '../public/fonts/Satoshi-Medium.otf', style: 'normal', weight: '500' },
+                { path: '../public/fonts/Satoshi-Bold.otf', style: 'normal', weight: '700' },
+                { path: '../public/fonts/Satoshi-Black.otf', style: 'normal', weight: '900' },
+        ],
+        display: 'swap',
+})
 
 export const metadata: Metadata = {
         title: 'Assignee - Smart Assignment Management',
@@ -21,7 +29,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                         className='select-none'
                 >
                         <body
-                                className={inter.className}
+                                className={`${satoshi.className} font-sans text-base`}
                                 suppressHydrationWarning
                         >
                                 <Link

@@ -80,7 +80,7 @@
                 @apply bg-background text-foreground;
         }
         .container {
-                @apply !max-w-7xl;
+                @apply !max-w-7xl mx-auto;
         }
 }
 
