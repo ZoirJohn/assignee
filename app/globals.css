@@ -1,10 +1,4 @@
-@tailwind base;
-
-@import "tw-animate-css";
-
-@custom-variant dark (&:is(.dark *));
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
 :root {
         --foreground-rgb: 0, 0, 0;
@@ -15,7 +9,7 @@
         --card-foreground: oklch(0.129 0.042 264.695);
         --popover: oklch(1 0 0);
         --popover-foreground: oklch(0.129 0.042 264.695);
-        --primary: oklch(0.208 0.042 265.755);
+        --primary: oklch(0.28 0.03 257);
         --primary-foreground: oklch(0.984 0.003 247.858);
         --secondary: oklch(0.968 0.007 247.896);
         --secondary-foreground: oklch(0.208 0.042 265.755);
@@ -108,18 +102,6 @@
         }
 }
 
-@layer base {
-        * {
-                @apply border-border;
-        }
-        body {
-                @apply bg-background text-foreground;
-        }
-        .container {
-                @apply !max-w-7xl mx-auto;
-        }
-}
-
 .scrollbar-hide {
         -ms-overflow-style: none;
         scrollbar-width: none;
@@ -200,12 +182,20 @@
         --sidebar-border: oklch(1 0 0 / 10%);
         --sidebar-ring: oklch(0.551 0.027 264.364);
 }
-
+@media (prefers-color-scheme: dark) {
+        :root {
+                --background: #0a0a0a;
+                --foreground: #ededed;
+        }
+}
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+        * {
+                @apply border-border outline-ring/50;
         }
-  body {
-    @apply bg-background text-foreground;
+        body {
+                @apply bg-background text-foreground;
         }
+}
+.container {
+        @apply max-w-[1600px] mx-auto px-1;
 }

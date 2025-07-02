@@ -1,8 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { BookOpen, RefreshCw, Home, AlertTriangle, Bug } from 'lucide-react'
+import { BookOpen, Home, AlertTriangle, Bug } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -93,7 +92,7 @@ export default function Error({ error, reset }: ErrorProps) {
                                         >
                                                 <h1 className='text-3xl md:text-4xl font-bold text-gray-900 mb-4'>Something Went Wrong</h1>
                                                 <p className='text-xl text-gray-600 mb-6 max-w-lg mx-auto'>
-                                                        We encountered an unexpected error. Don't worry, our team has been notified and we're working to fix this issue.
+                                                        We encountered an unexpected error. Don&apos;t worry, our team has been notified and we&apos;re working to fix this issue.
                                                 </p>
 
                                                 <div className='flex justify-center mb-6'>
@@ -115,7 +114,6 @@ export default function Error({ error, reset }: ErrorProps) {
                                                         size='lg'
                                                         onClick={reset}
                                                 >
-                                                        <RefreshCw className='mr-2 w-5 h-5' />
                                                         Try Again
                                                 </Button>
                                                 <Button

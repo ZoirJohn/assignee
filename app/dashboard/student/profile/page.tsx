@@ -32,28 +32,6 @@ export default function StudentProfile() {
                 }
         }
 
-        async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
-                const file = e.target.files?.[0]
-                if (!file) return
-
-                const fileExt = file.name.split('.').pop()
-                const fileName = `${profile.id}.${fileExt}`
-                const filePath = `${fileName}`
-
-                const { data, error } = await supabase.storage.from('avatars').upload(filePath, file, {
-                        upsert: true,
-                        cacheControl: '3600',
-                })
-                if (!error) {
-                        const {
-                                data: { publicUrl },
-                        } = supabase.storage.from('avatars').getPublicUrl(filePath)
-                        if (publicUrl) {
-                                await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', profile.id)
-                        }
-                }
-        }
-
         const handleIdCopy = () => {
                 navigator.clipboard.writeText(profile.id)
                 setCopied(true)
@@ -70,7 +48,7 @@ export default function StudentProfile() {
                 }
 
                 fetchProfile()
-        }, [])
+        }, [supabase, supabase.auth])
         useEffect(() => {
                 const timeout = setTimeout(() => {
                         setCopied(false)

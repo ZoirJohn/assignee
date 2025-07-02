@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Separator } from '@/components/ui/separator'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { signup } from '../actions/auth'
 import Image from 'next/image'
@@ -188,7 +187,7 @@ export default function SignUpPage() {
                                                                         <FormField
                                                                                 control={teacherForm.control}
                                                                                 name='role'
-                                                                                render={({ field }) => (
+                                                                                render={({}) => (
                                                                                         <FormControl>
                                                                                                 <Input
                                                                                                         type='hidden'
@@ -288,7 +287,7 @@ export default function SignUpPage() {
                                                                         <FormField
                                                                                 control={teacherForm.control}
                                                                                 name='role'
-                                                                                render={({ field }) => (
+                                                                                render={({ }) => (
                                                                                         <FormControl>
                                                                                                 <Input
                                                                                                         type='hidden'

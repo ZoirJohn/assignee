@@ -1,7 +1,7 @@
 'use client'
 
-import { ChangeEvent, MouseEvent, useEffect, useState } from 'react'
-import { Camera, Mail, User, Save, Upload } from 'lucide-react'
+import { ChangeEvent, useEffect, useState } from 'react'
+import { Camera, Mail, User, Save } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -51,7 +51,7 @@ export default function TeacherProfile() {
                 const fileName = `${profile.id}.${fileExt}`
                 const filePath = `${fileName}`
 
-                const { data, error } = await supabase.storage.from('avatars').upload(filePath, file, {
+                const {  error } = await supabase.storage.from('avatars').upload(filePath, file, {
                         upsert: true,
                         cacheControl: '3600',
                 })
@@ -80,7 +80,7 @@ export default function TeacherProfile() {
                 }
 
                 fetchUser()
-        }, [])
+        }, [supabase.auth])
         useEffect(() => {
                 const fetchProfile = async () => {
                         const { data } = await supabase.from('profiles').select('*').single()
@@ -89,7 +89,7 @@ export default function TeacherProfile() {
                 if (id && email) {
                         fetchProfile()
                 }
-        }, [id, email])
+        }, [id, email, supabase, supabase.from])
         useEffect(() => {
                 const timeout = setTimeout(() => {
                         setCopied(false)

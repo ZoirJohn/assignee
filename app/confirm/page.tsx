@@ -1,13 +1,12 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { ArrowRight, RefreshCw } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/client'
 
 const fadeInUp = {
         initial: { opacity: 0, y: 60 },
@@ -88,11 +87,11 @@ export default function ConfirmEmailPage() {
                                                                         Email Verification Required
                                                                 </Badge>
                                                                 <CardTitle className='text-2xl md:text-3xl font-bold text-gray-900'>Check Your Email</CardTitle>
-                                                                <CardDescription className='text-lg text-gray-600 mt-4'>We've sent a verification link to your email address</CardDescription>
+                                                                <CardDescription className='text-base italic'>&quot;Check your email and confirm it to continue.&quot;</CardDescription>
                                                         </CardHeader>
                                                         <CardContent className='space-y-6'>
                                                                 <div className='bg-blue-50 p-4 rounded-lg border border-blue-200'>
-                                                                        <h4 className='font-semibold text-blue-900 mb-2'>What's next?</h4>
+                                                                        <h4 className='font-semibold text-blue-900 mb-2'>What&apos;s next?</h4>
                                                                         <ol className='text-sm text-blue-800 space-y-1'>
                                                                                 <li>1. Check your email inbox (and spam folder)</li>
                                                                                 <li>2. Click the verification link in the email</li>
