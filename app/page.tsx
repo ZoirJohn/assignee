@@ -7,12 +7,103 @@ import { Badge } from '@/components/ui/badge'
 import icon from '@/app/favicon.svg'
 import Link from 'next/link'
 import Image from 'next/image'
+import { motion } from 'motion/react'
 
 export default function LandingPage() {
+        const streamline = 'Streamline Your'
+        const assignment = 'Assignment'
+        const workflow = 'Workflow'
+        const customDelay = [0.8, 0.4, 0.4, 0.8]
+
+        const AnimatedText = ({ text, className, delayOffset = 0 }: { text: string; className: string; delayOffset?: number }) => (
+                <>
+                        {text.split('').map((char, idx) => (
+                                <motion.span
+                                        key={idx}
+                                        className={className}
+                                        initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }}
+                                        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                                        transition={{
+                                                delay: (delayOffset + idx) * 0.08,
+                                                duration: 0.4,
+                                                ease: 'easeOut',
+                                        }}
+                                >
+                                        {char}
+                                </motion.span>
+                        ))}
+                </>
+        )
+        const AnimatedFeedback = ({ name, role, content, rating, index, delay = 0.4 }: { name: string; role: string; content: string; rating: number; index: number; delay?: number }) => (
+                <>
+                        <motion.div
+                                key={index}
+                                initial={{ opacity: 0, y: 30, filter: 'blur(6px)' }}
+                                whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                                transition={{
+                                        delay: delay * index,
+                                        duration: 0.5,
+                                        ease: 'easeOut',
+                                }}
+                                viewport={{ once: true }}
+                        >
+                                <Card className='h-full'>
+                                        <CardHeader>
+                                                <div className='flex items-center space-x-1 mb-2'>
+                                                        {[...Array(rating)].map((_, i) => (
+                                                                <Star
+                                                                        key={i}
+                                                                        className='w-4 h-4 fill-yellow-400 text-yellow-400'
+                                                                />
+                                                        ))}
+                                                </div>
+                                                <CardDescription className='text-base italic'>&quot;{content}&quot;</CardDescription>
+                                        </CardHeader>
+                                        <CardContent>
+                                                <div className='flex items-center space-x-3'>
+                                                        <div className='w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center'>
+                                                                <User className='w-5 h-5 text-gray-600' />
+                                                        </div>
+                                                        <div>
+                                                                <p className='font-semibold text-gray-900'>{name}</p>
+                                                                <p className='text-sm text-gray-600'>{role}</p>
+                                                        </div>
+                                                </div>
+                                        </CardContent>
+                                </Card>
+                        </motion.div>
+                </>
+        )
+        const AnimatedShowcase = ({ Icon, title, description, delay, index }: { Icon: any; title: string; description: string; delay: number; index: number }) => (
+                <>
+                        <motion.div
+                                initial={{ opacity: 0, y: 30, filter: 'blur(6px)' }}
+                                whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                                transition={{
+                                        delay: delay,
+                                        duration: 0.5,
+                                        ease: 'easeOut',
+                                }}
+                        >
+                                <Card className='h-full hover:shadow-lg transition-shadow duration-300'>
+                                        <CardHeader>
+                                                <div className='w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mb-4'>
+                                                        <Icon className='w-6 h-6 text-gray-600' />
+                                                </div>
+                                                <CardTitle className='text-xl'>{title}</CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                                <CardDescription className='text-base'>{description}</CardDescription>
+                                        </CardContent>
+                                </Card>
+                        </motion.div>
+                </>
+        )
+
         return (
                 <>
                         <div className='min-h-screen bg-gray-50'>
-                                <header className='sticky top-0 z-10 bg-dark-background backdrop-blur-md border-b border-gray-100 py-4'>
+                                <header className='sticky top-0 z-10 bg-dark-background backdrop-blur-xs border-b border-gray-100 py-4'>
                                         <div className='container flex items-center justify-between'>
                                                 <Link
                                                         href='/'
@@ -41,25 +132,41 @@ export default function LandingPage() {
                                                 </div>
                                         </div>
                                 </header>
-                                <section className='relative py-20 overflow-hidden'>
+                                <section className='relative py-10 overflow-hidden'>
                                         <div className='absolute inset-0 bg-gradient-to-r from-gray-600/10 to-gray-600/20' />
-                                        <div className='container mx-auto px-4 text-center relative z-0'>
-                                                <Badge
-                                                        variant='secondary'
-                                                        className='mb-4'
-                                                >
+                                        <div className='container px-4 text-center relative z-0'>
+                                                <Badge variant='secondary'>
                                                         Powered by
                                                         <Link href='https://bolt.dev'>bolt.dev</Link>
                                                 </Badge>
-                                                <h1 className='text-4xl md:text-6xl font-bold text-gray-900 mb-6'>
-                                                        Streamline Your
-                                                        <span className='text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600'> Assignment </span>
-                                                        Workflow
+                                                <h1 className='text-4xl md:text-6xl font-bold text-gray-900 text-wrap sm:my-4'>
+                                                        <div>
+                                                                <AnimatedText
+                                                                        text={streamline}
+                                                                        className='inline-block'
+                                                                />
+                                                        </div>
+                                                        {'  '}
+                                                        <div>
+                                                                <AnimatedText
+                                                                        text={assignment}
+                                                                        className='text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-800 inline-block leading-[1.5]'
+                                                                        delayOffset={streamline.length}
+                                                                />
+                                                        </div>
+                                                        {'  '}
+                                                        <div>
+                                                                <AnimatedText
+                                                                        text={workflow}
+                                                                        className='inline-block'
+                                                                        delayOffset={streamline.length + assignment.length}
+                                                                />
+                                                        </div>
                                                 </h1>
-                                                <p className='text-xl text-gray-600 mb-8 max-w-2xl mx-auto'>
+                                                <p className='text-xl text-gray-600 mb-8 max-w-2xl mx-auto max-sm:text-xs'>
                                                         Smart grading, seamless communication, and intelligent insights for teachers and students.
                                                 </p>
-                                                <div className='flex flex-col sm:flex-row gap-4 justify-center'>
+                                                <div className='flex max-[375px]:flex-col gap-4 justify-center'>
                                                         <Button
                                                                 size='lg'
                                                                 asChild
@@ -78,104 +185,55 @@ export default function LandingPage() {
                                                                 Watch Demo
                                                         </Button>
                                                 </div>
-                                                {/* </motion.div> */}
                                         </div>
                                 </section>
-
                                 <section
                                         id='advantages'
-                                        className='py-20 bg-white'
+                                        className='py-10 bg-gray-50'
                                 >
-                                        <div className='container mx-auto px-4'>
-                                                {/* <motion.div
-                                                        className='text-center mb-16'
-                                                        initial={{ opacity: 0, y: 20 }}
-                                                        whileInView={{ opacity: 1, y: 0 }}
-                                                        viewport={{ once: true }}
-                                                >
-                                                        <h2 className='text-3xl md:text-4xl font-bold text-gray-900 mb-4'>Why Choose Assignee?</h2>
-                                                        <p className='text-xl text-gray-600 max-w-2xl mx-auto'>Transform your teaching and learning experience with our comprehensive platform</p>
-                                                </motion.div> */}
-
-                                                {/* <motion.div */}
-                                                <div
-                                                        className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8'
-                                                        // variants={staggerContainer}
-                                                        // initial='initial'
-                                                        // whileInView='animate'
-                                                        // viewport={{ once: true }}
-                                                >
+                                        <div className='container px-4'>
+                                                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8'>
                                                         {[
                                                                 {
-                                                                        icon: CheckCircle,
+                                                                        Icon: CheckCircle,
                                                                         title: 'AI-Powered Grading',
                                                                         description: 'Intelligent assignment evaluation with consistent, fair grading standards',
                                                                 },
                                                                 {
-                                                                        icon: Clock,
+                                                                        Icon: Clock,
                                                                         title: 'Time Management',
                                                                         description: 'Track deadlines, submissions, and progress with intuitive dashboards',
                                                                 },
                                                                 {
-                                                                        icon: MessageSquare,
+                                                                        Icon: MessageSquare,
                                                                         title: 'Seamless Communication',
                                                                         description: 'Built-in chat system for instant teacher-student collaboration',
                                                                 },
                                                                 {
-                                                                        icon: Users,
+                                                                        Icon: Users,
                                                                         title: 'Role-Based Access',
                                                                         description: 'Tailored experiences for teachers and students with secure access controls',
                                                                 },
                                                         ].map((advantage, index) => (
-                                                                // <motion.div
-                                                                <div
-                                                                        key={index}
-                                                                        // variants={fadeInUp}
-                                                                >
-                                                                        <Card className='h-full hover:shadow-lg transition-shadow duration-300'>
-                                                                                <CardHeader>
-                                                                                        <div className='w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4'>
-                                                                                                <advantage.icon className='w-6 h-6 text-blue-600' />
-                                                                                        </div>
-                                                                                        <CardTitle className='text-xl'>{advantage.title}</CardTitle>
-                                                                                </CardHeader>
-                                                                                <CardContent>
-                                                                                        <CardDescription className='text-base'>{advantage.description}</CardDescription>
-                                                                                </CardContent>
-                                                                        </Card>
-                                                                </div>
-                                                                // {/* </motion.div> */}
+                                                                <AnimatedShowcase
+                                                                        {...advantage}
+                                                                        delay={customDelay[index]}
+                                                                        index={index}
+                                                                ></AnimatedShowcase>
                                                         ))}
                                                 </div>
-                                                {/* </motion.div> */}
                                         </div>
                                 </section>
-
                                 <section
                                         id='testimonials'
-                                        className='py-20 bg-gray-50'
+                                        className='py-10 bg-gray-50'
                                 >
-                                        <div className='container mx-auto px-4'>
-                                                {/* <motion.div */}
-                                                <div
-                                                        className='text-center mb-16'
-                                                        // initial={{ opacity: 0, y: 20 }}
-                                                        // whileInView={{ opacity: 1, y: 0 }}
-                                                        // viewport={{ once: true }}
-                                                >
+                                        <div className='container px-4'>
+                                                <div className='text-center mb-16'>
                                                         <h2 className='text-3xl md:text-4xl font-bold text-gray-900 mb-4'>What Our Users Say</h2>
                                                         <p className='text-xl text-gray-600'>Trusted by thousands of educators and students worldwide</p>
                                                 </div>
-                                                {/* </motion.div> */}
-
-                                                {/* <motion.div */}
-                                                <div
-                                                        className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'
-                                                        // variants={staggerContainer}
-                                                        // initial='initial'
-                                                        // whileInView='animate'
-                                                        // viewport={{ once: true }}
-                                                >
+                                                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
                                                         {[
                                                                 {
                                                                         name: 'Sarah Johnson',
@@ -196,68 +254,26 @@ export default function LandingPage() {
                                                                         rating: 5,
                                                                 },
                                                         ].map((testimonial, index) => (
-                                                                // <motion.div
-                                                                <div
+                                                                <AnimatedFeedback
+                                                                        {...testimonial}
+                                                                        index={index}
                                                                         key={index}
-                                                                        // variants={fadeInUp}
-                                                                >
-                                                                        <Card className='h-full'>
-                                                                                <CardHeader>
-                                                                                        <div className='flex items-center space-x-1 mb-2'>
-                                                                                                {[...Array(testimonial.rating)].map((_, i) => (
-                                                                                                        <Star
-                                                                                                                key={i}
-                                                                                                                className='w-4 h-4 fill-yellow-400 text-yellow-400'
-                                                                                                        />
-                                                                                                ))}
-                                                                                        </div>
-                                                                                        <CardDescription className='text-base italic'>&quot;{testimonial.content}&qout;</CardDescription>
-                                                                                </CardHeader>
-                                                                                <CardContent>
-                                                                                        <div className='flex items-center space-x-3'>
-                                                                                                <div className='w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center'>
-                                                                                                        <User className='w-5 h-5 text-gray-600' />
-                                                                                                </div>
-                                                                                                <div>
-                                                                                                        <p className='font-semibold text-gray-900'>{testimonial.name}</p>
-                                                                                                        <p className='text-sm text-gray-600'>{testimonial.role}</p>
-                                                                                                </div>
-                                                                                        </div>
-                                                                                </CardContent>
-                                                                        </Card>
-                                                                </div>
-                                                                // {/* </motion.div> */}
+                                                                />
                                                         ))}
                                                 </div>
-                                                {/* </motion.div> */}
                                         </div>
                                 </section>
-
                                 <section
                                         id='about'
-                                        className='py-20 bg-white'
+                                        className='py-10 bg-gray-50'
                                 >
-                                        <div className='container mx-auto px-4'>
-                                                {/* <motion.div */}
-                                                <div
-                                                        className='text-center mb-16'
-                                                        // initial={{ opacity: 0, y: 20 }}
-                                                        // whileInView={{ opacity: 1, y: 0 }}
-                                                        // viewport={{ once: true }}
-                                                >
+                                        <div className='container px-4'>
+                                                <div className='text-center mb-16'>
                                                         <h2 className='text-3xl md:text-4xl font-bold text-gray-900 mb-4'>How It Works</h2>
                                                         <p className='text-xl text-gray-600'>Get started in minutes with our simple three-step process</p>
                                                 </div>
-                                                {/* </motion.div> */}
 
-                                                {/* <motion.div */}
-                                                <div
-                                                        className='max-w-4xl mx-auto'
-                                                        // variants={staggerContainer}
-                                                        // initial='initial'
-                                                        // whileInView='animate'
-                                                        // viewport={{ once: true }}
-                                                >
+                                                <div className='max-w-4xl mx-auto'>
                                                         {[
                                                                 {
                                                                         step: '01',
@@ -275,34 +291,29 @@ export default function LandingPage() {
                                                                         description: 'Students submit work, teachers review AI suggestions, and everyone stays connected through chat.',
                                                                 },
                                                         ].map((step, index) => (
-                                                                // <motion.div
                                                                 <div
                                                                         key={index}
                                                                         className='flex flex-col md:flex-row items-center mb-12 last:mb-0'
-                                                                        // variants={fadeInUp}
                                                                 >
-                                                                        <div className='w-20 h-20 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0 md:mr-8 flex-shrink-0'>
+                                                                        <div className='w-20 h-20 bg-gray-700 text-white rounded-full flex items-center justify-center text-xl font-bold mb-4 md:mb-0 md:mr-8 flex-shrink-0'>
                                                                                 {step.step}
                                                                         </div>
                                                                         <div className='text-center md:text-left'>
                                                                                 <h3 className='text-2xl font-bold text-gray-900 mb-2'>{step.title}</h3>
-                                                                                <p className='text-lg text-gray-600'>{step.description}</p>
+                                                                                <p className='text-lg text-gray-600 max-sm:text-sm'>{step.description}</p>
                                                                         </div>
                                                                 </div>
-                                                                // {/* </motion.div> */}
                                                         ))}
                                                 </div>
-                                                {/* </motion.div> */}
                                         </div>
                                 </section>
-
                                 <footer className='bg-gray-900 text-white py-12'>
-                                        <div className='container mx-auto px-4 text-center'>
+                                        <div className='container px-4 text-center'>
                                                 <Link href='/'>
                                                         <div className='flex items-center justify-center space-x-2 mb-8'>
-                                                                <div className='w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center'>
+                                                                <div className='w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center'>
                                                                         <Image
-                                                                                src='/favicon.svg'
+                                                                                src={icon}
                                                                                 alt='logo'
                                                                                 width={20}
                                                                                 height={20}
@@ -311,22 +322,22 @@ export default function LandingPage() {
                                                                 <span className='text-xl font-bold'>Assignee</span>
                                                         </div>
                                                 </Link>
-                                                <nav className='flex justify-center space-x-8 mb-8'>
+                                                <nav className='flex justify-center sm:gap-x-4 gap-x-8 mb-8'>
                                                         <a
                                                                 href='#advantages'
-                                                                className='hover:text-blue-400 transition-colors'
+                                                                className='hover:text-gray-400 transition-colors'
                                                         >
                                                                 Advantages
                                                         </a>
                                                         <a
                                                                 href='#testimonials'
-                                                                className='hover:text-blue-400 transition-colors'
+                                                                className='hover:text-gray-400 transition-colors'
                                                         >
                                                                 Testimonials
                                                         </a>
                                                         <a
                                                                 href='#about'
-                                                                className='hover:text-blue-400 transition-colors'
+                                                                className='hover:text-gray-400 transition-colors'
                                                         >
                                                                 How It Works
                                                         </a>
