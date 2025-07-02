@@ -30,7 +30,7 @@ export function TeacherTabs() {
         const [disabled, setDisabled] = useState<boolean>()
         const messagesEndRef = useRef<HTMLDivElement>(null)
 
-        const handleGradeSubmission = (submissionId: string) => {
+        const handleGradeSubmission = () => {
                 setSelectedSubmission(null)
                 setGradeOverride(0)
                 setAdditionalComments('')
@@ -57,10 +57,12 @@ export function TeacherTabs() {
                         const {
                                 data: { user },
                         } = await supabase.auth.getUser()
-                        setUserId(user?.id!)
+                        if (user) {
+                                setUserId(user.id)
+                        }
                 }
                 fetchUser()
-        }, [])
+        }, [supabase.auth])
         useEffect(() => {
                 const channel = supabase
                         .channel('realtime-chat:teacher-student')
@@ -86,7 +88,7 @@ export function TeacherTabs() {
                 return () => {
                         supabase.removeChannel(channel)
                 }
-        }, [])
+        }, [supabase])
         useEffect(() => {
                 async function fetchStudents() {
                         const { data: students } = await supabase.from('profiles').select('id, full_name').eq('teacher_id', userId)
@@ -98,7 +100,7 @@ export function TeacherTabs() {
                 if (userId) {
                         fetchStudents()
                 }
-        }, [userId])
+        }, [userId, supabase])
         useEffect(() => {
                 const fetchMessages = async () => {
                         const { data: messages } = await supabase
@@ -112,14 +114,14 @@ export function TeacherTabs() {
 
                 if (currentUserId) fetchMessages()
                 setDisabled(students.length == 0)
-        }, [currentUserId, userId])
+        }, [currentUserId, userId, students.length, supabase])
         useEffect(() => {
                 const fetchAssignments = async () => {
-                        const { data, error } = await supabase.from('assignments').select('*').eq('teacher_id', userId)
-                        setAssignments((prev) => [...(data as TAssignment[])])
+                        const { data } = await supabase.from('assignments').select('*').eq('teacher_id', userId)
+                        setAssignments((prev) => [...prev, ...(data as TAssignment[])])
                 }
                 if (userId) fetchAssignments()
-        }, [userId])
+        }, [userId, supabase])
         useEffect(() => {
                 messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
         }, [messages])

@@ -8,6 +8,7 @@ import icon from '@/app/favicon.svg'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'motion/react'
+import { ComponentType } from 'react'
 
 export default function LandingPage() {
         const streamline = 'Streamline Your'
@@ -74,7 +75,7 @@ export default function LandingPage() {
                         </motion.div>
                 </>
         )
-        const AnimatedShowcase = ({ Icon, title, description, delay, index }: { Icon: any; title: string; description: string; delay: number; index: number }) => (
+        const AnimatedShowcase = ({ Icon, title, description, delay }: { Icon: ComponentType<{ className: string }>; title: string; description: string; delay: number }) => (
                 <>
                         <motion.div
                                 initial={{ opacity: 0, y: 30, filter: 'blur(6px)' }}
@@ -218,7 +219,7 @@ export default function LandingPage() {
                                                                 <AnimatedShowcase
                                                                         {...advantage}
                                                                         delay={customDelay[index]}
-                                                                        index={index}
+                                                                        key={index}
                                                                 ></AnimatedShowcase>
                                                         ))}
                                                 </div>

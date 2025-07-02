@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { Home, User, FileText, LogOut, Menu, X } from 'lucide-react'
+import { Home, User, FileText, LogOut, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
@@ -66,7 +66,7 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                         <nav className='flex-1 p-4'>
                                 <ul className='space-y-2'>
                                         {links.map((link) => (
-                                                <li key={link.label}>   
+                                                <li key={link.label}>
                                                         <Link
                                                                 href={link.href}
                                                                 className='flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors'

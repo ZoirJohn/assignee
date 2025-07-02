@@ -11,8 +11,6 @@ import { Badge } from '@/components/ui/badge'
 import { TabsContent } from '@/components/ui/tabs'
 import { createClient } from '@/lib/supabase/client'
 import { TMessage } from '@/definitions'
-import { useChatScroll } from '@/hooks/use-chat-scroll'
-import { ScrollAreaViewport } from '@radix-ui/react-scroll-area'
 
 const assignments = [
         {
@@ -65,7 +63,7 @@ export default function StudentTabs() {
         const [userId, setUserId] = useState<string>('')
         const [currentUserId, setCurrentUserId] = useState<string>('')
         const [disabled, setDisabled] = useState<boolean>(false)
-        const [status, setStatus] = useState(false)
+        // const [status, setStatus] = useState(false)
 
         const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
                 const file = event.target.files?.[0]
@@ -115,11 +113,13 @@ export default function StudentTabs() {
                         const {
                                 data: { user },
                         } = await supabase.auth.getUser()
-                        setCurrentUserId(user?.user_metadata.teacherId)
-                        setUserId(user?.id!)
+                        if (user) {
+                                setCurrentUserId(user.user_metadata.teacherId as string)
+                                setUserId(user.id)
+                        }
                 }
                 fetchUser()
-        }, [])
+        }, [supabase.auth])
         useEffect(() => {
                 const channel = supabase
                         .channel('realtime-chat:teacher-student')
@@ -145,7 +145,7 @@ export default function StudentTabs() {
                 return () => {
                         supabase.removeChannel(channel)
                 }
-        }, [])
+        }, [supabase.auth, supabase])
         useEffect(() => {
                 const fetchMessages = async () => {
                         const { data: messages } = await supabase
@@ -157,7 +157,7 @@ export default function StudentTabs() {
                 }
 
                 if (currentUserId) fetchMessages()
-        }, [currentUserId, userId])
+        }, [currentUserId, userId, supabase])
         const messagesEndRef = useRef<HTMLDivElement>(null)
         useEffect(() => {
                 messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -281,10 +281,12 @@ export default function StudentTabs() {
                                                                 value={newMessage}
                                                                 onChange={(e) => setNewMessage(e.target.value)}
                                                                 onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                                                                disabled={disabled}
                                                         />
                                                         <Button
                                                                 size='sm'
                                                                 onClick={handleSendMessage}
+                                                                disabled={disabled}
                                                         >
                                                                 <Send className='w-4 h-4' />
                                                         </Button>
