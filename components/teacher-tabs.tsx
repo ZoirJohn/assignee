@@ -298,7 +298,7 @@ export function TeacherTabs() {
 
                                                         <div className='flex items-center space-x-2'>
                                                                 <Button
-                                                                        onClick={() => handleGradeSubmission(selectedSubmission.id)}
+                                                                        onClick={() => handleGradeSubmission()}
                                                                         disabled={selectedSubmission.graded_at == undefined}
                                                                 >
                                                                         Confirm Grade
