@@ -1,6 +1,8 @@
 import './globals.css'
 import { Manrope } from 'next/font/google'
 import type { Metadata } from 'next'
+import Link from 'next/link'
+import Image from 'next/image'
 
 const manrope = Manrope({
         subsets: ['latin'],
@@ -19,7 +21,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                         className='select-none'
                 >
                         <body className={`${manrope.className} font-sans text-base`}>
-                                {/* <Link
+                                <Link
                                         href='https://bolt.new'
                                         target='_blank'
                                         className='absolute bg-black z-[100] text-white w-32 h-32 rounded-full flex justify-center top-72 left-72'
@@ -32,7 +34,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                                                 className='absolute top-[45%]'
                                         />
                                         <p className='absolute top-1/3 text-[10px]'>Built with</p>
-                                </Link> */}
+                                </Link>
 
                                 {children}
                         </body>
