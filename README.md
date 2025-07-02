@@ -1,36 +1,209 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Assignee 📚
 
-## Getting Started
+An AI-powered educational platform that streamlines assignment submission and grading through intelligent image-to-text conversion and automated assessment.
 
-First, run the development server:
+## 🚀 Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Assignee bridges the gap between traditional handwritten assignments and digital assessment by allowing students to photograph their work and receive AI-powered feedback, while giving teachers comprehensive tools to review, grade, and manage submissions efficiently.
+
+## ✨ Key Features
+
+### For Students
+- 📷 **Photo Assignment Submission** - Capture handwritten work with your camera
+- 🤖 **AI Text Extraction** - Automatic conversion of handwritten text to digital format
+- ⏰ **Smart Deadlines** - Visual deadline tracking with color-coded status
+- 📊 **Instant Feedback** - Receive AI grades and teacher comments
+- 💬 **Teacher Communication** - Direct chat functionality with assigned teachers
+- 📜 **Transcript Generation** - Download official transcripts of completed work
+
+### For Teachers
+- 👥 **Student Management** - Organize students using unique teacher IDs
+- ✅ **AI-Assisted Grading** - Review and approve AI-generated grades
+- 📝 **Custom Feedback** - Add personalized comments and effort ratings
+- 📧 **Assignment Inbox** - Email-like interface for managing submissions
+- 💬 **Student Communication** - Integrated chat system
+- 📈 **Progress Tracking** - Monitor student performance over time
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js 14+ (React, TypeScript)
+- **Backend**: Next.js API Routes
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth + OAuth (Google, Instagram)
+- **AI Services**: 
+  - Google Vision API (Text extraction from images)
+  - Custom AI grading agent
+- **Styling**: Tailwind CSS
+- **Animations**: Framer Motion, CSS animations for blobs and carousels
+
+## 🏗️ Project Structure
+
+```
+assignee/
+├── src/
+│   ├── app/                 # Next.js 13+ app directory
+│   │   ├── (auth)/         # Authentication pages
+│   │   │   ├── signin/
+│   │   │   └── signup/
+│   │   ├── dashboard/      # Protected dashboard routes
+│   │   │   ├── student/
+│   │   │   └── teacher/
+│   │   └── page.tsx       # Landing page
+│   ├── components/
+│   │   ├── ui/            # Reusable UI components
+│   │   ├── auth/          # Authentication components
+│   │   ├── dashboard/     # Dashboard-specific components
+│   │   └── landing/       # Landing page components
+│   ├── lib/
+│   │   ├── supabase/      # Database client and types
+│   │   ├── ai/            # AI service integrations
+│   │   └── utils/         # Utility functions
+│   ├── hooks/             # Custom React hooks
+│   └── types/             # TypeScript type definitions
+├── public/                # Static assets
+├── supabase/             # Database migrations and types
+└── docs/                 # Additional documentation
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🎨 UI/UX Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Landing Page
+- **Hero Section**: Animated welcome banner with call-to-action
+- **Feature Highlights**: Showcase app benefits with smooth animations
+- **Testimonials**: Student and teacher feedback carousel
+- **How It Works**: Step-by-step process explanation
+- **Blob Animations**: Dynamic background elements
+- **Scroll Animations**: Engaging on-scroll reveals
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Dashboard Design
+- **Responsive Layout**: Mobile-first design approach
+- **Color-Coded Status**: Visual assignment status indicators
+- **Email-like Interface**: Familiar inbox experience for teachers
+- **Real-time Updates**: Live chat and notification system
 
-## Learn More
+## 🔧 Installation & Setup
 
-To learn more about Next.js, take a look at the following resources:
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+- Supabase account
+- Google Cloud Platform account (for Vision API)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Environment Variables
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+GOOGLE_VISION_API_KEY=your_google_vision_key
+NEXTAUTH_SECRET=your_nextauth_secret
+NEXTAUTH_URL=http://localhost:3000
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Installation Steps
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/assignee.git
+cd assignee
 
-## Deploy on Vercel
+# Install dependencies
+npm install
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your actual values
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Run database migrations
+npx supabase db push
+
+# Start development server
+npm run dev
+```
+
+## 📊 Database Schema
+
+### Core Tables
+- **users**: User profiles (students, teachers)
+- **assignments**: Assignment submissions and metadata
+- **grades**: AI and teacher grading records
+- **teacher_students**: Teacher-student relationships
+- **chats**: Messaging system
+- **transcripts**: Generated academic transcripts
+
+## 🤖 AI Integration Flow
+
+1. **Image Capture**: Student photographs handwritten assignment
+2. **Text Extraction**: Google Vision API converts image to text
+3. **AI Grading**: Custom AI agent analyzes and grades content
+4. **Teacher Review**: Teachers can approve, modify, or override AI grades
+5. **Feedback Delivery**: Students receive grades and comments
+6. **Transcript Generation**: Completed assignments compiled into transcripts
+
+## 🔐 Authentication Flow
+
+### Student Registration
+1. Choose "Student" role
+2. Complete profile information
+3. Enter teacher's unique ID for assignment
+4. Verify email/OAuth authentication
+5. Access student dashboard
+
+### Teacher Registration
+1. Choose "Teacher" role
+2. Complete profile information
+3. OAuth or email verification
+4. Receive unique teacher ID
+5. Access teacher dashboard
+
+## 📱 Key User Flows
+
+### Assignment Submission (Student)
+1. Navigate to "New Assignment" 
+2. Capture image of handwritten work
+3. Preview extracted text
+4. Submit assignment
+5. Track deadline status
+6. Receive grade and feedback
+
+### Assignment Review (Teacher)
+1. Receive notification of new submission
+2. Review AI-extracted text and grade
+3. Approve or modify grade
+4. Add personal feedback and effort rating
+5. Submit final assessment
+
+## 🚀 Deployment
+
+The application is designed to be deployed on Vercel with Supabase as the backend service.
+
+```bash
+# Build for production
+npm run build
+
+# Deploy to Vercel
+vercel --prod
+```
+
+## 📈 Future Enhancements
+
+- **Mobile App**: React Native companion app
+- **Advanced Analytics**: Detailed performance insights
+- **Multi-language Support**: International accessibility
+- **Plagiarism Detection**: Academic integrity features
+- **Bulk Assignment Processing**: Batch operations for teachers
+- **Parent Portal**: Family engagement features
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+
+## 📞 Support
+
+For support, email support@assignee.app or join our Discord community.
+
+---
+
+**Made with ❤️ for educators and students worldwide**
