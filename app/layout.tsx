@@ -2,6 +2,7 @@ import './globals.css'
 import { Manrope } from 'next/font/google'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import bolt from '@/public/bolt.png'
 import Image from 'next/image'
 
 const manrope = Manrope({
@@ -21,21 +22,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                         className='select-none'
                 >
                         <body className={`${manrope.className} font-sans text-base`}>
-                                <Link
-                                        href='https://bolt.new'
-                                        target='_blank'
-                                        className='absolute bg-black z-[100] text-white w-32 h-32 rounded-full flex justify-center top-72 left-72'
-                                >
+                                <Link href='https://bolt.new' className='absolute top-80 left-80 z-10'>
                                         <Image
-                                                src='https://mintlify.s3.us-west-1.amazonaws.com/stackblitz/logo/light.svg'
-                                                alt='Bolt.dev Logo'
-                                                width={60}
-                                                height={60}
-                                                className='absolute top-[45%]'
+                                                src={bolt}
+                                                alt='Bolt'
+                                                width={80}
+                                                height={80}
                                         />
-                                        <p className='absolute top-1/3 text-[10px]'>Built with</p>
                                 </Link>
-
                                 {children}
                         </body>
                 </html>

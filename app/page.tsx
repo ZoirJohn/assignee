@@ -85,6 +85,7 @@ export default function LandingPage() {
                                         duration: 0.5,
                                         ease: 'easeOut',
                                 }}
+                                viewport={{ once: true }}
                         >
                                 <Card className='h-full hover:shadow-lg transition-shadow duration-300'>
                                         <CardHeader>
@@ -104,7 +105,7 @@ export default function LandingPage() {
         return (
                 <>
                         <div className='min-h-screen bg-gray-50'>
-                                <header className='sticky top-0 z-10 bg-dark-background backdrop-blur-xs border-b border-gray-100 py-4'>
+                                <header className='top-0 z-10 bg-dark-background backdrop-blur-xs border-b border-gray-100 py-4'>
                                         <div className='container flex items-center justify-between'>
                                                 <Link
                                                         href='/'
@@ -133,21 +134,20 @@ export default function LandingPage() {
                                                 </div>
                                         </div>
                                 </header>
-                                <section className='relative py-10 overflow-hidden'>
+                                <section className='relative overflow-hidden flex items-center py-20'>
                                         <div className='absolute inset-0 bg-gradient-to-r from-gray-600/10 to-gray-600/20' />
                                         <div className='container px-4 text-center relative z-0'>
                                                 <Badge variant='secondary'>
                                                         Powered by
                                                         <Link href='https://bolt.dev'>bolt.dev</Link>
                                                 </Badge>
-                                                <h1 className='text-4xl md:text-6xl font-bold text-gray-900 text-wrap sm:my-4'>
+                                                <h1 className='text-4xl md:text-6xl font-bold text-gray-900 text-wrap sm:my-4 flex gap-x-4 justify-center items-center'>
                                                         <div>
                                                                 <AnimatedText
                                                                         text={streamline}
                                                                         className='inline-block'
                                                                 />
                                                         </div>
-                                                        {'  '}
                                                         <div>
                                                                 <AnimatedText
                                                                         text={assignment}
@@ -155,7 +155,6 @@ export default function LandingPage() {
                                                                         delayOffset={streamline.length}
                                                                 />
                                                         </div>
-                                                        {'  '}
                                                         <div>
                                                                 <AnimatedText
                                                                         text={workflow}
@@ -190,7 +189,7 @@ export default function LandingPage() {
                                 </section>
                                 <section
                                         id='advantages'
-                                        className='py-10 bg-gray-50'
+                                        className='py-20 bg-gray-50'
                                 >
                                         <div className='container px-4'>
                                                 <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8'>
