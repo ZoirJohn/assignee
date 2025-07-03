@@ -27,7 +27,7 @@ export default function SignInPage() {
         })
 
         return (
-                <div className='min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4'>
+                <div className='min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center sm:p-4 p-1'>
                         <Card className='w-full max-w-md'>
                                 <CardHeader className='text-center'>
                                         <div className='flex items-center justify-center space-x-2 mb-4'>
@@ -35,7 +35,7 @@ export default function SignInPage() {
                                                         href='/'
                                                         className='flex items-center'
                                                 >
-                                                        <div className='w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center'>
+                                                        <div className='w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center'>
                                                                 <Image
                                                                         src='/favicon.svg'
                                                                         alt='logo'
@@ -49,7 +49,7 @@ export default function SignInPage() {
                                         <CardTitle className='text-2xl'>Welcome Back</CardTitle>
                                         <CardDescription>Sign in to your account to continue</CardDescription>
                                 </CardHeader>
-                                <CardContent>
+                                <CardContent className='max-sm:px-6'>
                                         <Form {...form}>
                                                 <form
                                                         className='space-y-4'

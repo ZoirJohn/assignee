@@ -62,7 +62,7 @@ export default function SignUpPage() {
                                                         href='/'
                                                         className='flex items-center'
                                                 >
-                                                        <div className='w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center'>
+                                                        <div className='w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center'>
                                                                 <Image
                                                                         src='/favicon.svg'
                                                                         alt='logo'
@@ -287,7 +287,7 @@ export default function SignUpPage() {
                                                                         <FormField
                                                                                 control={teacherForm.control}
                                                                                 name='role'
-                                                                                render={({ }) => (
+                                                                                render={({}) => (
                                                                                         <FormControl>
                                                                                                 <Input
                                                                                                         type='hidden'

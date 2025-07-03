@@ -102,15 +102,6 @@
         }
 }
 
-.scrollbar-hide {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-        display: none;
-}
-
 @theme inline {
         --radius-sm: calc(var(--radius) - 4px);
         --radius-md: calc(var(--radius) - 2px);
@@ -184,7 +175,6 @@
 }
 @media (prefers-color-scheme: dark) {
         :root {
-                --background: #0a0a0a;
                 --foreground: #ededed;
         }
 }
@@ -198,4 +188,12 @@
 }
 .container {
         @apply max-w-[1600px] mx-auto px-1;
+}
+.scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+        display: none;
 }

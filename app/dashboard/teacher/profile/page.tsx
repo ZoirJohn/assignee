@@ -51,7 +51,7 @@ export default function TeacherProfile() {
                 const fileName = `${profile.id}.${fileExt}`
                 const filePath = `${fileName}`
 
-                const {  error } = await supabase.storage.from('avatars').upload(filePath, file, {
+                const { error } = await supabase.storage.from('avatars').upload(filePath, file, {
                         upsert: true,
                         cacheControl: '3600',
                 })
@@ -74,22 +74,22 @@ export default function TeacherProfile() {
                                 data: { user },
                         } = await supabase.auth.getUser()
                         if (user) {
-                                setEmail(user?.email)
-                                setId(user?.id)
+                                setEmail(user.email)
+                                setId(user.id)
                         }
                 }
 
                 fetchUser()
-        }, [supabase.auth])
+        }, [])
         useEffect(() => {
                 const fetchProfile = async () => {
-                        const { data } = await supabase.from('profiles').select('*').single()
+                        const { data } = await supabase.from('profiles').select('*').eq('id', id).single()
                         if (data) setProfile({ ...data, email: email, id: id })
                 }
                 if (id && email) {
                         fetchProfile()
                 }
-        }, [id, email, supabase, supabase.from])
+        }, [id, email])
         useEffect(() => {
                 const timeout = setTimeout(() => {
                         setCopied(false)
@@ -129,6 +129,8 @@ export default function TeacherProfile() {
                                                                                 className='w-full h-full object-cover rounded-full'
                                                                                 width={30}
                                                                                 height={30}
+                                                                                quality={100}
+                                                                                unoptimized
                                                                         />
                                                                 ) : (
                                                                         <AvatarFallback className='text-2xl'>

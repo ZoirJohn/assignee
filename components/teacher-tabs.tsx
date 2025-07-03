@@ -319,8 +319,8 @@ export function TeacherTabs() {
                                 value='chat'
                                 className='space-y-4'
                         >
-                                <Card className='h-96'>
-                                        <CardHeader className='max-[400px]:!pb-0 flex-row justify-between items-center'>
+                                <Card className='h-120'>
+                                        <CardHeader className='max-[400px]:!pb-0 grid-cols-2'>
                                                 <div>
                                                         {students.length ? (
                                                                 <>
@@ -334,7 +334,7 @@ export function TeacherTabs() {
                                                                 </>
                                                         )}
                                                 </div>
-                                                <div className='flex gap-4'>
+                                                <div className='flex gap-4 justify-end'>
                                                         {students.map((student, id) => (
                                                                 <Avatar key={id}>
                                                                         <AvatarFallback className={cn({ 'bg-slate-500': student.id == currentUserId })}>

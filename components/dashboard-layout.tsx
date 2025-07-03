@@ -37,7 +37,7 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                                         href='/'
                                         className='flex items-center space-x-2 mb-4'
                                 >
-                                        <div className='w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center'>
+                                        <div className='w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center'>
                                                 <Image
                                                         src='/favicon.svg'
                                                         alt='logo'

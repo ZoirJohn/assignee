@@ -4,7 +4,6 @@ import { ArrowRight, Users, Clock, Star, CheckCircle, User, MessageSquare } from
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import icon from '@/app/favicon.svg'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'motion/react'
@@ -104,6 +103,18 @@ export default function LandingPage() {
 
         return (
                 <>
+                        <Link
+                                href='https://bolt.new'
+                                className='absolute top-25 sm:left-1/5 left-0 z-10 '
+                        >
+                                <Image
+                                        src={'/bolt.png'}
+                                        alt='Bolt'
+                                        className='rounded-full'
+                                        width={80}
+                                        height={80}
+                                />
+                        </Link>
                         <div className='min-h-screen bg-gray-50'>
                                 <header className='top-0 z-10 bg-dark-background backdrop-blur-xs border-b border-gray-100 py-4'>
                                         <div className='container flex items-center justify-between'>
@@ -113,7 +124,7 @@ export default function LandingPage() {
                                                 >
                                                         <div className='w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center'>
                                                                 <Image
-                                                                        src={icon}
+                                                                        src='/favicon.svg'
                                                                         alt='logo'
                                                                         width={28}
                                                                         height={28}
@@ -141,7 +152,7 @@ export default function LandingPage() {
                                                         Powered by
                                                         <Link href='https://bolt.dev'>bolt.dev</Link>
                                                 </Badge>
-                                                <h1 className='text-4xl md:text-6xl font-bold text-gray-900 text-wrap sm:my-4 flex gap-x-4 justify-center items-center'>
+                                                <h1 className='text-4xl md:text-6xl font-bold text-gray-900 text-wrap sm:my-4 flex gap-x-4 justify-center items-center flex-wrap'>
                                                         <div>
                                                                 <AnimatedText
                                                                         text={streamline}
@@ -313,7 +324,7 @@ export default function LandingPage() {
                                                         <div className='flex items-center justify-center space-x-2 mb-8'>
                                                                 <div className='w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center'>
                                                                         <Image
-                                                                                src={icon}
+                                                                                src='/favicon.svg'
                                                                                 alt='logo'
                                                                                 width={20}
                                                                                 height={20}
@@ -322,7 +333,7 @@ export default function LandingPage() {
                                                                 <span className='text-xl font-bold'>Assignee</span>
                                                         </div>
                                                 </Link>
-                                                <nav className='flex justify-center sm:gap-x-4 gap-x-8 mb-8'>
+                                                <nav className='flex justify-center sm:gap-4 gap-8 mb-8 flex-wrap'>
                                                         <a
                                                                 href='#advantages'
                                                                 className='hover:text-gray-400 transition-colors'
