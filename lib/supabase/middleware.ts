@@ -25,29 +25,15 @@ export async function updateSession(request: NextRequest) {
                 data: { user },
         } = await supabase.auth.getUser()
 
-        const isNotHome = request.nextUrl.pathname != '/'
-        const isNotSignIn = !request.nextUrl.pathname.startsWith('/signin')
-        const isNotSignUp = !request.nextUrl.pathname.startsWith('/signup')
-        const isNotConfirm = !request.nextUrl.pathname.startsWith('/confirm')
-
-        const routeCheck = isNotSignIn || isNotSignUp || isNotConfirm || isNotHome
-        const isDashboard = request.nextUrl.pathname.startsWith('/dashboard')
-
-        if (!user && isDashboard) {
+        if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
                 const url = request.nextUrl.clone()
                 url.pathname = '/'
                 return NextResponse.redirect(url)
         }
-
-        if (user && routeCheck && user.user_metadata.role == 'teacher' && !request.nextUrl.pathname.startsWith('/dashboard/teacher')) {
+        if (user && (request.nextUrl.pathname.startsWith('/signin') || request.nextUrl.pathname.startsWith('/signup'))) {
                 const url = request.nextUrl.clone()
-                url.pathname = '/dashboard/teacher'
-                return NextResponse.redirect(url)
-        }
-
-        if (user && routeCheck && user.user_metadata.role == 'student' && !request.nextUrl.pathname.startsWith('/dashboard/student')) {
-                const url = request.nextUrl.clone()
-                url.pathname = '/dashboard/student'
+                const role = user.user_metadata.role
+                url.pathname = `/dashboard/${role}`
                 return NextResponse.redirect(url)
         }
 

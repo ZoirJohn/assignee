@@ -106,6 +106,7 @@ export default function LandingPage() {
                         <Link
                                 href='https://bolt.new'
                                 className='absolute top-25 sm:left-1/5 left-0 z-10 '
+                                target='_blank'
                         >
                                 <Image
                                         src={'/bolt.png'}
@@ -116,7 +117,7 @@ export default function LandingPage() {
                                 />
                         </Link>
                         <div className='min-h-screen bg-gray-50'>
-                                <header className='top-0 z-10 bg-dark-background backdrop-blur-xs border-b border-gray-100 py-4'>
+                                <header className='sticky top-0 z-10 bg-dark-background backdrop-blur-xs border-b border-gray-100 py-4'>
                                         <div className='container flex items-center justify-between'>
                                                 <Link
                                                         href='/'
@@ -148,10 +149,7 @@ export default function LandingPage() {
                                 <section className='relative overflow-hidden flex items-center py-20'>
                                         <div className='absolute inset-0 bg-gradient-to-r from-gray-600/10 to-gray-600/20' />
                                         <div className='container px-4 text-center relative z-0'>
-                                                <Badge variant='secondary'>
-                                                        Powered by
-                                                        <Link href='https://bolt.dev'>bolt.dev</Link>
-                                                </Badge>
+                                                <Badge variant='secondary'>AI-Powered Assignment Management</Badge>
                                                 <h1 className='text-4xl md:text-6xl font-bold text-gray-900 text-wrap sm:my-4 flex gap-x-4 justify-center items-center flex-wrap'>
                                                         <div>
                                                                 <AnimatedText
