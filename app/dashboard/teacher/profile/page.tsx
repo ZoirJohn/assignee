@@ -107,9 +107,9 @@ export default function TeacherProfile() {
 
                         <div className='grid gap-6 max-w-2xl'>
                                 <Card>
-                                        <CardHeader>
-                                                <CardTitle>Profile Picture</CardTitle>
-                                                <CardDescription>Upload a profile picture to personalize your account</CardDescription>
+                                        <CardHeader className='gap-0'>
+                                                <CardTitle className='text-xl'>Profile Picture</CardTitle>
+                                                <CardDescription className='text-xs'>Upload a profile picture to personalize your account</CardDescription>
                                         </CardHeader>
                                         <CardContent className='space-y-4'>
                                                 <div className='flex items-center space-x-4'>
@@ -167,9 +167,9 @@ export default function TeacherProfile() {
                                 </Card>
 
                                 <Card>
-                                        <CardHeader>
-                                                <CardTitle>Personal Information</CardTitle>
-                                                <CardDescription>Update your personal details and contact information</CardDescription>
+                                        <CardHeader className='gap-0'>
+                                                <CardTitle className='text-xl'>Personal Information</CardTitle>
+                                                <CardDescription className='text-xs'>Update your personal details and contact information</CardDescription>
                                         </CardHeader>
                                         <CardContent className='space-y-4'>
                                                 <div className='space-y-2'>
@@ -202,9 +202,9 @@ export default function TeacherProfile() {
                                 </Card>
 
                                 <Card>
-                                        <CardHeader>
-                                                <CardTitle>Account Information</CardTitle>
-                                                <CardDescription>View your account details and status</CardDescription>
+                                        <CardHeader className='gap-0'>
+                                                <CardTitle className='text-xl'>Account Information</CardTitle>
+                                                <CardDescription className='text-xs'>View your account details and status</CardDescription>
                                         </CardHeader>
                                         <CardContent className='space-y-4'>
                                                 <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>

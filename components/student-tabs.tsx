@@ -119,7 +119,7 @@ export default function StudentTabs() {
                         }
                 }
                 fetchUser()
-        }, [supabase.auth])
+        }, [])
         useEffect(() => {
                 const channel = supabase
                         .channel('realtime-chat:teacher-student')
@@ -140,7 +140,7 @@ export default function StudentTabs() {
                                         }
                                 }
                         )
-                        .subscribe((status) => console.log(status))
+                        .subscribe()
 
                 return () => {
                         supabase.removeChannel(channel)
@@ -157,7 +157,7 @@ export default function StudentTabs() {
                 }
 
                 if (currentUserId) fetchMessages()
-        }, [currentUserId, userId, supabase])
+        }, [currentUserId, userId])
         const messagesEndRef = useRef<HTMLDivElement>(null)
         useEffect(() => {
                 messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -174,8 +174,8 @@ export default function StudentTabs() {
                                                         <CardHeader className='!pb-0'>
                                                                 <div className='flex items-start justify-between max-[400px]:flex-col-reverse max-[400px]:gap-2'>
                                                                         <div>
-                                                                                <CardTitle className='text-xl'>{assignment.title}</CardTitle>
-                                                                                <CardDescription className='text-base'>{assignment.subject}</CardDescription>
+                                                                                <CardTitle className='text-2xl'>{assignment.title}</CardTitle>
+                                                                                <CardDescription className='text-xs'>{assignment.subject}</CardDescription>
                                                                         </div>
                                                                         <div className='flex items-center space-x-2'>
                                                                                 <Badge className={getStatusColor(assignment.status)}>
@@ -194,7 +194,7 @@ export default function StudentTabs() {
                                                                 </div>
                                                         </CardHeader>
                                                         <CardContent>
-                                                                <p className='text-gray-600 mb-4'>{assignment.description}</p>
+                                                                <p className='text-gray-900 mb-4'>{assignment.description}</p>
                                                                 <div className='flex items-center justify-between flex-wrap gap-4'>
                                                                         <div className='flex items-center text-sm text-gray-500'>
                                                                                 <Clock className='w-4 h-4 mr-1' />
@@ -235,13 +235,13 @@ export default function StudentTabs() {
                                 value='chat'
                                 className='space-y-4'
                         >
-                                <Card className='h-96 '>
+                                <Card className='h-120 '>
                                         <CardHeader className='max-[400px]:!pb-0'>
-                                                <CardTitle>Chat with Teachers</CardTitle>
-                                                <CardDescription>Get help and feedback from your instructors</CardDescription>
+                                                <CardTitle className='text-2xl'>Chat with Teachers</CardTitle>
+                                                <CardDescription className='text-xs'>Get help and feedback from your instructors</CardDescription>
                                         </CardHeader>
                                         <CardContent className='flex flex-col h-full'>
-                                                <ScrollArea className='flex-1 mb-9 max-[400px]:mb-3 !h-20 max-[332px]:mb-8'>
+                                                <ScrollArea className='flex-1 mb-2 max-[400px]:mb-3 h-40  max-[332px]:mb-4'>
                                                         <div className='space-y-4'>
                                                                 {messages.map(({ id, sender_id, content, created_at }) => (
                                                                         <div

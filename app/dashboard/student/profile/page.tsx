@@ -31,6 +31,27 @@ export default function StudentProfile() {
                         setPreviewUrl(url)
                 }
         }
+        async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+                const file = e.target.files?.[0]
+                if (!file) return
+
+                const fileExt = file.name.split('.').pop()
+                const fileName = `${profile.id}.${fileExt}`
+                const filePath = `${fileName}`
+
+                const { error } = await supabase.storage.from('avatars').upload(filePath, file, {
+                        upsert: true,
+                        cacheControl: '3600',
+                })
+                if (!error) {
+                        const {
+                                data: { publicUrl },
+                        } = supabase.storage.from('avatars').getPublicUrl(filePath)
+                        if (publicUrl) {
+                                await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', profile.id)
+                        }
+                }
+        }
 
         const handleIdCopy = () => {
                 navigator.clipboard.writeText(profile.id)
@@ -66,9 +87,9 @@ export default function StudentProfile() {
 
                         <div className='grid gap-6 max-w-2xl'>
                                 <Card>
-                                        <CardHeader>
-                                                <CardTitle>Profile Picture</CardTitle>
-                                                <CardDescription>Upload a profile picture to personalize your account</CardDescription>
+                                        <CardHeader className='gap-0'>
+                                                <CardTitle className='text-xl'>Profile Picture</CardTitle>
+                                                <CardDescription className='text-xs'>Upload a profile picture to personalize your account</CardDescription>
                                         </CardHeader>
                                         <CardContent className='space-y-4'>
                                                 <div className='flex items-center space-x-4'>
@@ -76,10 +97,20 @@ export default function StudentProfile() {
                                                                 {previewUrl ? (
                                                                         <Image
                                                                                 src={previewUrl}
-                                                                                alt='Profile'
+                                                                                alt='preview'
                                                                                 className='w-full h-full object-cover rounded-full'
                                                                                 width={30}
                                                                                 height={30}
+                                                                        />
+                                                                ) : profile.avatar_url ? (
+                                                                        <Image
+                                                                                src={profile.avatar_url}
+                                                                                alt='profile'
+                                                                                className='w-full h-full object-cover rounded-full'
+                                                                                width={30}
+                                                                                height={30}
+                                                                                quality={100}
+                                                                                unoptimized
                                                                         />
                                                                 ) : (
                                                                         <AvatarFallback className='text-2xl'>
@@ -94,7 +125,10 @@ export default function StudentProfile() {
                                                                 <Input
                                                                         type='file'
                                                                         accept='image/*'
-                                                                        onChange={handleImageChange}
+                                                                        onChange={(e) => {
+                                                                                handleImageChange(e)
+                                                                                handleAvatarChange(e)
+                                                                        }}
                                                                         className='hidden'
                                                                         id='profile-image'
                                                                 />
@@ -112,9 +146,9 @@ export default function StudentProfile() {
                                 </Card>
 
                                 <Card>
-                                        <CardHeader>
-                                                <CardTitle>Personal Information</CardTitle>
-                                                <CardDescription>Update your personal details and contact information</CardDescription>
+                                        <CardHeader className='gap-0'>
+                                                <CardTitle className='text-xl'>Personal Information</CardTitle>
+                                                <CardDescription className='text-xs'>Update your personal details and contact information</CardDescription>
                                         </CardHeader>
                                         <CardContent className='space-y-4'>
                                                 <div className='space-y-2'>
@@ -147,9 +181,9 @@ export default function StudentProfile() {
                                 </Card>
 
                                 <Card>
-                                        <CardHeader>
-                                                <CardTitle>Account Information</CardTitle>
-                                                <CardDescription>View your account details and status</CardDescription>
+                                        <CardHeader className='gap-0'>
+                                                <CardTitle className='text-xl'>Account Information</CardTitle>
+                                                <CardDescription className='text-xs'>View your account details and status</CardDescription>
                                         </CardHeader>
                                         <CardContent className='space-y-4'>
                                                 <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
