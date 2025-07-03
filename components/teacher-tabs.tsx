@@ -132,79 +132,59 @@ export function TeacherTabs() {
                                 className='space-y-4'
                         >
                                 <div className='grid gap-4'>
-                                        {assigments.map(({ title, id, student_id, subject, status, ai_grade, graded_at, submitted_at, created_at, ...others }) => (
-                                                <Card key={id}>
-                                                        <CardHeader className='!pb-0'>
-                                                                <div className='flex items-start justify-between max-sm:flex-col-reverse max-sm:gap-y-2'>
-                                                                        <div>
-                                                                                <CardTitle className='text-xl'>{title}</CardTitle>
-                                                                                <CardDescription className='text-base'>
-                                                                                        by Student {student_id} • {subject || 'No Subject'}
-                                                                                </CardDescription>
-                                                                        </div>
-                                                                        <div className='flex items-center space-x-2'>
-                                                                                <Badge
-                                                                                        className='hover:bg-black'
-                                                                                        variant={status === 'graded' ? 'default' : 'secondary'}
-                                                                                >
-                                                                                        {status === 'graded' ? (
-                                                                                                <>
-                                                                                                        <CheckCircle className='w-3 h-3 mr-1' />
-                                                                                                        Graded
-                                                                                                </>
-                                                                                        ) : (
-                                                                                                <>
-                                                                                                        <Clock className='w-3 h-3 mr-1' />
-                                                                                                        {status === 'submitted' ? 'Submitted' : 'Pending'}
-                                                                                                </>
-                                                                                        )}
-                                                                                </Badge>
-                                                                                <Badge
-                                                                                        variant='outline'
-                                                                                        className='bg-blue-50 text-blue-700'
-                                                                                >
-                                                                                        AI Score: {ai_grade}/{others.max_grade}
-                                                                                </Badge>
-                                                                                {graded_at && (
-                                                                                        <Badge className='bg-green-100 text-green-800 hover:bg-green-100'>
-                                                                                                Graded: {new Date(graded_at).toLocaleDateString()}
+                                        {assigments.length ? (
+                                                assigments.map(({ title, id, student_id, subject, status, ai_grade, graded_at, submitted_at, created_at, ...others }) => (
+                                                        <Card key={id}>
+                                                                <CardHeader className='!pb-0'>
+                                                                        <div className='flex items-start justify-between max-sm:flex-col-reverse max-sm:gap-y-2'>
+                                                                                <div>
+                                                                                        <CardTitle className='text-xl'>{title}</CardTitle>
+                                                                                        <CardDescription className='text-base'>
+                                                                                                by Student {student_id} • {subject || 'No Subject'}
+                                                                                        </CardDescription>
+                                                                                </div>
+                                                                                <div className='flex items-center space-x-2'>
+                                                                                        <Badge
+                                                                                                className='hover:bg-black'
+                                                                                                variant={status === 'graded' ? 'default' : 'secondary'}
+                                                                                        >
+                                                                                                {status === 'graded' ? (
+                                                                                                        <>
+                                                                                                                <CheckCircle className='w-3 h-3 mr-1' />
+                                                                                                                Graded
+                                                                                                        </>
+                                                                                                ) : (
+                                                                                                        <>
+                                                                                                                <Clock className='w-3 h-3 mr-1' />
+                                                                                                                {status === 'submitted' ? 'Submitted' : 'Pending'}
+                                                                                                        </>
+                                                                                                )}
                                                                                         </Badge>
-                                                                                )}
+                                                                                        <Badge
+                                                                                                variant='outline'
+                                                                                                className='bg-blue-50 text-blue-700'
+                                                                                        >
+                                                                                                AI Score: {ai_grade}/{others.max_grade}
+                                                                                        </Badge>
+                                                                                        {graded_at && (
+                                                                                                <Badge className='bg-green-100 text-green-800 hover:bg-green-100'>
+                                                                                                        Graded: {new Date(graded_at).toLocaleDateString()}
+                                                                                                </Badge>
+                                                                                        )}
+                                                                                </div>
                                                                         </div>
-                                                                </div>
-                                                        </CardHeader>
-                                                        <CardContent>
-                                                                <div className='flex items-center justify-between flex-wrap gap-4'>
-                                                                        <div className='flex items-center text-sm text-gray-500'>
-                                                                                <Clock className='w-4 h-4 mr-1' />
-                                                                                {submitted_at
-                                                                                        ? `Submitted: ${new Date(submitted_at).toLocaleDateString()}`
-                                                                                        : `Created: ${new Date(created_at).toLocaleDateString()}`}
-                                                                        </div>
-                                                                        <div className='flex items-center space-x-2'>
-                                                                                <Button
-                                                                                        variant='outline'
-                                                                                        size='sm'
-                                                                                        onClick={() =>
-                                                                                                openSubmissionReview({
-                                                                                                        title,
-                                                                                                        id,
-                                                                                                        student_id,
-                                                                                                        subject,
-                                                                                                        status,
-                                                                                                        ai_grade,
-                                                                                                        graded_at,
-                                                                                                        submitted_at,
-                                                                                                        created_at,
-                                                                                                        ...others,
-                                                                                                })
-                                                                                        }
-                                                                                >
-                                                                                        <Eye className='w-4 h-4 mr-2' />
-                                                                                        Review
-                                                                                </Button>
-                                                                                {status === 'pending' && (
+                                                                </CardHeader>
+                                                                <CardContent>
+                                                                        <div className='flex items-center justify-between flex-wrap gap-4'>
+                                                                                <div className='flex items-center text-sm text-gray-500'>
+                                                                                        <Clock className='w-4 h-4 mr-1' />
+                                                                                        {submitted_at
+                                                                                                ? `Submitted: ${new Date(submitted_at).toLocaleDateString()}`
+                                                                                                : `Created: ${new Date(created_at).toLocaleDateString()}`}
+                                                                                </div>
+                                                                                <div className='flex items-center space-x-2'>
                                                                                         <Button
+                                                                                                variant='outline'
                                                                                                 size='sm'
                                                                                                 onClick={() =>
                                                                                                         openSubmissionReview({
@@ -221,14 +201,38 @@ export function TeacherTabs() {
                                                                                                         })
                                                                                                 }
                                                                                         >
-                                                                                                Grade Now
+                                                                                                <Eye className='w-4 h-4 mr-2' />
+                                                                                                Review
                                                                                         </Button>
-                                                                                )}
+                                                                                        {status === 'pending' && (
+                                                                                                <Button
+                                                                                                        size='sm'
+                                                                                                        onClick={() =>
+                                                                                                                openSubmissionReview({
+                                                                                                                        title,
+                                                                                                                        id,
+                                                                                                                        student_id,
+                                                                                                                        subject,
+                                                                                                                        status,
+                                                                                                                        ai_grade,
+                                                                                                                        graded_at,
+                                                                                                                        submitted_at,
+                                                                                                                        created_at,
+                                                                                                                        ...others,
+                                                                                                                })
+                                                                                                        }
+                                                                                                >
+                                                                                                        Grade Now
+                                                                                                </Button>
+                                                                                        )}
+                                                                                </div>
                                                                         </div>
-                                                                </div>
-                                                        </CardContent>
-                                                </Card>
-                                        ))}
+                                                                </CardContent>
+                                                        </Card>
+                                                ))
+                                        ) : (
+                                                <h1 className='text-gray-600'>No assignments found</h1>
+                                        )}
                                 </div>
 
                                 {selectedSubmission && (
@@ -406,15 +410,15 @@ export function TeacherTabs() {
                                 value='feedback'
                                 className='space-y-4'
                         >
-                                <Card>
-                                        <CardHeader>
-                                                <CardTitle>Recent Feedback Given</CardTitle>
-                                                <CardDescription>Track the feedback you&apos;ve provided to students</CardDescription>
-                                        </CardHeader>
-                                        <CardContent>
-                                                <div className='space-y-4'>
-                                                        {assigments.length ? (
-                                                                assigments.map(({ id, student_id, title, ai_grade, feedback, max_grade }) => (
+                                {assigments.length ? (
+                                        assigments.map(({ id, student_id, title, ai_grade, feedback, max_grade }) => (
+                                                <Card>
+                                                        <CardHeader>
+                                                                <CardTitle>Recent Feedback Given</CardTitle>
+                                                                <CardDescription>Track the feedback you&apos;ve provided to students</CardDescription>
+                                                        </CardHeader>
+                                                        <CardContent>
+                                                                <div className='space-y-4'>
                                                                         <div
                                                                                 key={id}
                                                                                 className='flex items-center justify-between p-4 border rounded-lg'
@@ -437,13 +441,13 @@ export function TeacherTabs() {
                                                                                         </div>
                                                                                 </div>
                                                                         </div>
-                                                                ))
-                                                        ) : (
-                                                                <h1 className='text-gray-600'>No assignments found</h1>
-                                                        )}
-                                                </div>
-                                        </CardContent>
-                                </Card>
+                                                                </div>
+                                                        </CardContent>
+                                                </Card>
+                                        ))
+                                ) : (
+                                        <h1 className='text-gray-600'>No assignments found</h1>
+                                )}
                         </TabsContent>
                 </>
         )
