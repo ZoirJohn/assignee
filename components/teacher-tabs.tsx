@@ -411,8 +411,8 @@ export function TeacherTabs() {
                                 className='space-y-4'
                         >
                                 {assigments.length ? (
-                                        assigments.map(({ id, student_id, title, ai_grade, feedback, max_grade }) => (
-                                                <Card>
+                                        assigments.map(({ id, student_id, title, ai_grade, feedback, max_grade },idx) => (
+                                                <Card key={idx}>
                                                         <CardHeader>
                                                                 <CardTitle>Recent Feedback Given</CardTitle>
                                                                 <CardDescription>Track the feedback you&apos;ve provided to students</CardDescription>
