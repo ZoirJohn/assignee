@@ -152,7 +152,7 @@ export default function TeacherTranscript() {
 
                         <Card>
                                 <CardHeader>
-                                        <CardTitle>Teaching Performance</CardTitle>
+                                        <CardTitle className='text-2xl'>Teaching Performance</CardTitle>
                                         <CardDescription>Your teaching metrics and achievements</CardDescription>
                                 </CardHeader>
                                 <CardContent>
@@ -179,17 +179,22 @@ export default function TeacherTranscript() {
                                                         <div className='space-y-1'>
                                                                 <Badge
                                                                         variant='outline'
-                                                                        className='mr-2 mb-1'
+                                                                        className='mr-2 mb-1 text-black'
                                                                 >
                                                                         Teacher of the Month - Dec 2024
                                                                 </Badge>
                                                                 <Badge
                                                                         variant='outline'
-                                                                        className='mr-2 mb-1'
+                                                                        className='mr-2 mb-1 text-black'
                                                                 >
                                                                         Excellence in Education - 2024
                                                                 </Badge>
-                                                                <Badge variant='outline'>Outstanding Feedback - Fall 2024</Badge>
+                                                                <Badge
+                                                                        variant='outline'
+                                                                        className='text-black'
+                                                                >
+                                                                        Outstanding Feedback - Fall 2024
+                                                                </Badge>
                                                         </div>
                                                 </div>
                                         </div>
