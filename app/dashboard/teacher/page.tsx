@@ -2,7 +2,7 @@ import { FileText, MessageSquare, Star } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TeacherTabs } from '@/components/teacher-tabs'
 
-export default async function TeacherDashboard() {
+export default async function TeacherDashboard({ pathname }: { pathname: string }) {
         return (
                 <div className='space-y-6'>
                         <div>

@@ -324,13 +324,13 @@ export function TeacherTabs() {
                                                 <div>
                                                         {students.length ? (
                                                                 <>
-                                                                        <CardTitle>Student Messages</CardTitle>
-                                                                        <CardDescription>Communicate with your students</CardDescription>
+                                                                        <CardTitle className='text-2xl'>Student Messages</CardTitle>
+                                                                        <CardDescription className='text-xs'>Communicate with your students</CardDescription>
                                                                 </>
                                                         ) : (
                                                                 <>
-                                                                        <CardTitle>Please wait until your students arrive</CardTitle>
-                                                                        <CardDescription>Let them register here</CardDescription>
+                                                                        <CardTitle className='text-2xl'>Please wait until your students arrive</CardTitle>
+                                                                        <CardDescription className='text-xs'>Let them register here</CardDescription>
                                                                 </>
                                                         )}
                                                 </div>

@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import Image from 'next/image'
 import { signout } from '@/app/actions/auth'
+import { cn } from '@/lib/utils'
+import { usePathname } from 'next/navigation'
 
 interface DashboardLayoutProps {
         children: React.ReactNode
@@ -29,7 +31,7 @@ const teacherLinks = [
 export default function DashboardLayout({ children, userType, userName }: DashboardLayoutProps) {
         const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
         const links = userType === 'student' ? studentLinks : userType === 'teacher' ? teacherLinks : []
-
+        const pathname = usePathname()
         const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
                 <div className={`${mobile ? 'w-full' : 'w-64'} bg-white border-r border-gray-200 flex flex-col h-full`}>
                         <div className='p-6 border-b border-gray-200'>
@@ -69,7 +71,10 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                                                 <li key={link.label}>
                                                         <Link
                                                                 href={link.href}
-                                                                className='flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors'
+                                                                className={cn(
+                                                                        { 'bg-gray-100': link.href == pathname },
+                                                                        'flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors'
+                                                                )}
                                                                 onClick={() => mobile && setIsMobileMenuOpen(false)}
                                                         >
                                                                 <link.icon className='w-5 h-5' />
