@@ -170,7 +170,10 @@ export default function StudentTabs() {
                         >
                                 <div className='grid gap-4'>
                                         {assignments.map((assignment) => (
-                                                <Card key={assignment.id}>
+                                                <Card
+                                                        key={assignment.id}
+                                                        className='gap-2'
+                                                >
                                                         <CardHeader className='!pb-0'>
                                                                 <div className='flex items-start justify-between max-[400px]:flex-col-reverse max-[400px]:gap-2'>
                                                                         <div>
@@ -193,7 +196,7 @@ export default function StudentTabs() {
                                                                         </div>
                                                                 </div>
                                                         </CardHeader>
-                                                        <CardContent>
+                                                        <CardContent className=''>
                                                                 <p className='text-gray-900 mb-4'>{assignment.description}</p>
                                                                 <div className='flex items-center justify-between flex-wrap gap-4'>
                                                                         <div className='flex items-center text-sm text-gray-500'>
@@ -241,7 +244,7 @@ export default function StudentTabs() {
                                                 <CardDescription className='text-xs'>Get help and feedback from your instructors</CardDescription>
                                         </CardHeader>
                                         <CardContent className='flex flex-col h-full'>
-                                                <ScrollArea className='flex-1 mb-2 max-[400px]:mb-3 h-40  max-[332px]:mb-4'>
+                                                <ScrollArea className='flex-1 mb-2 max-[400px]:mb-3 h-40 max-[332px]:mb-4'>
                                                         <div className='space-y-4'>
                                                                 {messages.map(({ id, sender_id, content, created_at }) => (
                                                                         <div

@@ -352,7 +352,7 @@ export function TeacherTabs() {
                                                 </div>
                                         </CardHeader>
                                         <CardContent className='flex flex-col h-full'>
-                                                <ScrollArea className='flex-1 mb-9 max-[400px]:mb-3 !h-20 max-[332px]:mb-8'>
+                                                <ScrollArea className='flex-1 mb-5 max-[400px]:mb-3 h-10 max-[332px]:mb-8'>
                                                         <div className='space-y-4'>
                                                                 {messages.map(({ id, sender_id, created_at, content }) => (
                                                                         <div
@@ -411,7 +411,7 @@ export function TeacherTabs() {
                                 className='space-y-4'
                         >
                                 {assigments.length ? (
-                                        assigments.map(({ id, student_id, title, ai_grade, feedback, max_grade },idx) => (
+                                        assigments.map(({ id, student_id, title, ai_grade, feedback, max_grade }, idx) => (
                                                 <Card key={idx}>
                                                         <CardHeader>
                                                                 <CardTitle>Recent Feedback Given</CardTitle>

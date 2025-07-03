@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { Home, User, FileText, LogOut, Menu } from 'lucide-react'
+import { Home, User, FileText, LogOut, Menu, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
@@ -33,7 +33,7 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
         const links = userType === 'student' ? studentLinks : userType === 'teacher' ? teacherLinks : []
         const pathname = usePathname()
         const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
-                <div className={`${mobile ? 'w-full' : 'w-64'} bg-white border-r border-gray-200 flex flex-col h-full`}>
+                <div className={`${mobile ? 'w-full' : 'w-64'} bg-white border-r border-gray-200 flex flex-col h-screen `}>
                         <div className='p-6 border-b border-gray-200'>
                                 <Link
                                         href='/'
@@ -65,7 +65,7 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                                 </div>
                         </div>
 
-                        <nav className='flex-1 p-4'>
+                        <nav className='p-4'>
                                 <ul className='space-y-2'>
                                         {links.map((link) => (
                                                 <li key={link.label}>
@@ -84,6 +84,21 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                                         ))}
                                 </ul>
                         </nav>
+                        {userType == 'teacher' ? (
+                                <div className='flex-1 flex justify-center'>
+                                        <Button
+                                                variant='outline'
+                                                className='text-gray-700 hover:bg-red-50 w-10 h-10 justify-start rounded-full'
+                                                asChild
+                                        >
+                                                <Link href='/dashboard/teacher/create'>
+                                                        <Plus className='w-5 h-5 mr-3' />
+                                                </Link>
+                                        </Button>
+                                </div>
+                        ) : (
+                                <></>
+                        )}
 
                         <div className='p-4 border-t border-gray-200'>
                                 <Button
@@ -101,7 +116,7 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
         )
 
         return (
-                <div className='min-h-screen bg-gray-50 flex'>
+                <div className='h-screen bg-gray-50 flex'>
                         <div className='hidden lg:block'>
                                 <Sidebar />
                         </div>
@@ -128,7 +143,7 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                                 </SheetContent>
                         </Sheet>
 
-                        <div className='flex-1 flex flex-col min-h-screen'>
+                        <div className='flex-1 flex flex-col h-screen overflow-auto'>
                                 <div className='lg:hidden bg-white border-b border-gray-200 p-4 pl-16'>
                                         <div className='flex items-center justify-between'>
                                                 <div className='flex items-center space-x-2'>
@@ -155,7 +170,7 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                                         </div>
                                 </div>
 
-                                <main className='flex-1 p-6 lg:p-8 max-[400px]:p-1'>{children}</main>
+                                <main className='p-6 lg:p-8 max-[400px]:p-1'>{children}</main>
                         </div>
                 </div>
         )
