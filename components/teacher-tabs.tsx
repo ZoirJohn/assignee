@@ -13,6 +13,7 @@ import { TabsContent } from '@/components/ui/tabs'
 import { createClient } from '@/lib/supabase/client'
 import { TAssignment, TMessage, TStudent } from '@/definitions'
 import { cn } from '@/lib/utils'
+import { FormItem, FormLabel, FormControl } from '@/components/ui/form'
 
 export function TeacherTabs() {
         const supabase = createClient()
@@ -123,7 +124,13 @@ export function TeacherTabs() {
                 if (userId) fetchAssignments()
         }, [userId, supabase])
         useEffect(() => {
-                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+                const scrollTimeout = setTimeout(() => {
+                        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+                }, 0)
+
+                return () => {
+                        clearTimeout(scrollTimeout)
+                }
         }, [messages])
         return (
                 <>
@@ -266,38 +273,50 @@ export function TeacherTabs() {
                                                                 </div>
 
                                                                 <div>
-                                                                        <label className='block text-sm font-medium mb-2'>Feedback Level</label>
-                                                                        <Select
-                                                                                value={selectedSubmission.feedback}
-                                                                                onValueChange={(value) => {
-                                                                                        if (selectedSubmission) {
-                                                                                                setSelectedSubmission({ ...selectedSubmission, feedback: value as TAssignment['feedback'] })
-                                                                                        }
-                                                                                }}
-                                                                                disabled={selectedSubmission.graded_at == undefined}
-                                                                        >
-                                                                                <SelectTrigger>
-                                                                                        <SelectValue placeholder='Select feedback' />
-                                                                                </SelectTrigger>
-                                                                                <SelectContent>
-                                                                                        <SelectItem value='excellent'>Excellent</SelectItem>
-                                                                                        <SelectItem value='good'>Good</SelectItem>
-                                                                                        <SelectItem value='okay'>Okay</SelectItem>
-                                                                                        <SelectItem value='poor'>Poor</SelectItem>
-                                                                                </SelectContent>
-                                                                        </Select>
+                                                                        <FormItem>
+                                                                                <FormLabel htmlFor='feedback-level'>Feedback Level</FormLabel>
+                                                                                <FormControl>
+                                                                                        <Select
+                                                                                                value={selectedSubmission.feedback}
+                                                                                                onValueChange={(value) => {
+                                                                                                        if (selectedSubmission) {
+                                                                                                                setSelectedSubmission({
+                                                                                                                        ...selectedSubmission,
+                                                                                                                        feedback: value as TAssignment['feedback'],
+                                                                                                                })
+                                                                                                        }
+                                                                                                }}
+                                                                                                disabled={selectedSubmission.graded_at == undefined}
+                                                                                        >
+                                                                                                <SelectTrigger id='feedback-level'>
+                                                                                                        <SelectValue placeholder='Select feedback' />
+                                                                                                </SelectTrigger>
+                                                                                                <SelectContent>
+                                                                                                        <SelectItem value='excellent'>Excellent</SelectItem>
+                                                                                                        <SelectItem value='good'>Good</SelectItem>
+                                                                                                        <SelectItem value='okay'>Okay</SelectItem>
+                                                                                                        <SelectItem value='poor'>Poor</SelectItem>
+                                                                                                </SelectContent>
+                                                                                        </Select>
+                                                                                </FormControl>
+                                                                        </FormItem>
                                                                 </div>
                                                         </div>
 
                                                         <div>
-                                                                <label className='block text-sm font-medium mb-2'>Additional Comments</label>
-                                                                <Textarea
-                                                                        placeholder='Add specific feedback for the student...'
-                                                                        className='min-h-20'
-                                                                        readOnly={selectedSubmission.graded_at == undefined}
-                                                                        value={additionalComments}
-                                                                        onChange={(e) => setAdditionalComments(e.target.value)}
-                                                                />
+                                                                <FormItem>
+                                                                        <FormLabel htmlFor='additional-comments'>Additional Comments</FormLabel>
+                                                                        <FormControl>
+                                                                                <Textarea
+                                                                                        id='additional-comments'
+                                                                                        placeholder='Add specific feedback for the student...'
+                                                                                        className='min-h-20'
+                                                                                        readOnly={selectedSubmission.graded_at == undefined}
+                                                                                        value={additionalComments}
+                                                                                        onChange={(e) => setAdditionalComments(e.target.value)}
+                                                                                />
+                                                                        </FormControl>
+                                                                </FormItem>
                                                         </div>
 
                                                         <div className='flex items-center space-x-2'>
@@ -387,7 +406,14 @@ export function TeacherTabs() {
                                                         </div>
                                                 </ScrollArea>
                                                 <div className='flex items-center space-x-2'>
+                                                        <label
+                                                                htmlFor='chat-message-input'
+                                                                className='sr-only'
+                                                        >
+                                                                Type your message
+                                                        </label>
                                                         <Input
+                                                                id='chat-message-input'
                                                                 placeholder='Type your message...'
                                                                 value={newMessage}
                                                                 onChange={(e) => setNewMessage(e.target.value)}

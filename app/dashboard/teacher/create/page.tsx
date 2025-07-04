@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { ChevronDownIcon } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
+import { createClient } from '@/lib/supabase/client'
 
 const assignmentSchema = z.object({
         name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -20,7 +21,10 @@ const assignmentSchema = z.object({
         deadline: z.string().refine(
                 (val) => {
                         const date = new Date(val)
-                        return !isNaN(date.getTime()) && date > new Date()
+                        const now = new Date()
+                        now.setHours(0, 0, 0, 0)
+                        date.setHours(0, 0, 0, 0)
+                        return date >= now
                 },
                 { message: 'Deadline must be a valid future date' }
         ),
@@ -29,6 +33,7 @@ const assignmentSchema = z.object({
 type AssignmentForm = z.infer<typeof assignmentSchema>
 
 export default function CreateAssignmentPage() {
+        const supabase = createClient()
         const [submitted, setSubmitted] = useState(false)
         const [date, setDate] = useState<Date>()
         const [open, setOpen] = useState(false)
@@ -42,7 +47,20 @@ export default function CreateAssignmentPage() {
                         deadline: date?.toLocaleString(),
                 },
         })
-        const onSubmit = (data: AssignmentForm) => {
+        const onSubmit = async (data: AssignmentForm) => {
+                const id = (await supabase.auth.getUser()).data.user?.id
+                if (id) {
+                        await supabase.from('assignments').insert([
+                                {
+                                        title: data.name,
+                                        description: data.description,
+                                        subject: data.subject,
+                                        deadline: data.deadline,
+                                        created_by: id,
+                                        status: 'pending',
+                                },
+                        ])
+                }
                 setSubmitted(true)
         }
 
