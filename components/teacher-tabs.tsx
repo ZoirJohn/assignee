@@ -13,8 +13,6 @@ import { TabsContent } from '@/components/ui/tabs'
 import { createClient } from '@/lib/supabase/client'
 import { TAssignment, TMessage, TStudent } from '@/definitions'
 import { cn } from '@/lib/utils'
-import { FormItem, FormLabel, FormControl, FormField, Form } from '@/components/ui/form'
-import { assignmentSchema } from '@/app/dashboard/teacher/create/page'
 import { Label } from './ui/label'
 
 export function TeacherTabs() {
