@@ -14,7 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar'
 import { createClient } from '@/lib/supabase/client'
 
-export const assignmentSchema = z.object({
+const assignmentSchema = z.object({
         name: z.string().min(2, 'Name must be at least 2 characters'),
         subject: z.string().min(2, 'Subject must be at least 2 characters'),
         description: z.string().min(10, 'Description must be at least 10 characters'),
