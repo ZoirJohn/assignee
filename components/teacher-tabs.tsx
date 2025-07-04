@@ -13,17 +13,19 @@ import { TabsContent } from '@/components/ui/tabs'
 import { createClient } from '@/lib/supabase/client'
 import { TAssignment, TMessage, TStudent } from '@/definitions'
 import { cn } from '@/lib/utils'
-import { FormItem, FormLabel, FormControl } from '@/components/ui/form'
+import { FormItem, FormLabel, FormControl, FormField, Form } from '@/components/ui/form'
+import { assignmentSchema } from '@/app/dashboard/teacher/create/page'
+import { Label } from './ui/label'
 
 export function TeacherTabs() {
         const supabase = createClient()
 
-        const [selectedSubmission, setSelectedSubmission] = useState<TAssignment | null>(null)
+        const [selectedAssignment, setSelectedAssignment] = useState<TAssignment | null>(null)
         const [gradeOverride, setGradeOverride] = useState<number>(0)
         const [additionalComments, setAdditionalComments] = useState('')
 
         const [messages, setMessages] = useState<TMessage[]>([])
-        const [assigments, setAssignments] = useState<TAssignment[]>([])
+        const [assignments, setAssignments] = useState<TAssignment[]>([])
         const [students, setStudents] = useState<TStudent[]>([])
         const [newMessage, setNewMessage] = useState<string>('')
         const [currentUserId, setCurrentUserId] = useState<string>('')
@@ -32,15 +34,15 @@ export function TeacherTabs() {
         const messagesEndRef = useRef<HTMLDivElement>(null)
 
         const handleGradeSubmission = () => {
-                setSelectedSubmission(null)
+                setSelectedAssignment(null)
                 setGradeOverride(0)
                 setAdditionalComments('')
         }
         const openSubmissionReview = (submission: TAssignment) => {
-                if (selectedSubmission) {
-                        setSelectedSubmission(null)
+                if (selectedAssignment) {
+                        setSelectedAssignment(null)
                 } else {
-                        setSelectedSubmission(submission)
+                        setSelectedAssignment(submission)
                 }
         }
         const handleSendMessage = async () => {
@@ -63,7 +65,7 @@ export function TeacherTabs() {
                         }
                 }
                 fetchUser()
-        }, [supabase.auth])
+        }, [])
         useEffect(() => {
                 const channel = supabase
                         .channel('realtime-chat:teacher-student')
@@ -89,7 +91,7 @@ export function TeacherTabs() {
                 return () => {
                         supabase.removeChannel(channel)
                 }
-        }, [supabase])
+        }, [])
         useEffect(() => {
                 async function fetchStudents() {
                         const { data: students } = await supabase.from('profiles').select('id, full_name').eq('teacher_id', userId)
@@ -101,7 +103,7 @@ export function TeacherTabs() {
                 if (userId) {
                         fetchStudents()
                 }
-        }, [userId, supabase])
+        }, [userId])
         useEffect(() => {
                 const fetchMessages = async () => {
                         const { data: messages } = await supabase
@@ -115,14 +117,14 @@ export function TeacherTabs() {
 
                 if (currentUserId) fetchMessages()
                 setDisabled(students.length == 0)
-        }, [currentUserId, userId, students.length, supabase])
+        }, [currentUserId, userId, students.length])
         useEffect(() => {
                 const fetchAssignments = async () => {
-                        const { data } = await supabase.from('assignments').select('*').eq('teacher_id', userId)
-                        setAssignments((prev) => [...prev, ...(data as TAssignment[])])
+                        const { data: assignments } = await supabase.from('assignments').select('*').eq('created_by', userId)
+                        setAssignments((prev) => [...prev, ...(assignments as TAssignment[])])
                 }
                 if (userId) fetchAssignments()
-        }, [userId, supabase])
+        }, [userId])
         useEffect(() => {
                 const scrollTimeout = setTimeout(() => {
                         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -132,6 +134,7 @@ export function TeacherTabs() {
                         clearTimeout(scrollTimeout)
                 }
         }, [messages])
+        console.log(selectedAssignment)
         return (
                 <>
                         <TabsContent
@@ -139,8 +142,8 @@ export function TeacherTabs() {
                                 className='space-y-4'
                         >
                                 <div className='grid gap-4'>
-                                        {assigments.length ? (
-                                                assigments.map(({ title, id, student_id, subject, status, ai_grade, graded_at, submitted_at, created_at, ...others }) => (
+                                        {assignments.length ? (
+                                                assignments.map(({ title, id, student_id, subject, status, ai_grade, graded_at, submitted_at, created_at, ...others }) => (
                                                         <Card key={id}>
                                                                 <CardHeader className='!pb-0'>
                                                                         <div className='flex items-start justify-between max-sm:flex-col-reverse max-sm:gap-y-2'>
@@ -171,7 +174,7 @@ export function TeacherTabs() {
                                                                                                 variant='outline'
                                                                                                 className='bg-blue-50 text-blue-700'
                                                                                         >
-                                                                                                AI Score: {ai_grade}/{others.max_grade}
+                                                                                                AI Score: {ai_grade}/{5}
                                                                                         </Badge>
                                                                                         {graded_at && (
                                                                                                 <Badge className='bg-green-100 text-green-800 hover:bg-green-100'>
@@ -187,7 +190,11 @@ export function TeacherTabs() {
                                                                                         <Clock className='w-4 h-4 mr-1' />
                                                                                         {submitted_at
                                                                                                 ? `Submitted: ${new Date(submitted_at).toLocaleDateString()}`
-                                                                                                : `Created: ${new Date(created_at).toLocaleDateString()}`}
+                                                                                                : `Created: ${new Date(created_at).toLocaleDateString('en-UZ', {
+                                                                                                          day: 'numeric',
+                                                                                                          month: 'long',
+                                                                                                          year: 'numeric',
+                                                                                                  })}`}
                                                                                 </div>
                                                                                 <div className='flex items-center space-x-2'>
                                                                                         <Button
@@ -242,93 +249,101 @@ export function TeacherTabs() {
                                         )}
                                 </div>
 
-                                {selectedSubmission && (
+                                {selectedAssignment && (
                                         <Card className='border-2 border-blue-200 bg-blue-50/30'>
                                                 <CardHeader>
-                                                        <CardTitle>Review: {selectedSubmission.title}</CardTitle>
-                                                        <CardDescription>Student ID: {selectedSubmission.student_id}</CardDescription>
+                                                        <CardTitle>Review: {selectedAssignment.title}</CardTitle>
+                                                        <CardDescription>Student ID: {selectedAssignment.student_id}</CardDescription>
                                                 </CardHeader>
                                                 <CardContent className='space-y-4'>
                                                         <div>
                                                                 <h4 className='font-semibold mb-2'>Extracted Text:</h4>
                                                                 <div className='bg-gray-50 p-4 rounded-lg max-h-32 overflow-y-auto'>
-                                                                        <p className='text-sm'>{selectedSubmission.extracted_text}</p>
+                                                                        <p className='text-sm'>{selectedAssignment.extracted_text}</p>
                                                                 </div>
                                                         </div>
-
                                                         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                                                                 <div>
-                                                                        <label className='block text-sm font-medium mb-2'>Grade</label>
+                                                                        <Label className='block text-sm font-medium mb-2'>Grade</Label>
                                                                         <Input
                                                                                 type='number'
-                                                                                min={selectedSubmission.min_grade}
-                                                                                max={selectedSubmission.max_grade}
+                                                                                max={5}
+                                                                                min={2}
+                                                                                defaultValue={2}
                                                                                 value={gradeOverride}
                                                                                 onChange={(e) => setGradeOverride(parseInt(e.target.value, 10))}
                                                                                 placeholder='Enter grade (0-100)'
+                                                                                disabled={selectedAssignment.ai_grade == undefined}
                                                                         />
                                                                         <p className='text-xs text-gray-500 mt-1'>
-                                                                                AI Score: {selectedSubmission.ai_grade}/{selectedSubmission.max_grade}
+                                                                                AI Score: {selectedAssignment.ai_grade}/{5}
                                                                         </p>
                                                                 </div>
 
                                                                 <div>
-                                                                        <FormItem>
-                                                                                <FormLabel htmlFor='feedback-level'>Feedback Level</FormLabel>
-                                                                                <FormControl>
-                                                                                        <Select
-                                                                                                value={selectedSubmission.feedback}
-                                                                                                onValueChange={(value) => {
-                                                                                                        if (selectedSubmission) {
-                                                                                                                setSelectedSubmission({
-                                                                                                                        ...selectedSubmission,
-                                                                                                                        feedback: value as TAssignment['feedback'],
-                                                                                                                })
-                                                                                                        }
-                                                                                                }}
-                                                                                                disabled={selectedSubmission.graded_at == undefined}
-                                                                                        >
-                                                                                                <SelectTrigger id='feedback-level'>
-                                                                                                        <SelectValue placeholder='Select feedback' />
-                                                                                                </SelectTrigger>
-                                                                                                <SelectContent>
-                                                                                                        <SelectItem value='excellent'>Excellent</SelectItem>
-                                                                                                        <SelectItem value='good'>Good</SelectItem>
-                                                                                                        <SelectItem value='okay'>Okay</SelectItem>
-                                                                                                        <SelectItem value='poor'>Poor</SelectItem>
-                                                                                                </SelectContent>
-                                                                                        </Select>
-                                                                                </FormControl>
-                                                                        </FormItem>
+                                                                        <Label
+                                                                                className='block text-sm font-medium mb-2'
+                                                                                htmlFor='feedback-level'
+                                                                        >
+                                                                                Feedback Level
+                                                                        </Label>
+
+                                                                        <Select
+                                                                                value={selectedAssignment.feedback}
+                                                                                onValueChange={(value) => {
+                                                                                        if (selectedAssignment) {
+                                                                                                setSelectedAssignment({
+                                                                                                        ...selectedAssignment,
+                                                                                                        feedback: value as TAssignment['feedback'],
+                                                                                                })
+                                                                                        }
+                                                                                }}
+                                                                                disabled={selectedAssignment.graded_at == undefined}
+                                                                        >
+                                                                                <SelectTrigger
+                                                                                        id='feedback-level'
+                                                                                        className='w-full'
+                                                                                >
+                                                                                        <SelectValue placeholder='Select feedback' />
+                                                                                </SelectTrigger>
+                                                                                <SelectContent>
+                                                                                        <SelectItem value='excellent'>Excellent</SelectItem>
+                                                                                        <SelectItem value='good'>Good</SelectItem>
+                                                                                        <SelectItem value='okay'>Okay</SelectItem>
+                                                                                        <SelectItem value='poor'>Poor</SelectItem>
+                                                                                        <SelectItem value='not-graded'>Not Graded</SelectItem>
+                                                                                </SelectContent>
+                                                                        </Select>
                                                                 </div>
                                                         </div>
 
                                                         <div>
-                                                                <FormItem>
-                                                                        <FormLabel htmlFor='additional-comments'>Additional Comments</FormLabel>
-                                                                        <FormControl>
-                                                                                <Textarea
-                                                                                        id='additional-comments'
-                                                                                        placeholder='Add specific feedback for the student...'
-                                                                                        className='min-h-20'
-                                                                                        readOnly={selectedSubmission.graded_at == undefined}
-                                                                                        value={additionalComments}
-                                                                                        onChange={(e) => setAdditionalComments(e.target.value)}
-                                                                                />
-                                                                        </FormControl>
-                                                                </FormItem>
+                                                                <Label
+                                                                        className='block text-sm font-medium mb-2'
+                                                                        htmlFor='additional-comments'
+                                                                >
+                                                                        Additional Comments
+                                                                </Label>
+                                                                <Textarea
+                                                                        id='additional-comments'
+                                                                        placeholder='Add specific feedback for the student...'
+                                                                        className='min-h-20'
+                                                                        readOnly={selectedAssignment.graded_at == undefined}
+                                                                        value={additionalComments}
+                                                                        onChange={(e) => setAdditionalComments(e.target.value)}
+                                                                />
                                                         </div>
 
                                                         <div className='flex items-center space-x-2'>
                                                                 <Button
                                                                         onClick={() => handleGradeSubmission()}
-                                                                        disabled={selectedSubmission.graded_at == undefined}
+                                                                        disabled={selectedAssignment.graded_at == undefined}
                                                                 >
                                                                         Confirm Grade
                                                                 </Button>
                                                                 <Button
                                                                         variant='outline'
-                                                                        onClick={() => setSelectedSubmission(null)}
+                                                                        onClick={() => setSelectedAssignment(null)}
                                                                 >
                                                                         Cancel
                                                                 </Button>
@@ -436,8 +451,8 @@ export function TeacherTabs() {
                                 value='feedback'
                                 className='space-y-4'
                         >
-                                {assigments.length ? (
-                                        assigments.map(({ id, student_id, title, ai_grade, feedback, max_grade }, idx) => (
+                                {assignments.length ? (
+                                        assignments.map(({ id, student_id, title, ai_grade, feedback }, idx) => (
                                                 <Card key={idx}>
                                                         <CardHeader>
                                                                 <CardTitle>Recent Feedback Given</CardTitle>
@@ -456,7 +471,7 @@ export function TeacherTabs() {
                                                                                 <div className='text-right'>
                                                                                         <div className='flex items-center space-x-2'>
                                                                                                 <Badge className='bg-green-100 text-green-800 hover:bg-green-100'>
-                                                                                                        {ai_grade}/{max_grade}
+                                                                                                        {ai_grade}/{5}
                                                                                                 </Badge>
                                                                                                 <Badge
                                                                                                         variant='outline'

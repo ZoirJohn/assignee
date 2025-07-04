@@ -1,4 +1,3 @@
-// Type definitions for animated components in app/page.tsx
 import { ComponentType } from 'react'
 
 export type AnimatedTextProps = {
@@ -23,7 +22,6 @@ export type AnimatedShowcaseProps = {
         delay: number
 }
 
-// Message type for chat/messages
 export type TMessage = {
         id: string
         sender_id: string
@@ -32,7 +30,6 @@ export type TMessage = {
         created_at: string
 }
 
-// Assignment type for teacher/student assignment management
 export type TAssignment = {
         id: string
         title: string
@@ -40,16 +37,13 @@ export type TAssignment = {
         subject?: string
         status: 'pending' | 'submitted' | 'graded'
         ai_grade: number
-        max_grade: number
-        min_grade?: number
         graded_at?: string
         submitted_at?: string
         created_at: string
-        feedback?: 'excellent' | 'good' | 'okay' | 'poor' | string
+        feedback?: 'excellent' | 'good' | 'okay' | 'poor' | 'not-graded' | string
         extracted_text?: string
 }
 
-// Student type for teacher-student relations
 export type TStudent = {
         id: string
         full_name: string
