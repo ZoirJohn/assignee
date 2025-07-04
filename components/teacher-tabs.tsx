@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { Clock, Send, Eye, CheckCircle } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -19,7 +19,7 @@ export function TeacherTabs() {
         const supabase = createClient()
 
         const [selectedAssignment, setSelectedAssignment] = useState<TAssignment | null>(null)
-        const [gradeOverride, setGradeOverride] = useState<number>(0)
+        const [gradeOverride, setGradeOverride] = useState<number>()
         const [additionalComments, setAdditionalComments] = useState('')
 
         const [messages, setMessages] = useState<TMessage[]>([])
@@ -33,7 +33,7 @@ export function TeacherTabs() {
 
         const handleGradeSubmission = () => {
                 setSelectedAssignment(null)
-                setGradeOverride(0)
+                setGradeOverride(undefined)
                 setAdditionalComments('')
         }
         const openSubmissionReview = (submission: TAssignment) => {
@@ -139,216 +139,199 @@ export function TeacherTabs() {
                                 value='assignments'
                                 className='space-y-4'
                         >
-                                <div className='grid gap-4'>
+                                <div className='grid gap-3'>
                                         {assignments.length ? (
-                                                assignments.map(({ title, id, student_id, subject, status, ai_grade, graded_at, submitted_at, created_at, ...others }) => (
-                                                        <Card key={id}>
-                                                                <CardHeader className='!pb-0'>
-                                                                        <div className='flex items-start justify-between max-sm:flex-col-reverse max-sm:gap-y-2'>
-                                                                                <div>
-                                                                                        <CardTitle className='text-xl'>{title}</CardTitle>
-                                                                                        <CardDescription className='text-base'>
-                                                                                                by Student {student_id} • {subject || 'No Subject'}
-                                                                                        </CardDescription>
-                                                                                </div>
-                                                                                <div className='flex items-center space-x-2'>
-                                                                                        <Badge
-                                                                                                className='hover:bg-black'
-                                                                                                variant={status === 'graded' ? 'default' : 'secondary'}
-                                                                                        >
-                                                                                                {status === 'graded' ? (
-                                                                                                        <>
-                                                                                                                <CheckCircle className='w-3 h-3 mr-1' />
-                                                                                                                Graded
-                                                                                                        </>
-                                                                                                ) : (
-                                                                                                        <>
-                                                                                                                <Clock className='w-3 h-3 mr-1' />
-                                                                                                                {status === 'submitted' ? 'Submitted' : 'Pending'}
-                                                                                                        </>
-                                                                                                )}
-                                                                                        </Badge>
-                                                                                        <Badge
-                                                                                                variant='outline'
-                                                                                                className='bg-blue-50 text-blue-700'
-                                                                                        >
-                                                                                                AI Score: {ai_grade}/{5}
-                                                                                        </Badge>
-                                                                                        {graded_at && (
-                                                                                                <Badge className='bg-green-100 text-green-800 hover:bg-green-100'>
-                                                                                                        Graded: {new Date(graded_at).toLocaleDateString()}
-                                                                                                </Badge>
-                                                                                        )}
-                                                                                </div>
-                                                                        </div>
-                                                                </CardHeader>
-                                                                <CardContent>
-                                                                        <div className='flex items-center justify-between flex-wrap gap-4'>
-                                                                                <div className='flex items-center text-sm text-gray-500'>
-                                                                                        <Clock className='w-4 h-4 mr-1' />
-                                                                                        {submitted_at
-                                                                                                ? `Submitted: ${new Date(submitted_at).toLocaleDateString()}`
-                                                                                                : `Created: ${new Date(created_at).toLocaleDateString('en-UZ', {
-                                                                                                          day: 'numeric',
-                                                                                                          month: 'long',
-                                                                                                          year: 'numeric',
-                                                                                                  })}`}
-                                                                                </div>
-                                                                                <div className='flex items-center space-x-2'>
-                                                                                        <Button
-                                                                                                variant='outline'
-                                                                                                size='sm'
-                                                                                                onClick={() =>
-                                                                                                        openSubmissionReview({
-                                                                                                                title,
-                                                                                                                id,
-                                                                                                                student_id,
-                                                                                                                subject,
-                                                                                                                status,
-                                                                                                                ai_grade,
-                                                                                                                graded_at,
-                                                                                                                submitted_at,
-                                                                                                                created_at,
-                                                                                                                ...others,
-                                                                                                        })
-                                                                                                }
-                                                                                        >
-                                                                                                <Eye className='w-4 h-4 mr-2' />
-                                                                                                Review
-                                                                                        </Button>
-                                                                                        {status === 'pending' && (
-                                                                                                <Button
-                                                                                                        size='sm'
-                                                                                                        onClick={() =>
-                                                                                                                openSubmissionReview({
-                                                                                                                        title,
-                                                                                                                        id,
-                                                                                                                        student_id,
-                                                                                                                        subject,
-                                                                                                                        status,
-                                                                                                                        ai_grade,
-                                                                                                                        graded_at,
-                                                                                                                        submitted_at,
-                                                                                                                        created_at,
-                                                                                                                        ...others,
-                                                                                                                })
-                                                                                                        }
+                                                assignments.map((assignment) => (
+                                                        <Fragment key={assignment.id}>
+                                                                <Card className='gap-0'>
+                                                                        <CardHeader className='!pb-0 mb-0'>
+                                                                                <div className='flex flex-col gap-1'>
+                                                                                        <CardTitle className='text-2xl font-bold leading-tight text-blue-900'>{assignment.title}</CardTitle>
+                                                                                        <div className='text-sm text-gray-400 mt-0.5 mb-0.5'>{assignment.subject}</div>
+                                                                                        <div className='text-lg font-medium text-gray-800 mb-1'>{assignment.description}</div>
+                                                                                        <div className='flex items-center flex-wrap gap-1 mt-1'>
+                                                                                                <Badge
+                                                                                                        className={assignment.status === 'graded' ? 'hover:bg-black' : ''}
+                                                                                                        variant={assignment.status === 'graded' ? 'default' : 'secondary'}
                                                                                                 >
-                                                                                                        Grade Now
-                                                                                                </Button>
-                                                                                        )}
+                                                                                                        {assignment.status === 'graded' ? (
+                                                                                                                <>
+                                                                                                                        <CheckCircle className='w-3 h-3 mr-1' />
+                                                                                                                        Graded
+                                                                                                                </>
+                                                                                                        ) : (
+                                                                                                                <>
+                                                                                                                        <Clock className='w-3 h-3 mr-1' />
+                                                                                                                        {assignment.status === 'submitted' ? 'Submitted' : 'Pending'}
+                                                                                                                </>
+                                                                                                        )}
+                                                                                                </Badge>
+                                                                                                <Badge
+                                                                                                        variant='outline'
+                                                                                                        className='bg-blue-50 text-blue-700'
+                                                                                                >
+                                                                                                        AI Score: {assignment.ai_grade}/{5}
+                                                                                                </Badge>
+                                                                                                {assignment.teacher_grade && (
+                                                                                                        <Badge className='bg-green-100 text-green-800 hover:bg-green-100'>
+                                                                                                                Graded: {new Date(assignment.teacher_grade).toLocaleDateString()}
+                                                                                                        </Badge>
+                                                                                                )}
+                                                                                        </div>
+                                                                                        <div className='flex justify-end w-full mt-1'>
+                                                                                                <span className='text-xs text-gray-400 italic'>by Student: {assignment.created_by}</span>
+                                                                                        </div>
                                                                                 </div>
-                                                                        </div>
-                                                                </CardContent>
-                                                        </Card>
+                                                                        </CardHeader>
+                                                                        <CardContent>
+                                                                                <div className='flex items-center justify-between flex-wrap gap-4 border-t pt-3 mt-2'>
+                                                                                        <div className='flex items-center text-xs text-gray-400'>
+                                                                                                <Clock className='w-4 h-4 mr-1' />
+                                                                                                {assignment.submitted_at
+                                                                                                        ? `Submitted: ${new Date(assignment.submitted_at).toLocaleDateString()}`
+                                                                                                        : `Created: ${new Date(assignment.created_at).toLocaleDateString('en-UZ', {
+                                                                                                                  day: 'numeric',
+                                                                                                                  month: 'long',
+                                                                                                                  year: 'numeric',
+                                                                                                          })}`}
+                                                                                        </div>
+                                                                                        <div className='flex items-center space-x-2'>
+                                                                                                <Button
+                                                                                                        variant='outline'
+                                                                                                        size='sm'
+                                                                                                        onClick={() => openSubmissionReview(assignment)}
+                                                                                                >
+                                                                                                        <Eye className='w-4 h-4 mr-2' />
+                                                                                                        Review
+                                                                                                </Button>
+                                                                                                {assignment.status === 'pending' && (
+                                                                                                        <Button
+                                                                                                                size='sm'
+                                                                                                                onClick={() => openSubmissionReview(assignment)}
+                                                                                                        >
+                                                                                                                Grade Now
+                                                                                                        </Button>
+                                                                                                )}
+                                                                                        </div>
+                                                                                </div>
+                                                                        </CardContent>
+                                                                </Card>
+                                                                {selectedAssignment && selectedAssignment.id === assignment.id && (
+                                                                        <Card className='border-2 border-blue-200 bg-blue-50/30'>
+                                                                                <CardHeader>
+                                                                                        <CardTitle>Review: {selectedAssignment.title}</CardTitle>
+                                                                                        <CardDescription>Student ID: {selectedAssignment.created_by}</CardDescription>
+                                                                                </CardHeader>
+                                                                                <CardContent className='space-y-4'>
+                                                                                        <div>
+                                                                                                <h4 className='font-semibold mb-2'>Extracted Text:</h4>
+                                                                                                {selectedAssignment.extracted_text}
+                                                                                                <div className='bg-gray-50 p-4 rounded-lg max-h-32 overflow-y-auto'>
+                                                                                                        <p className='text-sm'>{selectedAssignment.extracted_text}</p>
+                                                                                                </div>
+                                                                                        </div>
+                                                                                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                                                                                                <div>
+                                                                                                        <Label className='block text-sm font-medium mb-2'>AI Grade</Label>
+                                                                                                        <Input
+                                                                                                                type='number'
+                                                                                                                value={selectedAssignment.ai_grade ?? ''}
+                                                                                                                readOnly
+                                                                                                                disabled
+                                                                                                                className='bg-gray-100 cursor-not-allowed'
+                                                                                                        />
+                                                                                                        <p className='text-xs text-gray-500 mt-1'>This is the AI-predicted grade (out of 5)</p>
+                                                                                                </div>
+                                                                                                <div>
+                                                                                                        <Label className='block text-sm font-medium mb-2'>Grade</Label>
+                                                                                                        <Input
+                                                                                                                type='number'
+                                                                                                                max={5}
+                                                                                                                min={2}
+                                                                                                                value={gradeOverride}
+                                                                                                                onChange={(e) => setGradeOverride(parseInt(e.target.value, 10))}
+                                                                                                                placeholder='Enter grade (0-100)'
+                                                                                                                disabled={selectedAssignment.ai_grade == undefined}
+                                                                                                        />
+                                                                                                        <p className='text-xs text-gray-500 mt-1'>Your grade for this assignment (out of 5)</p>
+                                                                                                </div>
+                                                                                                <div>
+                                                                                                        <Label
+                                                                                                                className='block text-sm font-medium mb-2'
+                                                                                                                htmlFor='feedback-level'
+                                                                                                        >
+                                                                                                                Feedback Level
+                                                                                                        </Label>
+
+                                                                                                        <Select
+                                                                                                                value={selectedAssignment.feedback}
+                                                                                                                onValueChange={(value) => {
+                                                                                                                        if (selectedAssignment) {
+                                                                                                                                setSelectedAssignment({
+                                                                                                                                        ...selectedAssignment,
+                                                                                                                                        feedback: value as TAssignment['feedback'],
+                                                                                                                                })
+                                                                                                                        }
+                                                                                                                }}
+                                                                                                                disabled={selectedAssignment.teacher_grade == undefined}
+                                                                                                        >
+                                                                                                                <SelectTrigger
+                                                                                                                        id='feedback-level'
+                                                                                                                        className='w-full'
+                                                                                                                >
+                                                                                                                        <SelectValue placeholder='Select feedback' />
+                                                                                                                </SelectTrigger>
+                                                                                                                <SelectContent>
+                                                                                                                        <SelectItem value='excellent'>Excellent</SelectItem>
+                                                                                                                        <SelectItem value='good'>Good</SelectItem>
+                                                                                                                        <SelectItem value='okay'>Okay</SelectItem>
+                                                                                                                        <SelectItem value='poor'>Poor</SelectItem>
+                                                                                                                        <SelectItem value='not-graded'>Not Graded</SelectItem>
+                                                                                                                </SelectContent>
+                                                                                                        </Select>
+                                                                                                </div>
+                                                                                        </div>
+
+                                                                                        <div>
+                                                                                                <Label
+                                                                                                        className='block text-sm font-medium mb-2'
+                                                                                                        htmlFor='additional-comments'
+                                                                                                >
+                                                                                                        Additional Comments
+                                                                                                </Label>
+                                                                                                <Textarea
+                                                                                                        id='additional-comments'
+                                                                                                        placeholder='Add specific feedback for the student...'
+                                                                                                        className='min-h-20'
+                                                                                                        readOnly={selectedAssignment.teacher_grade == undefined}
+                                                                                                        value={additionalComments}
+                                                                                                        onChange={(e) => setAdditionalComments(e.target.value)}
+                                                                                                />
+                                                                                        </div>
+
+                                                                                        <div className='flex items-center space-x-2'>
+                                                                                                <Button
+                                                                                                        onClick={() => handleGradeSubmission()}
+                                                                                                        disabled={selectedAssignment.teacher_grade == undefined}
+                                                                                                >
+                                                                                                        Confirm Grade
+                                                                                                </Button>
+                                                                                                <Button
+                                                                                                        variant='outline'
+                                                                                                        onClick={() => setSelectedAssignment(null)}
+                                                                                                >
+                                                                                                        Cancel
+                                                                                                </Button>
+                                                                                        </div>
+                                                                                </CardContent>
+                                                                        </Card>
+                                                                )}
+                                                        </Fragment>
                                                 ))
                                         ) : (
                                                 <h1 className='text-gray-600'>No assignments found</h1>
                                         )}
                                 </div>
-
-                                {selectedAssignment && (
-                                        <Card className='border-2 border-blue-200 bg-blue-50/30'>
-                                                <CardHeader>
-                                                        <CardTitle>Review: {selectedAssignment.title}</CardTitle>
-                                                        <CardDescription>Student ID: {selectedAssignment.student_id}</CardDescription>
-                                                </CardHeader>
-                                                <CardContent className='space-y-4'>
-                                                        <div>
-                                                                <h4 className='font-semibold mb-2'>Extracted Text:</h4>
-                                                                <div className='bg-gray-50 p-4 rounded-lg max-h-32 overflow-y-auto'>
-                                                                        <p className='text-sm'>{selectedAssignment.extracted_text}</p>
-                                                                </div>
-                                                        </div>
-                                                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                                                                <div>
-                                                                        <Label className='block text-sm font-medium mb-2'>Grade</Label>
-                                                                        <Input
-                                                                                type='number'
-                                                                                max={5}
-                                                                                min={2}
-                                                                                defaultValue={2}
-                                                                                value={gradeOverride}
-                                                                                onChange={(e) => setGradeOverride(parseInt(e.target.value, 10))}
-                                                                                placeholder='Enter grade (0-100)'
-                                                                                disabled={selectedAssignment.ai_grade == undefined}
-                                                                        />
-                                                                        <p className='text-xs text-gray-500 mt-1'>
-                                                                                AI Score: {selectedAssignment.ai_grade}/{5}
-                                                                        </p>
-                                                                </div>
-
-                                                                <div>
-                                                                        <Label
-                                                                                className='block text-sm font-medium mb-2'
-                                                                                htmlFor='feedback-level'
-                                                                        >
-                                                                                Feedback Level
-                                                                        </Label>
-
-                                                                        <Select
-                                                                                value={selectedAssignment.feedback}
-                                                                                onValueChange={(value) => {
-                                                                                        if (selectedAssignment) {
-                                                                                                setSelectedAssignment({
-                                                                                                        ...selectedAssignment,
-                                                                                                        feedback: value as TAssignment['feedback'],
-                                                                                                })
-                                                                                        }
-                                                                                }}
-                                                                                disabled={selectedAssignment.graded_at == undefined}
-                                                                        >
-                                                                                <SelectTrigger
-                                                                                        id='feedback-level'
-                                                                                        className='w-full'
-                                                                                >
-                                                                                        <SelectValue placeholder='Select feedback' />
-                                                                                </SelectTrigger>
-                                                                                <SelectContent>
-                                                                                        <SelectItem value='excellent'>Excellent</SelectItem>
-                                                                                        <SelectItem value='good'>Good</SelectItem>
-                                                                                        <SelectItem value='okay'>Okay</SelectItem>
-                                                                                        <SelectItem value='poor'>Poor</SelectItem>
-                                                                                        <SelectItem value='not-graded'>Not Graded</SelectItem>
-                                                                                </SelectContent>
-                                                                        </Select>
-                                                                </div>
-                                                        </div>
-
-                                                        <div>
-                                                                <Label
-                                                                        className='block text-sm font-medium mb-2'
-                                                                        htmlFor='additional-comments'
-                                                                >
-                                                                        Additional Comments
-                                                                </Label>
-                                                                <Textarea
-                                                                        id='additional-comments'
-                                                                        placeholder='Add specific feedback for the student...'
-                                                                        className='min-h-20'
-                                                                        readOnly={selectedAssignment.graded_at == undefined}
-                                                                        value={additionalComments}
-                                                                        onChange={(e) => setAdditionalComments(e.target.value)}
-                                                                />
-                                                        </div>
-
-                                                        <div className='flex items-center space-x-2'>
-                                                                <Button
-                                                                        onClick={() => handleGradeSubmission()}
-                                                                        disabled={selectedAssignment.graded_at == undefined}
-                                                                >
-                                                                        Confirm Grade
-                                                                </Button>
-                                                                <Button
-                                                                        variant='outline'
-                                                                        onClick={() => setSelectedAssignment(null)}
-                                                                >
-                                                                        Cancel
-                                                                </Button>
-                                                        </div>
-                                                </CardContent>
-                                        </Card>
-                                )}
                         </TabsContent>
 
                         <TabsContent
@@ -450,7 +433,7 @@ export function TeacherTabs() {
                                 className='space-y-4'
                         >
                                 {assignments.length ? (
-                                        assignments.map(({ id, student_id, title, ai_grade, feedback }, idx) => (
+                                        assignments.map(({ id, created_by, title, ai_grade, feedback }, idx) => (
                                                 <Card key={idx}>
                                                         <CardHeader>
                                                                 <CardTitle>Recent Feedback Given</CardTitle>
@@ -463,7 +446,7 @@ export function TeacherTabs() {
                                                                                 className='flex items-center justify-between p-4 border rounded-lg'
                                                                         >
                                                                                 <div>
-                                                                                        <h4 className='font-semibold'>Student {student_id}</h4>
+                                                                                        <h4 className='font-semibold'>Student {created_by}</h4>
                                                                                         <p className='text-sm text-gray-600'>{title}</p>
                                                                                 </div>
                                                                                 <div className='text-right'>

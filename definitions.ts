@@ -33,15 +33,18 @@ export type TMessage = {
 export type TAssignment = {
         id: string
         title: string
-        student_id: string
-        subject?: string
-        status: 'pending' | 'submitted' | 'graded'
-        ai_grade: number
-        graded_at?: string
+        description: string
+        subject: string
+        deadline: string
+        created_by: string
         submitted_at?: string
-        created_at: string
-        feedback?: 'excellent' | 'good' | 'okay' | 'poor' | 'not-graded' | string
+        image_url?: string
         extracted_text?: string
+        ai_grade?: number
+        teacher_grade?: number
+        feedback?: string
+        status: 'pending' | 'submitted' | 'graded'
+        created_at: string
 }
 
 export type TStudent = {
