@@ -10,9 +10,9 @@ const teachingData = [
         {
                 semester: 'Fall 2024',
                 subjects: [
-                        { name: 'Environmental Science', students: 28, assignments: 8, averageGrade: 'B+', completion: 96 },
-                        { name: 'Chemistry 101', students: 32, assignments: 12, averageGrade: 'A-', completion: 94 },
-                        { name: 'Advanced Chemistry', students: 15, assignments: 10, averageGrade: 'A', completion: 100 },
+                        { name: 'Environmental Science', students: 28, assignments: 8, averageGrade: 4, completion: 96 },
+                        { name: 'Chemistry 101', students: 32, assignments: 12, averageGrade: 4, completion: 94 },
+                        { name: 'Advanced Chemistry', students: 15, assignments: 10, averageGrade: 5, completion: 100 },
                 ],
                 totalStudents: 75,
                 averageCompletion: 96.7,
@@ -20,19 +20,19 @@ const teachingData = [
         {
                 semester: 'Spring 2024',
                 subjects: [
-                        { name: 'Environmental Science', students: 25, assignments: 7, averageGrade: 'B+', completion: 92 },
-                        { name: 'Chemistry 101', students: 30, assignments: 10, averageGrade: 'B+', completion: 90 },
-                        { name: 'Organic Chemistry', students: 18, assignments: 9, averageGrade: 'A-', completion: 94 },
+                        { name: 'Environmental Science', students: 25, assignments: 7, averageGrade: 4, completion: 92 },
+                        { name: 'Chemistry 101', students: 30, assignments: 10, averageGrade: 4, completion: 90 },
+                        { name: 'Organic Chemistry', students: 18, assignments: 9, averageGrade: 4, completion: 94 },
                 ],
                 totalStudents: 73,
                 averageCompletion: 92.0,
         },
 ]
 
-const getGradeColor = (grade: string) => {
-        if (grade.startsWith('A')) return 'bg-green-100 text-green-800'
-        if (grade.startsWith('B')) return 'bg-blue-100 text-blue-800'
-        if (grade.startsWith('C')) return 'bg-yellow-100 text-yellow-800'
+const getGradeColor = (grade: number) => {
+        if (grade === 5) return 'bg-green-100 text-green-800'
+        if (grade === 4) return 'bg-blue-100 text-blue-800'
+        if (grade === 3) return 'bg-yellow-100 text-yellow-800'
         return 'bg-gray-100 text-gray-800'
 }
 

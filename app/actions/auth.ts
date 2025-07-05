@@ -1,7 +1,6 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 import { createClient } from '@/lib/supabase/server'
 
@@ -10,10 +9,12 @@ export async function signin(formData: FormData) {
 
         const email = formData.get('email') as string
         const password = formData.get('password') as string
+
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) {
-                throw new Error(error.message)
+                return { error: error.message }
         }
+
         const {
                 data: { user },
         } = await supabase.auth.getUser()
@@ -32,12 +33,14 @@ export async function signin(formData: FormData) {
         }
 
         revalidatePath('/', 'layout')
+
+        // Return success with redirect path instead of redirecting directly
         if (user?.user_metadata.role == 'student') {
-                redirect('/dashboard/student')
+                return { success: true, redirectTo: '/dashboard/student' }
         } else if (user?.user_metadata.role == 'teacher') {
-                redirect('/dashboard/teacher')
+                return { success: true, redirectTo: '/dashboard/teacher' }
         } else {
-                redirect('/')
+                return { success: true, redirectTo: '/' }
         }
 }
 
@@ -56,11 +59,11 @@ export async function signup(formData: FormData) {
         })
 
         if (error) {
-                throw new Error(error.message)
+                return { error: error.message }
         }
 
         revalidatePath('/', 'layout')
-        redirect('/confirm')
+        return { success: true, redirectTo: '/confirm' }
 }
 
 export async function signout() {
@@ -69,9 +72,9 @@ export async function signout() {
         const { error } = await supabase.auth.signOut()
 
         if (error) {
-                throw new Error('Error has occured:', error)
+                return { error: 'Error has occurred: ' + error.message }
         }
 
         revalidatePath('dashboard')
-        redirect('/')
+        return { success: true, redirectTo: '/' }
 }

@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Mail, Lock, User, Hash } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -32,6 +33,9 @@ const teacherSchema = baseSchema.extend({
 
 export default function SignUpPage() {
         const [userType, setUserType] = useState<'student' | 'teacher'>('student')
+        const [isLoading, setIsLoading] = useState(false)
+        const [authError, setAuthError] = useState<string | null>(null)
+        const router = useRouter()
 
         const studentForm = useForm<z.infer<typeof studentSchema>>({
                 resolver: zodResolver(studentSchema),
@@ -53,6 +57,58 @@ export default function SignUpPage() {
                         role: 'teacher',
                 },
         })
+
+        const onSubmitStudent = async (data: z.infer<typeof studentSchema>) => {
+                setIsLoading(true)
+                setAuthError(null)
+
+                try {
+                        const formData = new FormData()
+                        formData.append('email', data.email)
+                        formData.append('password', data.password)
+                        formData.append('fullName', data.fullName)
+                        formData.append('role', data.role)
+                        formData.append('teacherId', data.teacherId)
+
+                        const result = await signup(formData)
+
+                        if (result?.error) {
+                                setAuthError(result.error)
+                        } else if (result?.success && result?.redirectTo) {
+                                router.push(result.redirectTo)
+                        }
+                } catch (error) {
+                        setAuthError('An unexpected error occurred. Please try again.')
+                } finally {
+                        setIsLoading(false)
+                }
+        }
+
+        const onSubmitTeacher = async (data: z.infer<typeof teacherSchema>) => {
+                setIsLoading(true)
+                setAuthError(null)
+
+                try {
+                        const formData = new FormData()
+                        formData.append('email', data.email)
+                        formData.append('password', data.password)
+                        formData.append('fullName', data.fullName)
+                        formData.append('role', data.role)
+
+                        const result = await signup(formData)
+
+                        if (result?.error) {
+                                setAuthError(result.error)
+                        } else if (result?.success && result?.redirectTo) {
+                                router.push(result.redirectTo)
+                        }
+                } catch (error) {
+                        setAuthError('An unexpected error occurred. Please try again.')
+                } finally {
+                        setIsLoading(false)
+                }
+        }
+
         return (
                 <div className='min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4'>
                         <Card className='w-full max-w-md'>
@@ -91,7 +147,10 @@ export default function SignUpPage() {
                                                         className='space-y-4'
                                                 >
                                                         <Form {...studentForm}>
-                                                                <form className='space-y-4'>
+                                                                <form
+                                                                        className='space-y-4'
+                                                                        onSubmit={studentForm.handleSubmit(onSubmitStudent)}
+                                                                >
                                                                         <FormField
                                                                                 control={studentForm.control}
                                                                                 name='fullName'
@@ -107,6 +166,7 @@ export default function SignUpPage() {
                                                                                                                         {...field}
                                                                                                                         id='fullName'
                                                                                                                         autoComplete='name'
+                                                                                                                        disabled={isLoading}
                                                                                                                 />
                                                                                                         </div>
                                                                                                 </FormControl>
@@ -130,6 +190,7 @@ export default function SignUpPage() {
                                                                                                                         {...field}
                                                                                                                         id='email'
                                                                                                                         autoComplete='email'
+                                                                                                                        disabled={isLoading}
                                                                                                                 />
                                                                                                         </div>
                                                                                                 </FormControl>
@@ -154,6 +215,7 @@ export default function SignUpPage() {
                                                                                                                         {...field}
                                                                                                                         id='password'
                                                                                                                         autoComplete='current-password'
+                                                                                                                        disabled={isLoading}
                                                                                                                 />
                                                                                                         </div>
                                                                                                 </FormControl>
@@ -176,6 +238,7 @@ export default function SignUpPage() {
                                                                                                                         className='pl-10'
                                                                                                                         {...field}
                                                                                                                         id='teacherId'
+                                                                                                                        disabled={isLoading}
                                                                                                                 />
                                                                                                         </div>
                                                                                                 </FormControl>
@@ -184,26 +247,18 @@ export default function SignUpPage() {
                                                                                 )}
                                                                         />
 
-                                                                        <FormField
-                                                                                control={teacherForm.control}
-                                                                                name='role'
-                                                                                render={({}) => (
-                                                                                        <FormControl>
-                                                                                                <Input
-                                                                                                        type='hidden'
-                                                                                                        value='student'
-                                                                                                        name='role'
-                                                                                                ></Input>
-                                                                                        </FormControl>
-                                                                                )}
-                                                                        ></FormField>
+                                                                        {authError && (
+                                                                                <div className='h-10 flex items-center px-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md'>
+                                                                                        {authError}
+                                                                                </div>
+                                                                        )}
 
                                                                         <Button
                                                                                 type='submit'
                                                                                 className='w-full'
-                                                                                formAction={signup}
+                                                                                disabled={isLoading}
                                                                         >
-                                                                                Create Student Account
+                                                                                {isLoading ? 'Creating Account...' : 'Create Student Account'}
                                                                         </Button>
                                                                 </form>
                                                         </Form>
@@ -214,7 +269,10 @@ export default function SignUpPage() {
                                                         className='space-y-4'
                                                 >
                                                         <Form {...teacherForm}>
-                                                                <form className='space-y-4'>
+                                                                <form
+                                                                        className='space-y-4'
+                                                                        onSubmit={teacherForm.handleSubmit(onSubmitTeacher)}
+                                                                >
                                                                         <FormField
                                                                                 control={teacherForm.control}
                                                                                 name='fullName'
@@ -230,6 +288,7 @@ export default function SignUpPage() {
                                                                                                                         {...field}
                                                                                                                         autoComplete='name'
                                                                                                                         id='fullName'
+                                                                                                                        disabled={isLoading}
                                                                                                                 />
                                                                                                         </div>
                                                                                                 </FormControl>
@@ -253,6 +312,7 @@ export default function SignUpPage() {
                                                                                                                         {...field}
                                                                                                                         autoComplete='email'
                                                                                                                         id='email'
+                                                                                                                        disabled={isLoading}
                                                                                                                 />
                                                                                                         </div>
                                                                                                 </FormControl>
@@ -277,6 +337,7 @@ export default function SignUpPage() {
                                                                                                                         {...field}
                                                                                                                         autoComplete='current-password'
                                                                                                                         id='password'
+                                                                                                                        disabled={isLoading}
                                                                                                                 />
                                                                                                         </div>
                                                                                                 </FormControl>
@@ -284,25 +345,19 @@ export default function SignUpPage() {
                                                                                         </FormItem>
                                                                                 )}
                                                                         />
-                                                                        <FormField
-                                                                                control={teacherForm.control}
-                                                                                name='role'
-                                                                                render={({}) => (
-                                                                                        <FormControl>
-                                                                                                <Input
-                                                                                                        type='hidden'
-                                                                                                        value='teacher'
-                                                                                                        name='role'
-                                                                                                ></Input>
-                                                                                        </FormControl>
-                                                                                )}
-                                                                        ></FormField>
+
+                                                                        {authError && (
+                                                                                <div className='h-10 flex items-center px-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md'>
+                                                                                        {authError}
+                                                                                </div>
+                                                                        )}
+
                                                                         <Button
                                                                                 type='submit'
                                                                                 className='w-full'
-                                                                                formAction={signup}
+                                                                                disabled={isLoading}
                                                                         >
-                                                                                Create Teacher Account
+                                                                                {isLoading ? 'Creating Account...' : 'Create Teacher Account'}
                                                                         </Button>
                                                                 </form>
                                                         </Form>

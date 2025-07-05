@@ -250,7 +250,7 @@ export function TeacherTabs() {
                                                                                                                 min={2}
                                                                                                                 value={gradeOverride}
                                                                                                                 onChange={(e) => setGradeOverride(parseInt(e.target.value, 10))}
-                                                                                                                placeholder='Enter grade (0-100)'
+                                                                                                                placeholder='Enter grade (2-5)'
                                                                                                                 disabled={selectedAssignment.ai_grade == undefined}
                                                                                                         />
                                                                                                         <p className='text-xs text-gray-500 mt-1'>Your grade for this assignment (out of 5)</p>

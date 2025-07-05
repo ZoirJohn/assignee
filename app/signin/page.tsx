@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Mail, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -18,6 +20,10 @@ const signInSchema = z.object({
 })
 
 export default function SignInPage() {
+        const [isLoading, setIsLoading] = useState(false)
+        const [authError, setAuthError] = useState<string | null>(null)
+        const router = useRouter()
+
         const form = useForm<z.infer<typeof signInSchema>>({
                 resolver: zodResolver(signInSchema),
                 defaultValues: {
@@ -25,6 +31,29 @@ export default function SignInPage() {
                         password: '',
                 },
         })
+
+        const onSubmit = async (data: z.infer<typeof signInSchema>) => {
+                setIsLoading(true)
+                setAuthError(null)
+
+                try {
+                        const formData = new FormData()
+                        formData.append('email', data.email)
+                        formData.append('password', data.password)
+
+                        const result = await signin(formData)
+
+                        if (result?.error) {
+                                setAuthError(result.error)
+                        } else if (result?.success && result?.redirectTo) {
+                                router.push(result.redirectTo)
+                        }
+                } catch (error) {
+                        setAuthError('An unexpected error occurred. Please try again.')
+                } finally {
+                        setIsLoading(false)
+                }
+        }
 
         return (
                 <div className='min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center sm:p-4 p-1'>
@@ -53,7 +82,7 @@ export default function SignInPage() {
                                         <Form {...form}>
                                                 <form
                                                         className='space-y-4'
-                                                        name='signin'
+                                                        onSubmit={form.handleSubmit(onSubmit)}
                                                 >
                                                         <FormField
                                                                 control={form.control}
@@ -70,6 +99,7 @@ export default function SignInPage() {
                                                                                                         {...field}
                                                                                                         id='email'
                                                                                                         autoComplete='email'
+                                                                                                        disabled={isLoading}
                                                                                                 />
                                                                                         </div>
                                                                                 </FormControl>
@@ -94,6 +124,7 @@ export default function SignInPage() {
                                                                                                         {...field}
                                                                                                         id='password'
                                                                                                         autoComplete='current-password'
+                                                                                                        disabled={isLoading}
                                                                                                 />
                                                                                         </div>
                                                                                 </FormControl>
@@ -101,6 +132,8 @@ export default function SignInPage() {
                                                                         </FormItem>
                                                                 )}
                                                         />
+
+                                                        {authError && <div className='h-10 flex items-center px-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md'>{authError}</div>}
 
                                                         <div className='flex items-center justify-between'>
                                                                 <div className='text-sm'>
@@ -116,9 +149,9 @@ export default function SignInPage() {
                                                         <Button
                                                                 type='submit'
                                                                 className='w-full'
-                                                                formAction={signin}
+                                                                disabled={isLoading}
                                                         >
-                                                                Sign In
+                                                                {isLoading ? 'Signing In...' : 'Sign In'}
                                                         </Button>
                                                 </form>
                                         </Form>
