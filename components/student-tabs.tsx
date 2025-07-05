@@ -11,13 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { TabsContent } from '@/components/ui/tabs'
 import { createClient } from '@/lib/supabase/client'
 import { TAssignment, TMessage } from '@/definitions'
-
-const grades = [
-        { subject: 'Environmental Science', assignment: 'Essay: Renewable Energy', grade: 5, date: '2025-01-10' },
-        { subject: 'Calculus', assignment: 'Problem Set #4', grade: 4, date: '2025-01-08' },
-        { subject: 'World History', assignment: 'WWII Timeline', grade: 4, date: '2025-01-05' },
-        { subject: 'Chemistry', assignment: 'Molecular Structures', grade: 5, date: '2025-01-03' },
-]
+import Image from 'next/image'
 
 export default function StudentTabs() {
         const supabase = createClient()
@@ -52,8 +46,8 @@ export default function StudentTabs() {
 
                 try {
                         setAssignments((prev) =>
-                                prev.map((assignment: any) =>
-                                        assignment.id === parseInt(assignmentId)
+                                prev.map((assignment: TAssignment) =>
+                                        assignment.id === assignmentId
                                                 ? {
                                                           ...assignment,
                                                           status: 'submitted',
@@ -69,8 +63,7 @@ export default function StudentTabs() {
                         if (fileInput) fileInput.value = ''
 
                         alert('Assignment submitted successfully!')
-                } catch (error) {
-                        console.error('Error submitting assignment:', error)
+                } catch {
                         alert('Failed to submit assignment. Please try again.')
                 }
         }
@@ -94,20 +87,20 @@ export default function StudentTabs() {
                 }
         }
 
-        const getStatusColor = (status: string) => {
-                switch (status) {
-                        case 'graded':
-                                return 'bg-green-100 text-green-800'
-                        case 'submitted':
-                                return 'bg-blue-100 text-blue-800'
-                        case 'pending':
-                                return 'bg-yellow-100 text-yellow-800'
-                        case 'missed':
-                                return 'bg-red-100 text-red-800'
-                        default:
-                                return 'bg-gray-100 text-gray-800'
-                }
-        }
+        // const getStatusColor = (status: string) => {
+        //         switch (status) {
+        //                 case 'graded':
+        //                         return 'bg-green-100 text-green-800'
+        //                 case 'submitted':
+        //                         return 'bg-blue-100 text-blue-800'
+        //                 case 'pending':
+        //                         return 'bg-yellow-100 text-yellow-800'
+        //                 case 'missed':
+        //                         return 'bg-red-100 text-red-800'
+        //                 default:
+        //                         return 'bg-gray-100 text-gray-800'
+        //         }
+        // }
 
         const getStatusIcon = (status: string) => {
                 switch (status) {
@@ -336,11 +329,13 @@ export default function StudentTabs() {
                                                                                                 <div>
                                                                                                         <h4 className='font-semibold mb-2'>Uploaded Image:</h4>
                                                                                                         <div className='bg-white p-4 rounded-lg border'>
-                                                                                                                <img
+                                                                                                                <Image
                                                                                                                         src={selectedAssignment.image_url}
                                                                                                                         alt='Assignment submission'
                                                                                                                         className='max-w-full h-auto rounded-lg shadow-sm'
                                                                                                                         style={{ maxHeight: '400px' }}
+                                                                                                                        width={400}
+                                                                                                                        height={400}
                                                                                                                 />
                                                                                                         </div>
                                                                                                 </div>

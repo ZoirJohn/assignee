@@ -48,7 +48,7 @@ export default function SignInPage() {
                         } else if (result?.success && result?.redirectTo) {
                                 router.push(result.redirectTo)
                         }
-                } catch (error) {
+                } catch {
                         setAuthError('An unexpected error occurred. Please try again.')
                 } finally {
                         setIsLoading(false)
