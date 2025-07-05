@@ -185,15 +185,21 @@ export function TeacherTabs() {
                                                                         </CardHeader>
                                                                         <CardContent>
                                                                                 <div className='flex items-center justify-between flex-wrap gap-4 border-t pt-3 mt-2'>
-                                                                                        <div className='flex items-center text-xs text-gray-400'>
-                                                                                                <Clock className='w-4 h-4 mr-1' />
-                                                                                                {assignment.submitted_at
-                                                                                                        ? `Submitted: ${new Date(assignment.submitted_at).toLocaleDateString()}`
-                                                                                                        : `Created: ${new Date(assignment.created_at).toLocaleDateString('en-UZ', {
-                                                                                                                  day: 'numeric',
-                                                                                                                  month: 'long',
-                                                                                                                  year: 'numeric',
-                                                                                                          })}`}
+                                                                                        <div className='flex flex-col gap-2'>
+                                                                                                <div className='flex items-center text-base font-medium text-gray-700'>
+                                                                                                        <Clock className='w-5 h-5 mr-2' />
+                                                                                                        Due: {new Date(assignment.deadline).toLocaleDateString('en-UZ')}
+                                                                                                </div>
+                                                                                                <div className='flex items-center text-xs text-gray-400'>
+                                                                                                        <Clock className='w-4 h-4 mr-1' />
+                                                                                                        {assignment.submitted_at
+                                                                                                                ? `Submitted: ${new Date(assignment.submitted_at).toLocaleDateString()}`
+                                                                                                                : `Created: ${new Date(assignment.created_at).toLocaleDateString('en-UZ', {
+                                                                                                                          day: 'numeric',
+                                                                                                                          month: 'long',
+                                                                                                                          year: 'numeric',
+                                                                                                                  })}`}
+                                                                                                </div>
                                                                                         </div>
                                                                                         <div className='flex items-center space-x-2'>
                                                                                                 <Button

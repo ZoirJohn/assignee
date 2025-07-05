@@ -10,47 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TabsContent } from '@/components/ui/tabs'
 import { createClient } from '@/lib/supabase/client'
-import { TMessage } from '@/definitions'
-
-const assignments = [
-        {
-                id: 1,
-                title: 'Essay: Climate Change Impact',
-                subject: 'Environmental Science',
-                dueDate: '2025-01-25',
-                status: 'pending',
-                description: 'Write a 1000-word essay on climate change impacts',
-                imageUrl: null,
-        },
-        {
-                id: 2,
-                title: 'Math Problem Set #5',
-                subject: 'Calculus',
-                dueDate: '2025-01-20',
-                status: 'graded',
-                grade: 4,
-                description: 'Solve problems 1-15 from chapter 8',
-                imageUrl: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=300&fit=crop',
-        },
-        {
-                id: 3,
-                title: 'History Research Paper',
-                subject: 'World History',
-                dueDate: '2025-01-15',
-                status: 'missed',
-                description: 'Research paper on World War II causes',
-                imageUrl: null,
-        },
-        {
-                id: 4,
-                title: 'Chemistry Lab Report',
-                subject: 'Chemistry',
-                dueDate: '2025-01-30',
-                status: 'pending',
-                description: 'Submit lab report for acid-base titration experiment',
-                imageUrl: null,
-        },
-]
+import { TAssignment, TMessage } from '@/definitions'
 
 const grades = [
         { subject: 'Environmental Science', assignment: 'Essay: Renewable Energy', grade: 5, date: '2025-01-10' },
@@ -62,17 +22,18 @@ const grades = [
 export default function StudentTabs() {
         const supabase = createClient()
         const [selectedFile, setSelectedFile] = useState<File | null>(null)
-        const [selectedAssignment, setSelectedAssignment] = useState<(typeof assignments)[0] | null>(null)
+        const [selectedAssignment, setSelectedAssignment] = useState<TAssignment | null>(null)
+        const [assignments, setAssignments] = useState<TAssignment[]>([])
         const [messages, setMessages] = useState<TMessage[]>([])
         const [newMessage, setNewMessage] = useState<string>('')
         const [userId, setUserId] = useState<string>('')
-        const [currentUserId, setCurrentUserId] = useState<string>('')
+        const [teacherId, setTeacherId] = useState<string>('')
         const [disabled, setDisabled] = useState<boolean>(false)
+        const [grades, setGrades] = useState<{ subject: string; assignment: string; grade: number | undefined; date: string }[]>([])
 
         const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
                 const file = event.target.files?.[0]
                 if (file) {
-                        // Check if file is an image
                         const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/bmp']
                         if (!validImageTypes.includes(file.type)) {
                                 alert('Please select an image file (JPEG, PNG, WebP, GIF, or BMP)')
@@ -83,18 +44,49 @@ export default function StudentTabs() {
                 }
         }
 
+        const handleSubmitAssignment = async (assignmentId: string) => {
+                if (!selectedFile) {
+                        alert('Please select a file first')
+                        return
+                }
+
+                try {
+                        setAssignments((prev) =>
+                                prev.map((assignment: any) =>
+                                        assignment.id === parseInt(assignmentId)
+                                                ? {
+                                                          ...assignment,
+                                                          status: 'submitted',
+                                                          imageUrl: URL.createObjectURL(selectedFile),
+                                                  }
+                                                : assignment
+                                )
+                        )
+
+                        setSelectedFile(null)
+
+                        const fileInput = document.getElementById(`file-${assignmentId}`) as HTMLInputElement
+                        if (fileInput) fileInput.value = ''
+
+                        alert('Assignment submitted successfully!')
+                } catch (error) {
+                        console.error('Error submitting assignment:', error)
+                        alert('Failed to submit assignment. Please try again.')
+                }
+        }
+
         const handleSendMessage = async () => {
                 setDisabled(true)
                 await supabase.from('messages').insert({
                         sender_id: userId,
-                        receiver_id: currentUserId,
+                        receiver_id: teacherId,
                         content: newMessage,
                 })
                 setNewMessage('')
                 setDisabled(false)
         }
 
-        const openSubmissionView = (assignment: (typeof assignments)[0]) => {
+        const openSubmissionView = (assignment: TAssignment) => {
                 if (selectedAssignment && selectedAssignment.id === assignment.id) {
                         setSelectedAssignment(null)
                 } else {
@@ -106,6 +98,8 @@ export default function StudentTabs() {
                 switch (status) {
                         case 'graded':
                                 return 'bg-green-100 text-green-800'
+                        case 'submitted':
+                                return 'bg-blue-100 text-blue-800'
                         case 'pending':
                                 return 'bg-yellow-100 text-yellow-800'
                         case 'missed':
@@ -119,6 +113,8 @@ export default function StudentTabs() {
                 switch (status) {
                         case 'graded':
                                 return <CheckCircle className='w-4 h-4' />
+                        case 'submitted':
+                                return <CheckCircle className='w-4 h-4' />
                         case 'pending':
                                 return <Clock className='w-4 h-4' />
                         case 'missed':
@@ -128,13 +124,34 @@ export default function StudentTabs() {
                 }
         }
 
+        const getStatusText = (status: string) => {
+                switch (status) {
+                        case 'graded':
+                                return 'Graded'
+                        case 'submitted':
+                                return 'Submitted'
+                        case 'pending':
+                                return 'Pending'
+                        case 'missed':
+                                return 'Missed'
+                        default:
+                                return 'Unknown'
+                }
+        }
+
+        const isAssignmentMissed = (assignment: TAssignment) => {
+                const deadline = new Date(assignment.deadline)
+                const now = new Date()
+                return now > deadline && assignment.status === 'pending'
+        }
+
         useEffect(() => {
                 async function fetchUser() {
                         const {
                                 data: { user },
                         } = await supabase.auth.getUser()
                         if (user) {
-                                setCurrentUserId(user.user_metadata.teacherId as string)
+                                setTeacherId(user.user_metadata.teacherId as string)
                                 setUserId(user.id)
                         }
                 }
@@ -173,14 +190,34 @@ export default function StudentTabs() {
                         const { data: messages } = await supabase
                                 .from('messages')
                                 .select('*')
-                                .or(`and(sender_id.eq.${userId},receiver_id.eq.${currentUserId}),and(sender_id.eq.${currentUserId},receiver_id.eq.${userId})`)
+                                .or(`and(sender_id.eq.${userId},receiver_id.eq.${teacherId}),and(sender_id.eq.${teacherId},receiver_id.eq.${userId})`)
                                 .order('created_at', { ascending: true })
                         setMessages(messages as TMessage[])
                 }
 
-                if (currentUserId) fetchMessages()
-        }, [currentUserId, userId])
+                if (teacherId) fetchMessages()
+        }, [teacherId, userId])
+        useEffect(() => {
+                const fetchAssignments = async () => {
+                        const { data: assignments } = await supabase.from('assignments').select('*').eq('created_by', teacherId)
+                        if (assignments) {
+                                const updatedAssignments = assignments.map((assignment: TAssignment) => {
+                                        if (isAssignmentMissed(assignment)) {
+                                                return { ...assignment, status: 'missed' as const }
+                                        }
+                                        return assignment
+                                })
+                                setGrades(
+                                        updatedAssignments
+                                                .filter((assignment) => assignment.teacher_grade)
+                                                .map((assignment) => ({ subject: assignment.subject, grade: assignment.teacher_grade, date: assignment.deadline, assignment: assignment.title }))
+                                )
+                                setAssignments(updatedAssignments as TAssignment[])
+                        }
+                }
 
+                if (teacherId) fetchAssignments()
+        }, [teacherId])
         const messagesEndRef = useRef<HTMLDivElement>(null)
         useEffect(() => {
                 messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -207,24 +244,23 @@ export default function StudentTabs() {
                                                                                                         className={assignment.status === 'graded' ? 'hover:bg-black' : ''}
                                                                                                         variant={assignment.status === 'graded' ? 'default' : 'secondary'}
                                                                                                 >
-                                                                                                        {assignment.status === 'graded' ? (
-                                                                                                                <>
-                                                                                                                        <CheckCircle className='w-3 h-3 mr-1' />
-                                                                                                                        Graded
-                                                                                                                </>
-                                                                                                        ) : (
-                                                                                                                <>
-                                                                                                                        <Clock className='w-3 h-3 mr-1' />
-                                                                                                                        {assignment.status === 'submitted' ? 'Submitted' : 'Pending'}
-                                                                                                                </>
-                                                                                                        )}
+                                                                                                        {getStatusIcon(assignment.status)}
+                                                                                                        <span className='ml-1'>{getStatusText(assignment.status)}</span>
                                                                                                 </Badge>
-                                                                                                {assignment.grade && (
+                                                                                                {assignment.ai_grade && assignment.status !== 'graded' && (
                                                                                                         <Badge
                                                                                                                 variant='outline'
                                                                                                                 className='bg-blue-50 text-blue-700'
                                                                                                         >
-                                                                                                                Grade: {assignment.grade}
+                                                                                                                AI Grade: {assignment.ai_grade}
+                                                                                                        </Badge>
+                                                                                                )}
+                                                                                                {assignment.teacher_grade && assignment.status === 'graded' && (
+                                                                                                        <Badge
+                                                                                                                variant='outline'
+                                                                                                                className='bg-green-50 text-green-700'
+                                                                                                        >
+                                                                                                                Teacher Grade: {assignment.teacher_grade}
                                                                                                         </Badge>
                                                                                                 )}
                                                                                         </div>
@@ -232,9 +268,14 @@ export default function StudentTabs() {
                                                                         </CardHeader>
                                                                         <CardContent>
                                                                                 <div className='flex items-center justify-between flex-wrap gap-4 border-t pt-3 mt-2'>
-                                                                                        <div className='flex items-center text-xs text-gray-400'>
-                                                                                                <Clock className='w-4 h-4 mr-1' />
-                                                                                                Due: {assignment.dueDate}
+                                                                                        <div className='flex items-center text-base font-medium text-gray-700'>
+                                                                                                <Clock className='w-5 h-5 mr-2' />
+                                                                                                Due:{' '}
+                                                                                                {new Date(assignment.deadline).toLocaleDateString('en-UZ', {
+                                                                                                        day: 'numeric',
+                                                                                                        month: 'long',
+                                                                                                        year: 'numeric',
+                                                                                                })}
                                                                                         </div>
                                                                                         <div className='flex items-center space-x-2'>
                                                                                                 {assignment.status === 'pending' && (
@@ -254,10 +295,15 @@ export default function StudentTabs() {
                                                                                                                         <Upload className='w-4 h-4 mr-2' />
                                                                                                                         Upload Image
                                                                                                                 </Button>
-                                                                                                                <Button size='sm'>Submit</Button>
+                                                                                                                <Button
+                                                                                                                        size='sm'
+                                                                                                                        onClick={() => handleSubmitAssignment(assignment.id.toString())}
+                                                                                                                >
+                                                                                                                        Submit
+                                                                                                                </Button>
                                                                                                         </>
                                                                                                 )}
-                                                                                                {assignment.imageUrl && (
+                                                                                                {(assignment.status === 'submitted' || assignment.status === 'graded') && assignment.image_url && (
                                                                                                         <Button
                                                                                                                 variant='outline'
                                                                                                                 size='sm'
@@ -266,6 +312,9 @@ export default function StudentTabs() {
                                                                                                                 <Eye className='w-4 h-4 mr-2' />
                                                                                                                 View Submission
                                                                                                         </Button>
+                                                                                                )}
+                                                                                                {assignment.status === 'missed' && (
+                                                                                                        <div className='text-sm text-red-600 font-medium'>Deadline passed</div>
                                                                                                 )}
                                                                                         </div>
                                                                                 </div>
@@ -283,12 +332,12 @@ export default function StudentTabs() {
                                                                                         <CardDescription>Your submitted work</CardDescription>
                                                                                 </CardHeader>
                                                                                 <CardContent className='space-y-4'>
-                                                                                        {selectedAssignment.imageUrl ? (
+                                                                                        {selectedAssignment.image_url ? (
                                                                                                 <div>
                                                                                                         <h4 className='font-semibold mb-2'>Uploaded Image:</h4>
                                                                                                         <div className='bg-white p-4 rounded-lg border'>
                                                                                                                 <img
-                                                                                                                        src={selectedAssignment.imageUrl}
+                                                                                                                        src={selectedAssignment.image_url}
                                                                                                                         alt='Assignment submission'
                                                                                                                         className='max-w-full h-auto rounded-lg shadow-sm'
                                                                                                                         style={{ maxHeight: '400px' }}
@@ -301,6 +350,28 @@ export default function StudentTabs() {
                                                                                                         <p>No image uploaded for this assignment</p>
                                                                                                 </div>
                                                                                         )}
+
+                                                                                        {selectedAssignment.ai_grade && selectedAssignment.status === 'submitted' && (
+                                                                                                <div className='bg-blue-50 p-4 rounded-lg border border-blue-200'>
+                                                                                                        <h4 className='font-semibold text-blue-800 mb-2'>AI Grade</h4>
+                                                                                                        <p className='text-blue-700'>Grade: {selectedAssignment.ai_grade}/5</p>
+                                                                                                        <p className='text-sm text-blue-600 mt-1'>Waiting for teacher review</p>
+                                                                                                </div>
+                                                                                        )}
+
+                                                                                        {selectedAssignment.teacher_grade && selectedAssignment.status === 'graded' && (
+                                                                                                <div className='bg-green-50 p-4 rounded-lg border border-green-200'>
+                                                                                                        <h4 className='font-semibold text-green-800 mb-2'>Teacher Grade</h4>
+                                                                                                        <p className='text-green-700'>Grade: {selectedAssignment.teacher_grade}/5</p>
+                                                                                                        {selectedAssignment.feedback && (
+                                                                                                                <div className='mt-2'>
+                                                                                                                        <p className='text-sm font-medium text-green-700'>Feedback:</p>
+                                                                                                                        <p className='text-green-600 mt-1'>{selectedAssignment.feedback}</p>
+                                                                                                                </div>
+                                                                                                        )}
+                                                                                                </div>
+                                                                                        )}
+
                                                                                         <div className='flex items-center space-x-2'>
                                                                                                 <Button
                                                                                                         variant='outline'
@@ -406,7 +477,13 @@ export default function StudentTabs() {
                                                                         </div>
                                                                         <div className='text-right self-end'>
                                                                                 <div className='text-2xl font-bold text-blue-600'>{grade.grade}</div>
-                                                                                <p className='text-sm text-gray-500'>{grade.date}</p>
+                                                                                <p className='text-sm text-gray-500'>
+                                                                                        {new Date(grade.date).toLocaleDateString('en-UZ', {
+                                                                                                day: 'numeric',
+                                                                                                month: 'long',
+                                                                                                year: 'numeric',
+                                                                                        })}
+                                                                                </p>
                                                                         </div>
                                                                 </div>
                                                         ))}

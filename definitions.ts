@@ -43,7 +43,7 @@ export type TAssignment = {
         ai_grade?: number
         teacher_grade?: number
         feedback?: string
-        status: 'pending' | 'submitted' | 'graded'
+        status: 'pending' | 'submitted' | 'graded' | 'missed'
         created_at: string
 }
 
