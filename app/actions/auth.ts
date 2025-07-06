@@ -34,7 +34,6 @@ export async function signin(formData: FormData) {
 
         revalidatePath('/', 'layout')
 
-        // Return success with redirect path instead of redirecting directly
         if (user?.user_metadata.role == 'student') {
                 return { success: true, redirectTo: '/dashboard/student' }
         } else if (user?.user_metadata.role == 'teacher') {

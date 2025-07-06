@@ -112,16 +112,6 @@ export default function ConfirmEmailPage() {
                                                                 </div>
 
                                                                 <div className='flex flex-col space-y-3'>
-                                                                        {/* ! Resending email should be implemented after MVP presentation in real production app */}
-                                                                        {/* <Button
-                                                                                onClick={handleResendEmail}
-                                                                                variant='outline'
-                                                                                className='w-full'
-                                                                        >
-                                                                                <RefreshCw className='w-4 h-4 mr-2' />
-                                                                                Resend Verification Email
-                                                                        </Button> */}
-
                                                                         <Button
                                                                                 asChild
                                                                                 className='w-full'
@@ -135,20 +125,6 @@ export default function ConfirmEmailPage() {
                                                                                 </Link>
                                                                         </Button>
                                                                 </div>
-
-                                                                {/* ! Resending email should be implemented after MVP presentation in real production app */}
-                                                                {/* <div className='text-center pt-4 border-t border-gray-200'>
-                                                                        <p className='text-sm text-gray-500'>
-                                                                                Didn't receive the email?{' '}
-
-                                                                                <button
-                                                                                        onClick={handleResendEmail}
-                                                                                        className='text-blue-600 hover:text-blue-800 font-medium hover:underline transition-colors'
-                                                                                >
-                                                                                        Click here to resend
-                                                                                </button>
-                                                                        </p>
-                                                                </div> */}
                                                         </CardContent>
                                                 </Card>
                                         </motion.div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { ChangeEvent, useEffect, useRef, useState } from 'react'
 import { Clock, Upload, Send, AlertCircle, CheckCircle, XCircle, Eye, Image as ImageIcon } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -15,7 +15,8 @@ import Image from 'next/image'
 
 export default function StudentTabs() {
         const supabase = createClient()
-        const [selectedFile, setSelectedFile] = useState<File | null>(null)
+        const [selectedFiles, setSelectedFiles] = useState<{ [key: string]: File }>({})
+        const [previewUrls, setPreviewUrls] = useState<{ [key: string]: string }>({})
         const [selectedAssignment, setSelectedAssignment] = useState<TAssignment | null>(null)
         const [assignments, setAssignments] = useState<TAssignment[]>([])
         const [messages, setMessages] = useState<TMessage[]>([])
@@ -25,7 +26,7 @@ export default function StudentTabs() {
         const [disabled, setDisabled] = useState<boolean>(false)
         const [grades, setGrades] = useState<{ subject: string; assignment: string; grade: number | undefined; date: string }[]>([])
 
-        const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const handleFileChange = (event: ChangeEvent<HTMLInputElement>, assignmentId: string) => {
                 const file = event.target.files?.[0]
                 if (file) {
                         const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/bmp']
@@ -34,11 +35,23 @@ export default function StudentTabs() {
                                 event.target.value = ''
                                 return
                         }
-                        setSelectedFile(file)
+
+                        const previewUrl = URL.createObjectURL(file)
+
+                        setSelectedFiles((prev) => ({
+                                ...prev,
+                                [assignmentId]: file,
+                        }))
+
+                        setPreviewUrls((prev) => ({
+                                ...prev,
+                                [assignmentId]: previewUrl,
+                        }))
                 }
         }
 
         const handleSubmitAssignment = async (assignmentId: string) => {
+                const selectedFile = selectedFiles[assignmentId]
                 if (!selectedFile) {
                         alert('Please select a file first')
                         return
@@ -57,7 +70,20 @@ export default function StudentTabs() {
                                 )
                         )
 
-                        setSelectedFile(null)
+                        setSelectedFiles((prev) => {
+                                const newFiles = { ...prev }
+                                delete newFiles[assignmentId]
+                                return newFiles
+                        })
+
+                        setPreviewUrls((prev) => {
+                                const newUrls = { ...prev }
+                                if (newUrls[assignmentId]) {
+                                        URL.revokeObjectURL(newUrls[assignmentId])
+                                        delete newUrls[assignmentId]
+                                }
+                                return newUrls
+                        })
 
                         const fileInput = document.getElementById(`file-${assignmentId}`) as HTMLInputElement
                         if (fileInput) fileInput.value = ''
@@ -80,27 +106,12 @@ export default function StudentTabs() {
         }
 
         const openSubmissionView = (assignment: TAssignment) => {
-                if (selectedAssignment && selectedAssignment.id === assignment.id) {
-                        setSelectedAssignment(null)
+                if (assignment.status === 'graded') {
+                        setSelectedAssignment(assignment)
                 } else {
                         setSelectedAssignment(assignment)
                 }
         }
-
-        // const getStatusColor = (status: string) => {
-        //         switch (status) {
-        //                 case 'graded':
-        //                         return 'bg-green-100 text-green-800'
-        //                 case 'submitted':
-        //                         return 'bg-blue-100 text-blue-800'
-        //                 case 'pending':
-        //                         return 'bg-yellow-100 text-yellow-800'
-        //                 case 'missed':
-        //                         return 'bg-red-100 text-red-800'
-        //                 default:
-        //                         return 'bg-gray-100 text-gray-800'
-        //         }
-        // }
 
         const getStatusIcon = (status: string) => {
                 switch (status) {
@@ -275,7 +286,7 @@ export default function StudentTabs() {
                                                                                                         <>
                                                                                                                 <Input
                                                                                                                         type='file'
-                                                                                                                        onChange={handleFileChange}
+                                                                                                                        onChange={(e) => handleFileChange(e, assignment.id.toString())}
                                                                                                                         className='hidden'
                                                                                                                         id={`file-${assignment.id}`}
                                                                                                                         accept='image/*'
@@ -311,9 +322,25 @@ export default function StudentTabs() {
                                                                                                 )}
                                                                                         </div>
                                                                                 </div>
-                                                                                {selectedFile && (
+                                                                                {selectedFiles[assignment.id] && (
                                                                                         <div className='mt-4 p-3 bg-gray-50 rounded-lg'>
-                                                                                                <p className='text-sm text-gray-600'>Selected file: {selectedFile.name}</p>
+                                                                                                <p className='text-sm text-gray-600 mb-2'>Selected file: {selectedFiles[assignment.id].name}</p>
+                                                                                                <div className='bg-white p-2 rounded border'>
+                                                                                                        <Image
+                                                                                                                src={previewUrls[assignment.id]}
+                                                                                                                alt='Preview'
+                                                                                                                className='rounded max-w-full'
+                                                                                                                style={{
+                                                                                                                        maxWidth: '300px',
+                                                                                                                        maxHeight: '200px',
+                                                                                                                        width: 'auto',
+                                                                                                                        height: 'auto',
+                                                                                                                }}
+                                                                                                                width={0}
+                                                                                                                height={0}
+                                                                                                                unoptimized
+                                                                                                        />
+                                                                                                </div>
                                                                                         </div>
                                                                                 )}
                                                                         </CardContent>
@@ -396,7 +423,7 @@ export default function StudentTabs() {
                                                 <CardDescription className='text-xs'>Get help and feedback from your instructors</CardDescription>
                                         </CardHeader>
                                         <CardContent className='flex flex-col h-full'>
-                                                <ScrollArea className='flex-1 mb-2 max-[400px]:mb-3 h-40 max-[332px]:mb-4'>
+                                                <ScrollArea className='flex-1 mb-5 max-[400px]:mb-3 h-40 max-[332px]:mb-4'>
                                                         <div className='space-y-4'>
                                                                 {messages.map(({ id, sender_id, content, created_at }) => (
                                                                         <div

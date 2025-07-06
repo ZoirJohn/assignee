@@ -234,34 +234,6 @@ export default function TeacherProfile() {
                                         </CardContent>
                                 </Card>
 
-                                {/* Closed for further development */}
-                                {/* <Card>
-                                                <CardHeader>
-                                                        <CardTitle>Teaching Information</CardTitle>
-                                                        <CardDescription>Your teaching credentials and subjects</CardDescription>
-                                                </CardHeader>
-                                                <CardContent className='space-y-4'>
-                                                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                                                                <div>
-                                                                        <Label className='text-sm font-medium text-gray-500'>Department</Label>
-                                                                        <p className='text-sm font-semibold text-gray-900'>Science</p>
-                                                                </div>
-                                                                <div>
-                                                                        <Label className='text-sm font-medium text-gray-500'>Subjects</Label>
-                                                                        <p className='text-sm font-semibold text-gray-900'>Environmental Science, Chemistry</p>
-                                                                </div>
-                                                                <div>
-                                                                        <Label className='text-sm font-medium text-gray-500'>Students</Label>
-                                                                        <p className='text-sm font-semibold text-gray-900'>45 Active</p>
-                                                                </div>
-                                                                <div>
-                                                                        <Label className='text-sm font-medium text-gray-500'>Assignments</Label>
-                                                                        <p className='text-sm font-semibold text-gray-900'>12 Pending Review</p>
-                                                                </div>
-                                                        </div>
-                                                </CardContent>
-                                        </Card> */}
-
                                 <div className='flex justify-end'>
                                         <Button className='flex items-center'>
                                                 <Save className='w-4 h-4 mr-2' />
