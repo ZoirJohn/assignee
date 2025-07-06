@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 
 export async function signin(formData: FormData) {
         const supabase = await createClient()
@@ -33,13 +34,12 @@ export async function signin(formData: FormData) {
         }
 
         revalidatePath('/', 'layout')
-
         if (user?.user_metadata.role == 'student') {
-                return { success: true, redirectTo: '/dashboard/student' }
+                redirect('/dashboard/student')
         } else if (user?.user_metadata.role == 'teacher') {
-                return { success: true, redirectTo: '/dashboard/teacher' }
+                redirect('/dashboard/teacher')
         } else {
-                return { success: true, redirectTo: '/' }
+                redirect('/')
         }
 }
 
@@ -62,7 +62,7 @@ export async function signup(formData: FormData) {
         }
 
         revalidatePath('/', 'layout')
-        return { success: true, redirectTo: '/confirm' }
+        redirect('/confirm')
 }
 
 export async function signout() {
@@ -74,6 +74,6 @@ export async function signout() {
                 return { error: 'Error has occurred: ' + error.message }
         }
 
-        revalidatePath('dashboard')
-        return { success: true, redirectTo: '/' }
+        revalidatePath('/', 'layout')
+        redirect('/')
 }

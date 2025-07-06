@@ -22,7 +22,6 @@ const signInSchema = z.object({
 export default function SignInPage() {
         const [isLoading, setIsLoading] = useState(false)
         const [authError, setAuthError] = useState<string | null>(null)
-        const router = useRouter()
 
         const form = useForm<z.infer<typeof signInSchema>>({
                 resolver: zodResolver(signInSchema),
@@ -42,14 +41,9 @@ export default function SignInPage() {
                         formData.append('password', data.password)
 
                         const result = await signin(formData)
-
                         if (result?.error) {
                                 setAuthError(result.error)
-                        } else if (result?.success && result?.redirectTo) {
-                                router.push(result.redirectTo)
                         }
-                } catch {
-                        setAuthError('An unexpected error occurred. Please try again.')
                 } finally {
                         setIsLoading(false)
                 }

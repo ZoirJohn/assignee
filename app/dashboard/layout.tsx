@@ -11,7 +11,7 @@ export default async function DashboardLayoutMain({ children }: { children: Reac
         const role = user?.user_metadata.role
         return (
                 <DashboardLayoutSidebar
-                        userName={userName}
+                        userName={userName || ''}
                         userType={role}
                 >
                         {children}

@@ -53,11 +53,6 @@ export default function StudentProfile() {
                 }
         }
 
-        const handleIdCopy = () => {
-                navigator.clipboard.writeText(profile.id)
-                setCopied(true)
-        }
-
         useEffect(() => {
                 const getUser = async () => {
                         return (await supabase.auth.getUser()).data.user
@@ -201,7 +196,6 @@ export default function StudentProfile() {
                                                                         className='text-sm font-semibold text-gray-900'
                                                                         value={profile.id}
                                                                         readOnly
-                                                                        onClick={handleIdCopy}
                                                                 />
                                                                 {copied && (
                                                                         <div className='absolute top-1/2 -right-20 mt-1 mr-1 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded shadow'>

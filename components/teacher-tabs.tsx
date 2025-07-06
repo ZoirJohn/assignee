@@ -132,7 +132,6 @@ export function TeacherTabs() {
                         clearTimeout(scrollTimeout)
                 }
         }, [messages])
-        console.log(selectedAssignment)
         return (
                 <>
                         <TabsContent
@@ -178,9 +177,6 @@ export function TeacherTabs() {
                                                                                                         </Badge>
                                                                                                 )}
                                                                                         </div>
-                                                                                        <div className='flex justify-end w-full mt-1'>
-                                                                                                <span className='text-xs text-gray-400 italic'>by Student: {assignment.created_by}</span>
-                                                                                        </div>
                                                                                 </div>
                                                                         </CardHeader>
                                                                         <CardContent>
@@ -188,17 +184,12 @@ export function TeacherTabs() {
                                                                                         <div className='flex flex-col gap-2'>
                                                                                                 <div className='flex items-center text-base font-medium text-gray-700'>
                                                                                                         <Clock className='w-5 h-5 mr-2' />
-                                                                                                        Due: {new Date(assignment.deadline).toLocaleDateString('en-UZ')}
-                                                                                                </div>
-                                                                                                <div className='flex items-center text-xs text-gray-400'>
-                                                                                                        <Clock className='w-4 h-4 mr-1' />
-                                                                                                        {assignment.submitted_at
-                                                                                                                ? `Submitted: ${new Date(assignment.submitted_at).toLocaleDateString()}`
-                                                                                                                : `Created: ${new Date(assignment.created_at).toLocaleDateString('en-UZ', {
-                                                                                                                          day: 'numeric',
-                                                                                                                          month: 'long',
-                                                                                                                          year: 'numeric',
-                                                                                                                  })}`}
+                                                                                                        Due:{' '}
+                                                                                                        {new Date(assignment.deadline).toLocaleDateString('en-UZ', {
+                                                                                                                day: 'numeric',
+                                                                                                                month: 'long',
+                                                                                                                year: 'numeric',
+                                                                                                        })}
                                                                                                 </div>
                                                                                         </div>
                                                                                         <div className='flex items-center space-x-2'>

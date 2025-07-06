@@ -65,7 +65,7 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                                 </div>
                         </div>
 
-                        <nav className='p-4'>
+                        <nav className={cn({ 'flex-1': userType == 'student' }, 'p-4')}>
                                 <ul className='space-y-2'>
                                         {links.map((link) => (
                                                 <li key={link.label}>
