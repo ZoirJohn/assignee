@@ -1,18 +1,16 @@
 import { extractTextFromImage } from '@/lib/azure/azureOcr'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/client'
 
-export async function submitAssignment({ file, assignmentId, studentId }: { file: File; assignmentId: string; studentId: string }) {
-        const supabase = await createClient()
+export async function submitAssignment({ file, assignmentId, teacherId }: { file: File; assignmentId: string; teacherId: string }) {
+        const supabase = createClient()
 
-        const filePath = `${studentId}/${Date.now()}-${file.name}`
+        const filePath = `${teacherId}/${Date.now()}-${file.name}`
 
-        const uploadRes = await supabase.storage.from('submissions').upload(filePath, file)
+        const uploadRes = await supabase.storage.from('assignments').upload(filePath, file)
         if (uploadRes.error) throw uploadRes.error
 
-        const publicUrl = supabase.storage.from('submissions').getPublicUrl(filePath).data.publicUrl
-
+        const publicUrl = supabase.storage.from('assignments').getPublicUrl(filePath).data.publicUrl
         const extractedText = await extractTextFromImage(publicUrl)
-
         await supabase
                 .from('assignments')
                 .update({
@@ -22,5 +20,5 @@ export async function submitAssignment({ file, assignmentId, studentId }: { file
                         status: 'submitted',
                 })
                 .eq('id', assignmentId)
-                .eq('created_by', studentId)
+                .eq('created_by', teacherId)
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { ChangeEvent, useEffect, useRef, useState } from 'react'
+import { ChangeEvent, Fragment, useEffect, useRef, useState } from 'react'
 import { Clock, Upload, Send, AlertCircle, CheckCircle, XCircle, Eye, Image as ImageIcon } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -12,6 +12,7 @@ import { TabsContent } from '@/components/ui/tabs'
 import { createClient } from '@/lib/supabase/client'
 import { TAssignment, TMessage } from '@/definitions'
 import Image from 'next/image'
+import { submitAssignment } from '@/lib/azure/submitAssignment'
 
 export default function StudentTabs() {
         const supabase = createClient()
@@ -58,24 +59,21 @@ export default function StudentTabs() {
                 }
 
                 try {
+                        await submitAssignment({
+                                file: selectedFile,
+                                assignmentId,
+                                teacherId,
+                        })
                         setAssignments((prev) =>
                                 prev.map((assignment: TAssignment) =>
-                                        assignment.id === assignmentId
-                                                ? {
-                                                          ...assignment,
-                                                          status: 'submitted',
-                                                          imageUrl: URL.createObjectURL(selectedFile),
-                                                  }
-                                                : assignment
+                                        assignment.id === assignmentId ? { ...assignment, status: 'submitted', image_url: URL.createObjectURL(selectedFile) } : assignment
                                 )
                         )
-
                         setSelectedFiles((prev) => {
                                 const newFiles = { ...prev }
                                 delete newFiles[assignmentId]
                                 return newFiles
                         })
-
                         setPreviewUrls((prev) => {
                                 const newUrls = { ...prev }
                                 if (newUrls[assignmentId]) {
@@ -84,14 +82,9 @@ export default function StudentTabs() {
                                 }
                                 return newUrls
                         })
-
                         const fileInput = document.getElementById(`file-${assignmentId}`) as HTMLInputElement
                         if (fileInput) fileInput.value = ''
-
-                        alert('Assignment submitted successfully!')
-                } catch {
-                        alert('Failed to submit assignment. Please try again.')
-                }
+                } catch (error) {}
         }
 
         const handleSendMessage = async () => {
@@ -236,7 +229,7 @@ export default function StudentTabs() {
                                 <div className='grid gap-3'>
                                         {assignments.length ? (
                                                 assignments.map((assignment) => (
-                                                        <div key={assignment.id}>
+                                                        <Fragment key={assignment.id}>
                                                                 <Card className='gap-0'>
                                                                         <CardHeader className='!pb-0 mb-0'>
                                                                                 <div className='flex flex-col gap-1'>
@@ -307,7 +300,17 @@ export default function StudentTabs() {
                                                                                                                 </Button>
                                                                                                         </>
                                                                                                 )}
-                                                                                                {(assignment.status === 'submitted' || assignment.status === 'graded') && assignment.image_url && (
+                                                                                                {assignment.status === 'submitted' && (
+                                                                                                        <Button
+                                                                                                                variant='outline'
+                                                                                                                size='sm'
+                                                                                                                onClick={() => openSubmissionView(assignment)}
+                                                                                                        >
+                                                                                                                <Eye className='w-4 h-4 mr-2' />
+                                                                                                                Review
+                                                                                                        </Button>
+                                                                                                )}
+                                                                                                {assignment.status === 'graded' && assignment.image_url && (
                                                                                                         <Button
                                                                                                                 variant='outline'
                                                                                                                 size='sm'
@@ -325,19 +328,25 @@ export default function StudentTabs() {
                                                                                 {selectedFiles[assignment.id] && (
                                                                                         <div className='mt-4 p-3 bg-gray-50 rounded-lg'>
                                                                                                 <p className='text-sm text-gray-600 mb-2'>Selected file: {selectedFiles[assignment.id].name}</p>
-                                                                                                <div className='bg-white p-2 rounded border'>
+                                                                                                <div
+                                                                                                        className='p-4 rounded'
+                                                                                                        style={{
+                                                                                                                width: '100%',
+                                                                                                                maxWidth: '800px',
+                                                                                                                height: '400px',
+                                                                                                                display: 'flex',
+                                                                                                                alignItems: 'center',
+                                                                                                                justifyContent: 'center',
+                                                                                                                background: 'none',
+                                                                                                        }}
+                                                                                                >
                                                                                                         <Image
                                                                                                                 src={previewUrls[assignment.id]}
                                                                                                                 alt='Preview'
-                                                                                                                className='rounded max-w-full'
-                                                                                                                style={{
-                                                                                                                        maxWidth: '300px',
-                                                                                                                        maxHeight: '200px',
-                                                                                                                        width: 'auto',
-                                                                                                                        height: 'auto',
-                                                                                                                }}
-                                                                                                                width={0}
-                                                                                                                height={0}
+                                                                                                                className='rounded shadow'
+                                                                                                                style={{ width: '100%', height: '100%', objectFit: 'contain', background: 'none' }}
+                                                                                                                width={800}
+                                                                                                                height={400}
                                                                                                                 unoptimized
                                                                                                         />
                                                                                                 </div>
@@ -355,13 +364,29 @@ export default function StudentTabs() {
                                                                                         {selectedAssignment.image_url ? (
                                                                                                 <div>
                                                                                                         <h4 className='font-semibold mb-2'>Uploaded Image:</h4>
-                                                                                                        <div className='bg-white p-4 rounded-lg border'>
+                                                                                                        <div
+                                                                                                                className='p-4 rounded-lg'
+                                                                                                                style={{
+                                                                                                                        width: '100%',
+                                                                                                                        maxWidth: '800px',
+                                                                                                                        height: '400px',
+                                                                                                                        display: 'flex',
+                                                                                                                        alignItems: 'center',
+                                                                                                                        justifyContent: 'center',
+                                                                                                                        background: 'none',
+                                                                                                                }}
+                                                                                                        >
                                                                                                                 <Image
                                                                                                                         src={selectedAssignment.image_url}
                                                                                                                         alt='Assignment submission'
-                                                                                                                        className='max-w-full h-auto rounded-lg shadow-sm'
-                                                                                                                        style={{ maxHeight: '400px' }}
-                                                                                                                        width={400}
+                                                                                                                        className='rounded-lg shadow-sm'
+                                                                                                                        style={{
+                                                                                                                                width: '100%',
+                                                                                                                                height: '100%',
+                                                                                                                                objectFit: 'contain',
+                                                                                                                                background: 'none',
+                                                                                                                        }}
+                                                                                                                        width={800}
                                                                                                                         height={400}
                                                                                                                 />
                                                                                                         </div>
@@ -405,7 +430,7 @@ export default function StudentTabs() {
                                                                                 </CardContent>
                                                                         </Card>
                                                                 )}
-                                                        </div>
+                                                        </Fragment>
                                                 ))
                                         ) : (
                                                 <h1 className='text-gray-600'>No assignments found</h1>
