@@ -84,7 +84,9 @@ export default function StudentTabs() {
                         })
                         const fileInput = document.getElementById(`file-${assignmentId}`) as HTMLInputElement
                         if (fileInput) fileInput.value = ''
-                } catch (error) {}
+                }catch{
+                        
+                }
         }
 
         const handleSendMessage = async () => {

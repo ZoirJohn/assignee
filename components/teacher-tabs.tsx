@@ -217,14 +217,12 @@ export function TeacherTabs() {
                                                                         <Card className='border-2 border-blue-200 bg-blue-50/30'>
                                                                                 <CardHeader>
                                                                                         <CardTitle>Review: {selectedAssignment.title}</CardTitle>
-                                                                                        <CardDescription>Student ID: {selectedAssignment.created_by}</CardDescription>
                                                                                 </CardHeader>
                                                                                 <CardContent className='space-y-4'>
                                                                                         <div>
                                                                                                 <h4 className='font-semibold mb-2'>Extracted Text:</h4>
-                                                                                                {selectedAssignment.extracted_text}
                                                                                                 <div className='bg-gray-50 p-4 rounded-lg max-h-32 overflow-y-auto'>
-                                                                                                        <p className='text-sm'>{selectedAssignment.extracted_text}</p>
+                                                                                                        <p className='text-lg'>{selectedAssignment.extracted_text}</p>
                                                                                                 </div>
                                                                                         </div>
                                                                                         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
@@ -270,7 +268,7 @@ export function TeacherTabs() {
                                                                                                                                 })
                                                                                                                         }
                                                                                                                 }}
-                                                                                                                disabled={selectedAssignment.teacher_grade == undefined}
+                                                                                                                disabled={selectedAssignment.ai_grade == undefined}
                                                                                                         >
                                                                                                                 <SelectTrigger
                                                                                                                         id='feedback-level'
@@ -300,7 +298,7 @@ export function TeacherTabs() {
                                                                                                         id='additional-comments'
                                                                                                         placeholder='Add specific feedback for the student...'
                                                                                                         className='min-h-20'
-                                                                                                        readOnly={selectedAssignment.teacher_grade == undefined}
+                                                                                                        readOnly={selectedAssignment.ai_grade == undefined}
                                                                                                         value={additionalComments}
                                                                                                         onChange={(e) => setAdditionalComments(e.target.value)}
                                                                                                 />
