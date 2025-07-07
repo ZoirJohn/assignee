@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import Link from 'next/link'
-import { redirect, useRouter } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import { Mail, Lock, User, Hash } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -35,7 +35,6 @@ export default function SignUpPage() {
         const [userType, setUserType] = useState<'student' | 'teacher'>('student')
         const [isLoading, setIsLoading] = useState(false)
         const [authError, setAuthError] = useState<string | null>(null)
-        const router = useRouter()
 
         const studentForm = useForm<z.infer<typeof studentSchema>>({
                 resolver: zodResolver(studentSchema),
