@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { redirect, useRouter } from 'next/navigation'
 import { Mail, Lock, User, Hash } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -74,8 +74,8 @@ export default function SignUpPage() {
 
                         if (result?.error) {
                                 setAuthError(result.error)
-                        } else if (result?.success && result?.redirectTo) {
-                                router.push(result.redirectTo)
+                        } else {
+                                redirect('/dashboard/student')
                         }
                 } catch {
                         setAuthError('An unexpected error occurred. Please try again.')
@@ -97,13 +97,11 @@ export default function SignUpPage() {
 
                         const result = await signup(formData)
 
-                        if (result?.error) {
+                        if (result.error) {
                                 setAuthError(result.error)
-                        } else if (result?.success && result?.redirectTo) {
-                                router.push(result.redirectTo)
+                        } else {
+                                redirect('/dashboard/teacher')
                         }
-                } catch {
-                        setAuthError('An unexpected error occurred. Please try again.')
                 } finally {
                         setIsLoading(false)
                 }
