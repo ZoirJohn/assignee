@@ -1,5 +1,5 @@
 'use client'
-import { Fragment, useEffect,  useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { Clock, Send, Eye, CheckCircle, XCircle } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -37,7 +37,12 @@ export function TeacherTabs() {
                         return
                 }
                 try {
-                        console.log('userId:', userId, typeof userId)
+                        const { data } = await supabase
+                                .from('assignments')
+                                .update({ teacher_grade: gradeOverride || selectedAssignment.ai_grade })
+                                .eq('id', selectedAssignment.id)
+                                .select()
+                        console.log(data)
                 } catch {
                 } finally {
                         setGradeOverride(undefined)
