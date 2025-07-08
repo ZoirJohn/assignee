@@ -61,7 +61,7 @@ export async function gradeAnswerWithGroq(studentAnswer: string, question: strin
         try {
                 const result = JSON.parse(content)
                 return result
-        } catch (err) {
+        } catch {
                 throw new Error('Invalid JSON returned from Groq: ' + content)
         }
 }
