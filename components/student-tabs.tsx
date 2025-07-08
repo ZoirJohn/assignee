@@ -26,6 +26,7 @@ export default function StudentTabs() {
         const [teacherId, setTeacherId] = useState<string>('')
         const [disabled, setDisabled] = useState<boolean>(false)
         const [grades, setGrades] = useState<{ subject: string; assignment: string; grade: number | undefined; date: string }[]>([])
+        const [submittingAssignmentId, setSubmittingAssignmentId] = useState<string | null>(null)
 
         const handleFileChange = (event: ChangeEvent<HTMLInputElement>, assignmentId: string) => {
                 const file = event.target.files?.[0]
@@ -63,6 +64,9 @@ export default function StudentTabs() {
                                 file: selectedFile,
                                 assignmentId,
                                 teacherId,
+                                assignmentName: selectedAssignment?.title,
+                                question: selectedAssignment?.description,
+                                subject: selectedAssignment?.subject,
                         })
                         setAssignments((prev) =>
                                 prev.map((assignment: TAssignment) =>
@@ -84,9 +88,7 @@ export default function StudentTabs() {
                         })
                         const fileInput = document.getElementById(`file-${assignmentId}`) as HTMLInputElement
                         if (fileInput) fileInput.value = ''
-                }catch{
-                        
-                }
+                } catch {}
         }
 
         const handleSendMessage = async () => {
@@ -240,8 +242,18 @@ export default function StudentTabs() {
                                                                                         <div className='text-lg font-medium text-gray-800 mb-1'>{assignment.description}</div>
                                                                                         <div className='flex items-center flex-wrap gap-1 mt-1'>
                                                                                                 <Badge
-                                                                                                        className={assignment.status === 'graded' ? 'hover:bg-black' : ''}
-                                                                                                        variant={assignment.status === 'graded' ? 'default' : 'secondary'}
+                                                                                                        className={
+                                                                                                                assignment.status === 'graded'
+                                                                                                                        ? 'bg-green-100 text-green-800'
+                                                                                                                        : assignment.status === 'submitted'
+                                                                                                                        ? 'bg-blue-100 text-blue-800'
+                                                                                                                        : assignment.status === 'pending'
+                                                                                                                        ? 'bg-yellow-100 text-yellow-800'
+                                                                                                                        : assignment.status === 'missed'
+                                                                                                                        ? 'bg-red-100 text-red-800'
+                                                                                                                        : ''
+                                                                                                        }
+                                                                                                        variant='secondary'
                                                                                                 >
                                                                                                         {getStatusIcon(assignment.status)}
                                                                                                         <span className='ml-1'>{getStatusText(assignment.status)}</span>
@@ -251,7 +263,9 @@ export default function StudentTabs() {
                                                                                                                 variant='outline'
                                                                                                                 className='bg-blue-50 text-blue-700'
                                                                                                         >
-                                                                                                                AI Grade: {assignment.ai_grade}
+                                                                                                                {assignment.ai_grade !== undefined && assignment.ai_grade !== null
+                                                                                                                        ? `AI Score: ${assignment.ai_grade}`
+                                                                                                                        : 'AI Score: Not scored'}
                                                                                                         </Badge>
                                                                                                 )}
                                                                                                 {assignment.teacher_grade && assignment.status === 'graded' && (
@@ -285,20 +299,53 @@ export default function StudentTabs() {
                                                                                                                         className='hidden'
                                                                                                                         id={`file-${assignment.id}`}
                                                                                                                         accept='image/*'
+                                                                                                                        disabled={submittingAssignmentId === assignment.id.toString()}
                                                                                                                 />
                                                                                                                 <Button
                                                                                                                         variant='outline'
                                                                                                                         size='sm'
                                                                                                                         onClick={() => document.getElementById(`file-${assignment.id}`)?.click()}
+                                                                                                                        disabled={submittingAssignmentId === assignment.id.toString()}
                                                                                                                 >
                                                                                                                         <Upload className='w-4 h-4 mr-2' />
                                                                                                                         Upload Image
                                                                                                                 </Button>
                                                                                                                 <Button
                                                                                                                         size='sm'
-                                                                                                                        onClick={() => handleSubmitAssignment(assignment.id.toString())}
+                                                                                                                        onClick={async () => {
+                                                                                                                                setSubmittingAssignmentId(assignment.id.toString())
+                                                                                                                                await handleSubmitAssignment(assignment.id.toString())
+                                                                                                                                setSubmittingAssignmentId(null)
+                                                                                                                        }}
+                                                                                                                        disabled={submittingAssignmentId === assignment.id.toString()}
                                                                                                                 >
-                                                                                                                        Submit
+                                                                                                                        {submittingAssignmentId === assignment.id.toString() ? (
+                                                                                                                                <span className='flex items-center'>
+                                                                                                                                        <svg
+                                                                                                                                                className='animate-spin h-4 w-4 mr-2 text-gray-500'
+                                                                                                                                                xmlns='http://www.w3.org/2000/svg'
+                                                                                                                                                fill='none'
+                                                                                                                                                viewBox='0 0 24 24'
+                                                                                                                                        >
+                                                                                                                                                <circle
+                                                                                                                                                        className='opacity-25'
+                                                                                                                                                        cx='12'
+                                                                                                                                                        cy='12'
+                                                                                                                                                        r='10'
+                                                                                                                                                        stroke='currentColor'
+                                                                                                                                                        strokeWidth='4'
+                                                                                                                                                ></circle>
+                                                                                                                                                <path
+                                                                                                                                                        className='opacity-75'
+                                                                                                                                                        fill='currentColor'
+                                                                                                                                                        d='M4 12a8 8 0 018-8v8z'
+                                                                                                                                                ></path>
+                                                                                                                                        </svg>
+                                                                                                                                        Submitting...
+                                                                                                                                </span>
+                                                                                                                        ) : (
+                                                                                                                                'Submit'
+                                                                                                                        )}
                                                                                                                 </Button>
                                                                                                         </>
                                                                                                 )}

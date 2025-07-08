@@ -117,7 +117,7 @@ export default function LandingPage() {
                                 />
                         </Link>
                         <div className='min-h-screen bg-gray-50'>
-                                <header className='sticky top-0 z-10 bg-dark-background backdrop-blur-xs border-b border-gray-100 py-4'>
+                                <header className='sticky top-0 z-10 bg-dark-background backdrop-blur-3xl border-b border-gray-100 py-4'>
                                         <div className='container flex items-center justify-between'>
                                                 <Link
                                                         href='/'
