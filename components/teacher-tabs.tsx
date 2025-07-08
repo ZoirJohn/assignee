@@ -1,6 +1,6 @@
 'use client'
 import { Fragment, useEffect, useRef, useState } from 'react'
-import { Clock, Send, Eye, CheckCircle, XCircle } from 'lucide-react'
+import { Clock, Send, Eye, CheckCircle, XCircle, Pen } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -39,7 +39,7 @@ export function TeacherTabs() {
                 try {
                         const { data } = await supabase
                                 .from('assignments')
-                                .update({ teacher_grade: gradeOverride || selectedAssignment.ai_grade })
+                                .update({ teacher_grade: gradeOverride || selectedAssignment.ai_grade, status: 'graded' })
                                 .eq('id', selectedAssignment.id)
                                 .select()
                         console.log(data)
@@ -199,13 +199,15 @@ export function TeacherTabs() {
                                                                                                         variant='outline'
                                                                                                         className='bg-blue-50 text-blue-700 text-sm rounded-full'
                                                                                                 >
-                                                                                                        {assignment.ai_grade !== undefined && assignment.ai_grade !== null
+                                                                                                        {assignment.ai_grade !== undefined && assignment.teacher_grade !== null
+                                                                                                                ? `Score: ${assignment.teacher_grade}`
+                                                                                                                : assignment.ai_grade
                                                                                                                 ? `AI Score: ${assignment.ai_grade}`
                                                                                                                 : 'AI Score: Not scored'}
                                                                                                 </Badge>
                                                                                                 {assignment.teacher_grade && (
                                                                                                         <Badge className='bg-green-100 text-green-800 hover:bg-green-100'>
-                                                                                                                Graded: {new Date(assignment.teacher_grade).toLocaleDateString()}
+                                                                                                                Graded: {new Date().toLocaleDateString([], { day: 'numeric', month: 'long' })}
                                                                                                         </Badge>
                                                                                                 )}
                                                                                         </div>
@@ -230,8 +232,14 @@ export function TeacherTabs() {
                                                                                                         size='sm'
                                                                                                         onClick={() => openSubmissionReview(assignment)}
                                                                                                 >
-                                                                                                        <Eye className='w-4 h-4 mr-2' />
-                                                                                                        Review
+                                                                                                        {assignment.status == 'graded' ? (
+                                                                                                                <Pen />
+                                                                                                        ) : (
+                                                                                                                <>
+                                                                                                                        <Eye className='w-4 h-4 mr-2' />
+                                                                                                                        Review
+                                                                                                                </>
+                                                                                                        )}
                                                                                                 </Button>
                                                                                         </div>
                                                                                 </div>
@@ -333,7 +341,7 @@ export function TeacherTabs() {
                                 className='space-y-4'
                         >
                                 <Card className='h-120'>
-                                        <CardHeader className='max-[400px]:!pb-0 grid-cols-2'>
+                                        <CardHeader className='max-[400px]:!pb-0 grid-cols-1'>
                                                 <div>
                                                         {students.length ? (
                                                                 <>
@@ -347,7 +355,7 @@ export function TeacherTabs() {
                                                                 </>
                                                         )}
                                                 </div>
-                                                <div className='flex gap-4 justify-end'>
+                                                {/* <div className='flex gap-4 justify-end'>
                                                         {students.map((student, id) => (
                                                                 <Avatar key={id}>
                                                                         <AvatarFallback className={cn({ 'bg-slate-500': student.id == currentUserId })}>
@@ -358,7 +366,7 @@ export function TeacherTabs() {
                                                                         </AvatarFallback>
                                                                 </Avatar>
                                                         ))}
-                                                </div>
+                                                </div> */}
                                         </CardHeader>
                                         <CardContent className='flex flex-col h-full'>
                                                 <ScrollArea className='flex-1 mb-5 max-[400px]:mb-3 h-10 max-[332px]:mb-8'>
