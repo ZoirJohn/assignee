@@ -26,13 +26,13 @@ Assignee bridges the gap between traditional handwritten assignments and digital
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Next.js 14+ (React, TypeScript)
+- **Frontend**: Next.js 15.3 (React, TypeScript)
 - **Backend**: Next.js API Routes
 - **Database**: Supabase (PostgreSQL)
 - **Authentication**: Supabase Auth + OAuth (Google, Instagram)
 - **AI Services**: 
-  - Google Vision API (Text extraction from images)
-  - Custom AI grading agent
+  - Azure Computer Vision OCR (Text extraction from images)
+  - Groq Mistral AI (Automated grading and assessment)
 - **Styling**: Tailwind CSS
 - **Animations**: Framer Motion, CSS animations for blobs and carousels
 
@@ -41,7 +41,7 @@ Assignee bridges the gap between traditional handwritten assignments and digital
 ```
 assignee/
 ├── src/
-│   ├── app/                 # Next.js 13+ app directory
+│   ├── app/                 # Next.js 15.3 app directory
 │   │   ├── (auth)/         # Authentication pages
 │   │   │   ├── signin/
 │   │   │   └── signup/
@@ -87,14 +87,17 @@ assignee/
 - Node.js 18+ 
 - npm or yarn
 - Supabase account
-- Google Cloud Platform account (for Vision API)
+- Azure account (for Computer Vision OCR)
+- Groq account (for Mistral AI access)
 
 ### Environment Variables
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-GOOGLE_VISION_API_KEY=your_google_vision_key
+AZURE_COMPUTER_VISION_ENDPOINT=your_azure_cv_endpoint
+AZURE_COMPUTER_VISION_KEY=your_azure_cv_key
+GROQ_API_KEY=your_groq_api_key
 NEXTAUTH_SECRET=your_nextauth_secret
 NEXTAUTH_URL=http://localhost:3000
 ```
@@ -132,8 +135,8 @@ npm run dev
 ## 🤖 AI Integration Flow
 
 1. **Image Capture**: Student photographs handwritten assignment
-2. **Text Extraction**: Google Vision API converts image to text
-3. **AI Grading**: Custom AI agent analyzes and grades content
+2. **Text Extraction**: Azure Computer Vision OCR converts image to text
+3. **AI Grading**: Groq Mistral AI analyzes and grades content
 4. **Teacher Review**: Teachers can approve, modify, or override AI grades
 5. **Feedback Delivery**: Students receive grades and comments
 6. **Transcript Generation**: Completed assignments compiled into transcripts
@@ -166,7 +169,7 @@ npm run dev
 
 ### Assignment Review (Teacher)
 1. Receive notification of new submission
-2. Review AI-extracted text and grade
+2. Review Azure OCR-extracted text and Mistral AI grade
 3. Approve or modify grade
 4. Add personal feedback and effort rating
 5. Submit final assessment
