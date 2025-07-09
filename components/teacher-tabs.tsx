@@ -37,14 +37,11 @@ export function TeacherTabs() {
                         return
                 }
                 try {
-                        console.log(gradeOverride, selectedAssignment.feedback)
-
-                        const { data } = await supabase
+                        await supabase
                                 .from('assignments')
                                 .update({ teacher_grade: gradeOverride || selectedAssignment.ai_grade, status: 'graded', feedback: selectedAssignment.feedback })
                                 .eq('id', selectedAssignment.id)
                                 .select()
-                        console.log(data)
                 } catch {
                 } finally {
                         setGradeOverride(undefined)
@@ -97,6 +94,7 @@ export function TeacherTabs() {
                                         }
 
                                         if (eventType === 'DELETE') {
+                                                console.log(oldRow)
                                                 setMessages((prev) => prev.filter((messages) => messages.id !== oldRow.id))
                                         }
                                 }
@@ -107,9 +105,17 @@ export function TeacherTabs() {
                 }
         }, [])
         useEffect(() => {
-                const channel = supabase.channel('realtime-assignment-update').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'assignments' }, (payload) => {
-                        const { eventType, new: newRow, old: oldRow } = payload
-                })
+                const channel = supabase
+                        .channel('realtime-assignment-update')
+                        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'assignments' }, (payload) => {
+                                const { eventType, new: newRow } = payload
+                                console.log(eventType)
+                                setAssignments((prev) => [...prev, newRow] as TAssignment[])
+                        })
+                        .subscribe()
+                return () => {
+                        supabase.removeChannel(channel)
+                }
         }, [])
         useEffect(() => {
                 async function fetchStudents() {

@@ -68,7 +68,6 @@ export default function StudentTabs() {
                                 question: selectedAssignment?.description,
                                 subject: selectedAssignment?.subject,
                         })
-                        console.log('Submitted')
                         setAssignments((prev) =>
                                 prev.map((assignment: TAssignment) =>
                                         assignment.id === assignmentId ? { ...assignment, status: 'submitted', image_url: URL.createObjectURL(selectedFile) } : assignment
