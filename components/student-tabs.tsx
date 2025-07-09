@@ -68,7 +68,7 @@ export default function StudentTabs() {
                                 question: selectedAssignment?.description,
                                 subject: selectedAssignment?.subject,
                         })
-                        console.log('Submitted');
+                        console.log('Submitted')
                         setAssignments((prev) =>
                                 prev.map((assignment: TAssignment) =>
                                         assignment.id === assignmentId ? { ...assignment, status: 'submitted', image_url: URL.createObjectURL(selectedFile) } : assignment
@@ -235,8 +235,8 @@ export default function StudentTabs() {
                                         {assignments.length ? (
                                                 assignments.map((assignment) => (
                                                         <Fragment key={assignment.id}>
-                                                                <Card className='gap-0'>
-                                                                        <CardHeader className='!pb-0 mb-0'>
+                                                                <Card className='gap-0 max-[425px]:py-4'>
+                                                                        <CardHeader className='!pb-0 mb-0 max-[425px]:px-4'>
                                                                                 <div className='flex flex-col gap-1'>
                                                                                         <CardTitle className='text-2xl font-bold leading-tight text-blue-900'>{assignment.title}</CardTitle>
                                                                                         <div className='text-sm text-gray-400 mt-0.5 mb-0.5'>{assignment.subject}</div>
@@ -280,7 +280,7 @@ export default function StudentTabs() {
                                                                                         </div>
                                                                                 </div>
                                                                         </CardHeader>
-                                                                        <CardContent>
+                                                                        <CardContent className='max-[425px]:px-4'>
                                                                                 <div className='flex items-center justify-between flex-wrap gap-4 border-t pt-3 mt-2'>
                                                                                         <div className='flex items-center text-base font-medium text-gray-700'>
                                                                                                 <Clock className='w-5 h-5 mr-2' />
@@ -405,12 +405,12 @@ export default function StudentTabs() {
                                                                         </CardContent>
                                                                 </Card>
                                                                 {selectedAssignment && selectedAssignment.id === assignment.id && (
-                                                                        <Card className='border-2 border-blue-200 bg-blue-50/30'>
-                                                                                <CardHeader>
+                                                                        <Card className='border-2 border-blue-200 bg-blue-50/30 max-[425px]:py-4'>
+                                                                                <CardHeader className='max-[425px]:px-4'>
                                                                                         <CardTitle>Submission: {selectedAssignment.title}</CardTitle>
                                                                                         <CardDescription>Your submitted work</CardDescription>
                                                                                 </CardHeader>
-                                                                                <CardContent className='space-y-4'>
+                                                                                <CardContent className='space-y-4 max-[425px]:px-4'>
                                                                                         {selectedAssignment.image_url ? (
                                                                                                 <div>
                                                                                                         <h4 className='font-semibold mb-2'>Uploaded Image:</h4>
@@ -492,14 +492,14 @@ export default function StudentTabs() {
                                 value='chat'
                                 className='space-y-4'
                         >
-                                <Card className='h-120 '>
-                                        <CardHeader className='max-[400px]:!pb-0'>
+                                <Card className='h-120 max-[425px]:py-4'>
+                                        <CardHeader className='max-[400px]:!pb-0 max-[425px]:px-4'>
                                                 <CardTitle className='text-2xl'>Chat with Teachers</CardTitle>
                                                 <CardDescription className='text-xs'>Get help and feedback from your instructors</CardDescription>
                                         </CardHeader>
-                                        <CardContent className='flex flex-col h-full'>
-                                                <ScrollArea className='flex-1 mb-5 max-[400px]:mb-3 h-40 max-[332px]:mb-4'>
-                                                        <div className='space-y-4'>
+                                        <CardContent className='flex flex-col h-full max-[425px]:px-3'>
+                                                <ScrollArea className='flex-1 mb-5 max-[400px]:mb-3 max-[332px]:mb-8'>
+                                                        <div className='space-y-4 h-93'>
                                                                 {messages.map(({ id, sender_id, content, created_at }) => (
                                                                         <div
                                                                                 key={id}
@@ -532,7 +532,7 @@ export default function StudentTabs() {
                                                                 />
                                                         </div>
                                                 </ScrollArea>
-                                                <div className='flex items-center space-x-2'>
+                                                <div className='flex items-center space-x-2 pb-5'>
                                                         <Input
                                                                 placeholder='Type your message...'
                                                                 value={newMessage}
@@ -556,12 +556,12 @@ export default function StudentTabs() {
                                 value='transcript'
                                 className='space-y-4'
                         >
-                                <Card>
-                                        <CardHeader>
+                                <Card className='max-[425px]:py-4'>
+                                        <CardHeader className='max-[425px]:px-4'>
                                                 <CardTitle>Academic Transcript</CardTitle>
                                                 <CardDescription>Your complete grades history</CardDescription>
                                         </CardHeader>
-                                        <CardContent>
+                                        <CardContent className='max-[425px]:px-4'>
                                                 <div className='space-y-4'>
                                                         {grades.map((grade, index) => (
                                                                 <div

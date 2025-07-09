@@ -106,12 +106,12 @@ export default function TeacherProfile() {
                         </div>
 
                         <div className='grid gap-6 max-w-2xl'>
-                                <Card>
-                                        <CardHeader className='gap-0'>
+                                <Card className='max-[425px]:py-4'>
+                                        <CardHeader className='gap-0 max-[425px]:px-4'>
                                                 <CardTitle className='text-xl'>Profile Picture</CardTitle>
                                                 <CardDescription className='text-xs'>Upload a profile picture to personalize your account</CardDescription>
                                         </CardHeader>
-                                        <CardContent className='space-y-4'>
+                                        <CardContent className='space-y-4 max-[425px]:px-4'>
                                                 <div className='flex items-center space-x-4'>
                                                         <Avatar className='w-20 h-20'>
                                                                 {previewUrl ? (
@@ -166,12 +166,12 @@ export default function TeacherProfile() {
                                         </CardContent>
                                 </Card>
 
-                                <Card>
-                                        <CardHeader className='gap-0'>
+                                <Card className='max-[425px]:py-4'>
+                                        <CardHeader className='gap-0 max-[425px]:px-4'>
                                                 <CardTitle className='text-xl'>Personal Information</CardTitle>
                                                 <CardDescription className='text-xs'>Update your personal details and contact information</CardDescription>
                                         </CardHeader>
-                                        <CardContent className='space-y-4'>
+                                        <CardContent className='space-y-4 max-[425px]:px-4'>
                                                 <div className='space-y-2'>
                                                         <Label htmlFor='fullName'>Full Name</Label>
                                                         <div className='relative'>
@@ -201,12 +201,12 @@ export default function TeacherProfile() {
                                         </CardContent>
                                 </Card>
 
-                                <Card>
-                                        <CardHeader className='gap-0'>
+                                <Card className='max-[425px]:py-4'>
+                                        <CardHeader className='gap-0 max-[425px]:px-4'>
                                                 <CardTitle className='text-xl'>Account Information</CardTitle>
                                                 <CardDescription className='text-xs'>View your account details and status</CardDescription>
                                         </CardHeader>
-                                        <CardContent className='space-y-4'>
+                                        <CardContent className='space-y-4 max-[425px]:px-4'>
                                                 <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                                                         <div>
                                                                 <Label className='text-sm font-medium text-gray-500'>Account Type</Label>

@@ -66,12 +66,12 @@ export default function CreateAssignmentPage() {
 
         return (
                 <div className='min-h-full flex items-center justify-center p-4'>
-                        <Card className='w-full max-w-lg'>
-                                <CardHeader>
+                        <Card className='w-full max-w-lg max-[425px]:py-4'>
+                                <CardHeader className='max-[425px]:px-4'>
                                         <CardTitle className='text-2xl'>Create Assignment</CardTitle>
                                         <CardDescription>Fill out the form to create a new assignment for your students.</CardDescription>
                                 </CardHeader>
-                                <CardContent>
+                                <CardContent className='max-[425px]:px-4'>
                                         {submitted ? (
                                                 <div className='text-green-700 font-semibold text-center py-8'>Assignment created successfully!</div>
                                         ) : (

@@ -163,7 +163,7 @@ export function TeacherTabs() {
                                         {assignments.length ? (
                                                 assignments.map((assignment) => (
                                                         <Fragment key={assignment.id}>
-                                                                <Card className='gap-0 max-[425px]:py-4'>
+                                                                <Card className='gap-0 max-[425px]:py-4 border'>
                                                                         <CardHeader className='max-[425px]:px-4'>
                                                                                 <div className='flex flex-col gap-1'>
                                                                                         <CardTitle className='text-2xl font-bold leading-tight text-blue-900'>{assignment.title}</CardTitle>
@@ -362,21 +362,9 @@ export function TeacherTabs() {
                                                                 </>
                                                         )}
                                                 </div>
-                                                {/* <div className='flex gap-4 justify-end'>
-                                                        {students.map((student, id) => (
-                                                                <Avatar key={id}>
-                                                                        <AvatarFallback className={cn({ 'bg-slate-500': student.id == currentUserId })}>
-                                                                                {student.full_name
-                                                                                        .split(' ')
-                                                                                        .map((n) => n[0])
-                                                                                        .join('')}
-                                                                        </AvatarFallback>
-                                                                </Avatar>
-                                                        ))}
-                                                </div> */}
                                         </CardHeader>
-                                        <CardContent className='flex flex-col'>
-                                                <ScrollArea className='flex-1 mb-5 max-[400px]:mb-3 max-[332px]:mb-8 '>
+                                        <CardContent className='flex flex-col max-[425px]:px-3'>
+                                                <ScrollArea className='flex-1 mb-5 max-[400px]:mb-3 max-[332px]:mb-8'>
                                                         <div className='space-y-4 h-93'>
                                                                 {messages.map(({ id, sender_id, created_at, content }) => (
                                                                         <div
@@ -410,7 +398,7 @@ export function TeacherTabs() {
                                                                 />
                                                         </div>
                                                 </ScrollArea>
-                                                <div className='flex items-center space-x-2'>
+                                                <div className='flex items-center space-x-2 pb-5'>
                                                         <label
                                                                 htmlFor='chat-message-input'
                                                                 className='sr-only'
@@ -442,40 +430,39 @@ export function TeacherTabs() {
                                 className='space-y-4'
                         >
                                 {assignments.length ? (
-                                        assignments.map(({ id, created_by, title, ai_grade, feedback }, idx) => (
-                                                <Card key={idx}>
-                                                        <CardHeader>
-                                                                <CardTitle>Recent Feedback Given</CardTitle>
-                                                                <CardDescription>Track the feedback you&apos;ve provided to students</CardDescription>
-                                                        </CardHeader>
-                                                        <CardContent>
+                                        <Card className='max-[425px]:py-4'>
+                                                <CardHeader className='max-[425px]:px-4'>
+                                                        <CardTitle>Recent Feedback Given</CardTitle>
+                                                        <CardDescription>Track the feedback you&apos;ve provided to students</CardDescription>
+                                                </CardHeader>
+                                                {assignments.map(({ id, title, teacher_grade, feedback }, idx) => (
+                                                        <CardContent
+                                                                className='max-[425px]:px-4'
+                                                                key={idx}
+                                                        >
                                                                 <div className='space-y-4'>
                                                                         <div
                                                                                 key={id}
-                                                                                className='flex items-center justify-between p-4 border rounded-lg'
+                                                                                className='flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg w-full gap-2'
                                                                         >
                                                                                 <div>
                                                                                         <h4 className='font-semibold'>Student </h4>
                                                                                         <p className='text-sm text-gray-600'>{title}</p>
                                                                                 </div>
-                                                                                <div className='text-right'>
-                                                                                        <div className='flex items-center space-x-2'>
-                                                                                                <Badge className='bg-green-100 text-green-800 hover:bg-green-100'>
-                                                                                                        {ai_grade}/{5}
-                                                                                                </Badge>
-                                                                                                <Badge
-                                                                                                        variant='outline'
-                                                                                                        className='capitalize'
-                                                                                                >
-                                                                                                        {feedback || 'No feedback yet'}
-                                                                                                </Badge>
-                                                                                        </div>
+                                                                                <div className='flex max-[425px]:flex-col gap-y-2'>
+                                                                                        <Badge className='bg-green-100 text-green-800 hover:bg-green-100'>
+                                                                                                {teacher_grade}/{5}
+                                                                                        </Badge>
+                                                                                        <p className='capitalize'>
+                                                                                                <b>Feedback: </b>
+                                                                                                {feedback || 'No feedback yet'}
+                                                                                        </p>
                                                                                 </div>
                                                                         </div>
                                                                 </div>
                                                         </CardContent>
-                                                </Card>
-                                        ))
+                                                ))}
+                                        </Card>
                                 ) : (
                                         <h1 className='text-gray-600'>No assignments found</h1>
                                 )}

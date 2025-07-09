@@ -144,10 +144,10 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                         </Sheet>
 
                         <div className='flex-1 flex flex-col'>
-                                <div className='lg:hidden bg-white border-b border-gray-200 p-4 pl-16'>
+                                <div className='lg:hidden bg-white border-b border-gray-200 p-4 pl-16 sticky top-0'>
                                         <div className='flex items-center justify-between'>
                                                 <div className='flex items-center space-x-2'>
-                                                        <div className='w-6 h-6 bg-blue-600 rounded flex items-center justify-center'>
+                                                        <div className='w-6 h-6 bg-gray-800 rounded flex items-center justify-center'>
                                                                 <Image
                                                                         src='/favicon.svg'
                                                                         alt='logo'
@@ -170,7 +170,7 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                                         </div>
                                 </div>
 
-                                <main className='p-6 lg:p-8 max-[425px]:p-2'>{children}</main>
+                                <main className='p-6 lg:p-8 max-[425px]:p-1'>{children}</main>
                         </div>
                 </div>
         )

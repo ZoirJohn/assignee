@@ -65,34 +65,34 @@ export default function TeacherTranscript() {
                         </div>
 
                         <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-                                <Card>
-                                        <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                                <Card className='max-[425px]:py-4'>
+                                        <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2 max-[425px]:px-4'>
                                                 <CardTitle className='text-sm font-medium'>Total Students Taught</CardTitle>
                                                 <Users className='h-4 w-4 text-muted-foreground' />
                                         </CardHeader>
-                                        <CardContent>
+                                        <CardContent className='max-[425px]:px-4'>
                                                 <div className='text-2xl font-bold text-blue-600'>{totalStudents}</div>
                                                 <p className='text-xs text-muted-foreground'>Across all semesters</p>
                                         </CardContent>
                                 </Card>
 
-                                <Card>
-                                        <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                                <Card className='max-[425px]:py-4'>
+                                        <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2 max-[425px]:px-4'>
                                                 <CardTitle className='text-sm font-medium'>Assignments Created</CardTitle>
                                                 <FileText className='h-4 w-4 text-muted-foreground' />
                                         </CardHeader>
-                                        <CardContent>
+                                        <CardContent className='max-[425px]:px-4'>
                                                 <div className='text-2xl font-bold'>{totalAssignments}</div>
                                                 <p className='text-xs text-muted-foreground'>Total assignments given</p>
                                         </CardContent>
                                 </Card>
 
-                                <Card>
-                                        <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                                <Card className='max-[425px]:py-4'>
+                                        <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2 max-[425px]:px-4'>
                                                 <CardTitle className='text-sm font-medium'>Average Completion</CardTitle>
                                                 <TrendingUp className='h-4 w-4 text-muted-foreground' />
                                         </CardHeader>
-                                        <CardContent>
+                                        <CardContent className='max-[425px]:px-4'>
                                                 <div className='text-2xl font-bold text-green-600'>{averageCompletion.toFixed(1)}%</div>
                                                 <p className='text-xs text-muted-foreground'>Student completion rate</p>
                                         </CardContent>
@@ -101,8 +101,11 @@ export default function TeacherTranscript() {
 
                         <div className='space-y-6'>
                                 {teachingData.map((semester, index) => (
-                                        <Card key={index}>
-                                                <CardHeader>
+                                        <Card
+                                                key={index}
+                                                className='max-[425px]:py-4'
+                                        >
+                                                <CardHeader className='max-[425px]:px-4'>
                                                         <div className='flex items-center justify-between'>
                                                                 <div>
                                                                         <CardTitle className='text-xl'>{semester.semester}</CardTitle>
@@ -118,7 +121,7 @@ export default function TeacherTranscript() {
                                                                 </Badge>
                                                         </div>
                                                 </CardHeader>
-                                                <CardContent>
+                                                <CardContent className='max-[425px]:px-4'>
                                                         <div className='space-y-4'>
                                                                 {semester.subjects.map((subject, subIndex) => (
                                                                         <div key={subIndex}>
@@ -150,12 +153,12 @@ export default function TeacherTranscript() {
                                 ))}
                         </div>
 
-                        <Card>
-                                <CardHeader>
+                        <Card className='max-[425px]:py-4'>
+                                <CardHeader className='max-[425px]:px-4'>
                                         <CardTitle className='text-2xl'>Teaching Performance</CardTitle>
                                         <CardDescription>Your teaching metrics and achievements</CardDescription>
                                 </CardHeader>
-                                <CardContent>
+                                <CardContent className='max-[425px]:px-4'>
                                         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                                                 <div>
                                                         <h4 className='font-semibold text-gray-900 mb-2'>Performance Metrics</h4>

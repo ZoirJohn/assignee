@@ -81,12 +81,12 @@ export default function StudentProfile() {
                         </div>
 
                         <div className='grid gap-6 max-w-2xl'>
-                                <Card>
-                                        <CardHeader className='gap-0'>
+                                <Card className='max-[425px]:py-4'>
+                                        <CardHeader className='gap-0 max-[425px]:px-4'>
                                                 <CardTitle className='text-xl'>Profile Picture</CardTitle>
                                                 <CardDescription className='text-xs'>Upload a profile picture to personalize your account</CardDescription>
                                         </CardHeader>
-                                        <CardContent className='space-y-4'>
+                                        <CardContent className='space-y-4 max-[425px]:px-4'>
                                                 <div className='flex items-center space-x-4'>
                                                         <Avatar className='w-20 h-20'>
                                                                 {previewUrl ? (
