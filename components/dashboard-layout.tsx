@@ -116,7 +116,7 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
         )
 
         return (
-                <div className='h-screen bg-gray-50 flex'>
+                <div className='md:h-screen flex'>
                         <div className='hidden lg:block'>
                                 <Sidebar />
                         </div>
@@ -128,7 +128,7 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                                 <SheetTitle />
                                 <SheetTrigger asChild>
                                         <Button
-                                                variant='ghost'
+                                                variant='secondary'
                                                 size='icon'
                                                 className='lg:hidden fixed top-4 left-4 z-50 bg-white shadow-md'
                                         >
@@ -143,7 +143,7 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                                 </SheetContent>
                         </Sheet>
 
-                        <div className='flex-1 flex flex-col h-screen overflow-auto'>
+                        <div className='flex-1 flex flex-col'>
                                 <div className='lg:hidden bg-white border-b border-gray-200 p-4 pl-16'>
                                         <div className='flex items-center justify-between'>
                                                 <div className='flex items-center space-x-2'>
@@ -170,7 +170,7 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                                         </div>
                                 </div>
 
-                                <main className='p-6 lg:p-8 max-[400px]:p-1'>{children}</main>
+                                <main className='p-6 lg:p-8 max-[425px]:p-2'>{children}</main>
                         </div>
                 </div>
         )

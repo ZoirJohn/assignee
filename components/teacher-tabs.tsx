@@ -37,9 +37,11 @@ export function TeacherTabs() {
                         return
                 }
                 try {
+                        console.log(gradeOverride, selectedAssignment.feedback)
+
                         const { data } = await supabase
                                 .from('assignments')
-                                .update({ teacher_grade: gradeOverride || selectedAssignment.ai_grade, status: 'graded' })
+                                .update({ teacher_grade: gradeOverride || selectedAssignment.ai_grade, status: 'graded', feedback: selectedAssignment.feedback })
                                 .eq('id', selectedAssignment.id)
                                 .select()
                         console.log(data)
@@ -105,6 +107,11 @@ export function TeacherTabs() {
                 }
         }, [])
         useEffect(() => {
+                const channel = supabase.channel('realtime-assignment-update').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'assignments' }, (payload) => {
+                        const { eventType, new: newRow, old: oldRow } = payload
+                })
+        }, [])
+        useEffect(() => {
                 async function fetchStudents() {
                         const { data: students } = await supabase.from('profiles').select('id, full_name').eq('teacher_id', userId)
                         if (students?.length) {
@@ -152,12 +159,12 @@ export function TeacherTabs() {
                                 value='assignments'
                                 className='space-y-4'
                         >
-                                <div className='grid gap-3'>
+                                <div className='grid gap-3 overflow-hidden'>
                                         {assignments.length ? (
                                                 assignments.map((assignment) => (
                                                         <Fragment key={assignment.id}>
-                                                                <Card className='gap-0'>
-                                                                        <CardHeader className='!pb-0 mb-0'>
+                                                                <Card className='gap-0 max-[425px]:py-4'>
+                                                                        <CardHeader className='max-[425px]:px-4'>
                                                                                 <div className='flex flex-col gap-1'>
                                                                                         <CardTitle className='text-2xl font-bold leading-tight text-blue-900'>{assignment.title}</CardTitle>
                                                                                         <div className='text-sm text-gray-400 mt-0.5 mb-0.5'>{assignment.subject}</div>
@@ -213,7 +220,7 @@ export function TeacherTabs() {
                                                                                         </div>
                                                                                 </div>
                                                                         </CardHeader>
-                                                                        <CardContent>
+                                                                        <CardContent className='max-[425px]:px-4'>
                                                                                 <div className='flex items-center justify-between flex-wrap gap-4 border-t pt-3 mt-2'>
                                                                                         <div className='flex flex-col gap-2'>
                                                                                                 <div className='flex items-center text-base font-medium text-gray-700'>
@@ -368,9 +375,9 @@ export function TeacherTabs() {
                                                         ))}
                                                 </div> */}
                                         </CardHeader>
-                                        <CardContent className='flex flex-col h-full'>
-                                                <ScrollArea className='flex-1 mb-5 max-[400px]:mb-3 h-10 max-[332px]:mb-8'>
-                                                        <div className='space-y-4'>
+                                        <CardContent className='flex flex-col'>
+                                                <ScrollArea className='flex-1 mb-5 max-[400px]:mb-3 max-[332px]:mb-8 '>
+                                                        <div className='space-y-4 h-93'>
                                                                 {messages.map(({ id, sender_id, created_at, content }) => (
                                                                         <div
                                                                                 key={id}
@@ -448,7 +455,7 @@ export function TeacherTabs() {
                                                                                 className='flex items-center justify-between p-4 border rounded-lg'
                                                                         >
                                                                                 <div>
-                                                                                        <h4 className='font-semibold'>Student {created_by}</h4>
+                                                                                        <h4 className='font-semibold'>Student </h4>
                                                                                         <p className='text-sm text-gray-600'>{title}</p>
                                                                                 </div>
                                                                                 <div className='text-right'>

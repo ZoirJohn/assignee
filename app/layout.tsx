@@ -18,10 +18,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                         lang='en'
                         className='select-none'
                 >
-                        <body className={`${manrope.className} font-sans text-base`}>
-                               
-                                {children}
-                        </body>
+                        <body className={`${manrope.className} font-sans text-base bg-gray-50`}>{children}</body>
                 </html>
         )
 }
