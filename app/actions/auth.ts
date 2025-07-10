@@ -54,7 +54,7 @@ export async function signup(formData: FormData) {
         const { error } = await supabase.auth.signUp({
                 email,
                 password,
-                options: { data: { role, fullName, teacherId } },
+                options: { data: { role, fullName, teacherId }, emailRedirectTo: 'https://assignee-psi.vercel.app/signin' },
         })
 
         if (error) {
@@ -76,4 +76,18 @@ export async function signout() {
 
         revalidatePath('/', 'layout')
         redirect('/')
+}
+
+export async function reset(formData: FormData) {
+        const supabase = await createClient()
+
+        const email = formData.get('email') as string
+
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: 'https://assignee-psi.vercel.app/signin',
+        })
+
+        if (error) {
+                return { error: error.message }
+        }
 }

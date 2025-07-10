@@ -1,6 +1,6 @@
 'use client'
 import { ChangeEvent, useEffect, useState } from 'react'
-import { Camera, Mail, User, Save } from 'lucide-react'
+import { Camera, Mail, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -82,7 +82,7 @@ export default function StudentProfile() {
 
                         <div className='grid gap-6 max-w-2xl'>
                                 <Card className='max-[425px]:py-4'>
-                                <CardHeader className='gap-0 max-[425px]:px-4'>
+                                        <CardHeader className='gap-0 max-[425px]:px-4'>
                                                 <CardTitle className='text-xl'>Profile Picture</CardTitle>
                                                 <CardDescription className='text-xs'>Upload a profile picture to personalize your account</CardDescription>
                                         </CardHeader>

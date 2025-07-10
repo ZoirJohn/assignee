@@ -1,6 +1,7 @@
 import './globals.css'
 import { Manrope } from 'next/font/google'
 import type { Metadata } from 'next'
+import { Analytics } from '@vercel/analytics/next'
 
 const manrope = Manrope({
         subsets: ['latin'],
@@ -18,7 +19,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                         lang='en'
                         className='select-none'
                 >
-                        <body className={`${manrope.className} font-sans text-base bg-gray-50`}>{children}</body>
+                        <body className={`${manrope.className} font-sans text-base bg-gray-50`}>
+                                {children} <Analytics />
+                        </body>
                 </html>
         )
 }
