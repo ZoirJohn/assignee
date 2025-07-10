@@ -40,10 +40,11 @@ export default function SignInPage() {
                         formData.append('password', data.password)
 
                         const result = await signin(formData)
-                        if (result?.error) {
+                        if (result.error) {
                                 setAuthError(result.error)
                         }
-                } finally {
+                } catch (error) {
+                        console.error(error)
                         setIsLoading(false)
                 }
         }

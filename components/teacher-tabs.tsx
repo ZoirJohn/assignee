@@ -449,17 +449,19 @@ export function TeacherTabs() {
                                                                 <div className='space-y-4'>
                                                                         <div
                                                                                 key={id}
-                                                                                className='flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg w-full gap-2'
+                                                                                className='p-4 rounded-lg w-full border grid grid-cols-2 max-[425px]:grid-cols-3'
                                                                         >
-                                                                                <div>
-                                                                                        <h4 className='font-semibold'>Student </h4>
+                                                                                <div className='max-[425px]:col-span-2'>
+                                                                                        <h4 className='font-semibold text-xl'>Student </h4>
                                                                                         <p className='text-sm text-gray-600'>{title}</p>
                                                                                 </div>
-                                                                                <div className='flex max-[425px]:flex-col gap-y-2'>
+                                                                                <div className='flex items-start justify-end'>
                                                                                         <Badge className='bg-green-100 text-green-800 hover:bg-green-100'>
                                                                                                 {teacher_grade}/{5}
                                                                                         </Badge>
-                                                                                        <p className='capitalize'>
+                                                                                </div>
+                                                                                <div className='[425px]:col-span-2 col-span-3 mt-4'>
+                                                                                        <p className='text-sm'>
                                                                                                 <b>Feedback: </b>
                                                                                                 {feedback || 'No feedback yet'}
                                                                                         </p>
