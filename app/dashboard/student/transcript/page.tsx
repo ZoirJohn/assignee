@@ -1,44 +1,13 @@
-'use client'
-import { FileText, Download, Calendar, TrendingUp } from 'lucide-react'
+import { FileText, Download, TrendingUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { createClient } from '@/lib/supabase/server'
+import { TAssignment } from '@/definitions'
 
-const transcriptData = [
-        {
-                semester: 'Fall 2024',
-                subjects: [
-                        { name: 'Environmental Science', assignments: 8, averageGrade: 4, gpa: 3.7 },
-                        { name: 'Calculus', assignments: 12, averageGrade: 4, gpa: 3.3 },
-                        { name: 'World History', assignments: 6, averageGrade: 5, gpa: 4.0 },
-                        { name: 'Chemistry', assignments: 10, averageGrade: 4, gpa: 3.7 },
-                ],
-                semesterGPA: 3.68,
-        },
-        {
-                semester: 'Spring 2024',
-                subjects: [
-                        { name: 'Environmental Science', assignments: 7, averageGrade: 4, gpa: 3.3 },
-                        { name: 'Advanced Mathematics', assignments: 10, averageGrade: 4, gpa: 3.7 },
-                        { name: 'Physics', assignments: 9, averageGrade: 3, gpa: 3.0 },
-                        { name: 'Literature', assignments: 5, averageGrade: 5, gpa: 4.0 },
-                ],
-                semesterGPA: 3.5,
-        },
-]
-
-const getGradeColor = (grade: number) => {
-        if (grade === 5) return 'bg-green-100 text-green-800'
-        if (grade === 4) return 'bg-blue-100 text-blue-800'
-        if (grade === 3) return 'bg-yellow-100 text-yellow-800'
-        return 'bg-gray-100 text-gray-800'
-}
-
-export default function StudentTranscript() {
-        const overallGPA = transcriptData.reduce((sum, semester) => sum + semester.semesterGPA, 0) / transcriptData.length
-        const totalAssignments = transcriptData.reduce((sum, semester) => sum + semester.subjects.reduce((subSum, subject) => subSum + subject.assignments, 0), 0)
-
+export default async function StudentTranscript() {
+        const supabase = await createClient()
+        const id = (await supabase.auth.getUser()).data.user!.user_metadata.teacherId
+        const { data: assignments }: { data: TAssignment[] | null } = await supabase.from('assignments').select('*').eq('created_by', id)
         return (
                 <div className='space-y-6'>
                         <div className='flex items-center justify-between max-[400px]:flex-col max-[400px]:gap-2'>
@@ -57,29 +26,29 @@ export default function StudentTranscript() {
 
                         <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
                                 <Card className='max-[425px]:py-4'>
-                                        <CardHeader className='max-[425px]:px-4'>
+                                        <CardHeader className='max-[425px]:px-4 flex justify-between'>
                                                 <CardTitle className='text-sm font-medium'>Overall GPA</CardTitle>
                                                 <TrendingUp className='h-4 w-4 text-muted-foreground' />
                                         </CardHeader>
                                         <CardContent>
-                                                <div className='text-2xl font-bold text-blue-600'>{overallGPA.toFixed(2)}</div>
-                                                <p className='text-xs text-muted-foreground'>Out of 4.0 scale</p>
+                                                <div className='text-2xl font-bold text-blue-600'>{assignments!.reduce((prv, nwv) => prv + nwv.teacher_grade!, 0) / assignments!.length}</div>
+                                                <p className='text-xs text-muted-foreground'>Out of 5.0 scale</p>
                                         </CardContent>
                                 </Card>
 
                                 <Card className='max-[425px]:py-4'>
-                                        <CardHeader className='max-[425px]:px-4'>
+                                        <CardHeader className='max-[425px]:px-4 flex justify-between'>
                                                 <CardTitle className='text-sm font-medium'>Total Assignments</CardTitle>
                                                 <FileText className='h-4 w-4 text-muted-foreground' />
                                         </CardHeader>
                                         <CardContent>
-                                                <div className='text-2xl font-bold'>{totalAssignments}</div>
+                                                <div className='text-2xl font-bold'>{assignments!.length}</div>
                                                 <p className='text-xs text-muted-foreground'>Completed successfully</p>
                                         </CardContent>
                                 </Card>
 
-                                <Card className='max-[425px]:py-4'>
-                                        <CardHeader className='max-[425px]:px-4'>
+                                {/* <Card className='max-[425px]:py-4'>
+                                        <CardHeader className='max-[425px]:px-4 flex justify-between'>
                                                 <CardTitle className='text-sm font-medium'>Semesters</CardTitle>
                                                 <Calendar className='h-4 w-4 text-muted-foreground' />
                                         </CardHeader>
@@ -87,10 +56,10 @@ export default function StudentTranscript() {
                                                 <div className='text-2xl font-bold'>{transcriptData.length}</div>
                                                 <p className='text-xs text-muted-foreground'>Academic periods</p>
                                         </CardContent>
-                                </Card>
+                                </Card> */}
                         </div>
 
-                        <div className='space-y-6'>
+                        {/* <div className='space-y-6'>
                                 {transcriptData.map((semester, index) => (
                                         <Card key={index}>
                                                 <CardHeader>
@@ -132,9 +101,9 @@ export default function StudentTranscript() {
                                                 </CardContent>
                                         </Card>
                                 ))}
-                        </div>
+                        </div> */}
 
-                        <Card>
+                        {/* <Card>
                                 <CardHeader>
                                         <CardTitle>Academic Standing</CardTitle>
                                         <CardDescription>Your current academic status and achievements</CardDescription>
@@ -165,7 +134,7 @@ export default function StudentTranscript() {
                                                 </div>
                                         </div>
                                 </CardContent>
-                        </Card>
+                        </Card> */}
                 </div>
         )
 }

@@ -170,7 +170,7 @@ export default function DashboardLayout({ children, userType, userName }: Dashbo
                                         </div>
                                 </div>
 
-                                <main className='p-6 lg:p-8 max-[425px]:p-1 h-screen overflow-auto'>{children}</main>
+                                <main className='p-6 lg:p-8 max-[425px]:p-1 h-screen overflow-auto max-[425px]:height-full'>{children}</main>
                         </div>
                 </div>
         )

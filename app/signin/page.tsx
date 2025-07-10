@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import Link from 'next/link'
-import { Mail, Lock } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -21,6 +21,7 @@ const signInSchema = z.object({
 export default function SignInPage() {
         const [isLoading, setIsLoading] = useState(false)
         const [authError, setAuthError] = useState<string | null>(null)
+        const [showPassword, setShowPassword] = useState(false)
 
         const form = useForm<z.infer<typeof signInSchema>>({
                 resolver: zodResolver(signInSchema),
@@ -42,6 +43,7 @@ export default function SignInPage() {
                         const result = await signin(formData)
                         if (result.error) {
                                 setAuthError(result.error)
+                                setIsLoading(false)
                         }
                 } catch (error) {
                         console.error(error)
@@ -112,14 +114,23 @@ export default function SignInPage() {
                                                                                         <div className='relative'>
                                                                                                 <Lock className='absolute left-3 top-3 h-4 w-4 text-gray-400' />
                                                                                                 <Input
-                                                                                                        type='password'
+                                                                                                        type={showPassword ? 'text' : 'password'}
                                                                                                         placeholder='Enter your password'
-                                                                                                        className='pl-10'
+                                                                                                        className='pl-10 pr-10'
                                                                                                         {...field}
                                                                                                         id='password'
                                                                                                         autoComplete='current-password'
                                                                                                         disabled={isLoading}
                                                                                                 />
+                                                                                                <button
+                                                                                                        type='button'
+                                                                                                        tabIndex={-1}
+                                                                                                        className='absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200'
+                                                                                                        onClick={() => setShowPassword((v) => !v)}
+                                                                                                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                                                                                >
+                                                                                                        {showPassword ? <EyeOff className='h-5 w-5' /> : <Eye className='h-5 w-5' />}
+                                                                                                </button>
                                                                                         </div>
                                                                                 </FormControl>
                                                                                 <FormMessage />

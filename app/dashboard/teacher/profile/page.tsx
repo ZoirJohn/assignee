@@ -113,7 +113,7 @@ export default function TeacherProfile() {
                                         </CardHeader>
                                         <CardContent className='space-y-4 max-[425px]:px-4'>
                                                 <div className='flex items-center space-x-4'>
-                                                        <Avatar className='w-20 h-20'>
+                                                        <Avatar className='w-20 h-20 z-10'>
                                                                 {previewUrl ? (
                                                                         <Image
                                                                                 src={previewUrl}
@@ -243,12 +243,12 @@ export default function TeacherProfile() {
                                         </CardContent>
                                 </Card>
 
-                                <div className='flex justify-end'>
+                                {/* <div className='flex justify-end'>
                                         <Button className='flex items-center'>
                                                 <Save className='w-4 h-4 mr-2' />
                                                 Save Changes
                                         </Button>
-                                </div>
+                                </div> */}
                         </div>
                 </div>
         )

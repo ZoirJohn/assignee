@@ -4,20 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { createClient } from '@/lib/supabase/server'
 import { TAssignment } from '@/definitions'
 
-const getGradeColor = (grade: number) => {
-        if (grade === 5) return 'bg-green-100 text-green-800'
-        if (grade === 4) return 'bg-blue-100 text-blue-800'
-        if (grade === 3) return 'bg-yellow-100 text-yellow-800'
-        return 'bg-gray-100 text-gray-800'
-}
-
-const getCompletionColor = (completion: number) => {
-        if (completion >= 95) return 'bg-green-100 text-green-800'
-        if (completion >= 85) return 'bg-blue-100 text-blue-800'
-        if (completion >= 75) return 'bg-yellow-100 text-yellow-800'
-        return 'bg-red-100 text-red-800'
-}
-
 export default async function TeacherTranscript() {
         const supabase = await createClient()
         const id = (await supabase.auth.getUser()).data.user!.id

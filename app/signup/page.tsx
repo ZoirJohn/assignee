@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Mail, Lock, User, Hash } from 'lucide-react'
+import { Mail, Lock, User, Hash, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -35,6 +35,8 @@ export default function SignUpPage() {
         const [userType, setUserType] = useState<'student' | 'teacher'>('student')
         const [isLoading, setIsLoading] = useState(false)
         const [authError, setAuthError] = useState<string | null>(null)
+        const [showStudentPassword, setShowStudentPassword] = useState(false)
+        const [showTeacherPassword, setShowTeacherPassword] = useState(false)
 
         const studentForm = useForm<z.infer<typeof studentSchema>>({
                 resolver: zodResolver(studentSchema),
@@ -73,6 +75,7 @@ export default function SignUpPage() {
 
                         if (result?.error) {
                                 setAuthError(result.error)
+                                setIsLoading(false)
                         } else {
                                 redirect('/dashboard/student')
                         }
@@ -97,6 +100,7 @@ export default function SignUpPage() {
 
                         if (result.error) {
                                 setAuthError(result.error)
+                                setIsLoading(false)
                         } else {
                                 redirect('/dashboard/teacher')
                         }
@@ -206,14 +210,27 @@ export default function SignUpPage() {
                                                                                                         <div className='relative'>
                                                                                                                 <Lock className='absolute left-3 top-3 h-4 w-4 text-gray-400' />
                                                                                                                 <Input
-                                                                                                                        type='password'
+                                                                                                                        type={showStudentPassword ? 'text' : 'password'}
                                                                                                                         placeholder='Create a password'
-                                                                                                                        className='pl-10'
+                                                                                                                        className='pl-10 pr-10'
                                                                                                                         {...field}
                                                                                                                         id='password'
                                                                                                                         autoComplete='current-password'
                                                                                                                         disabled={isLoading}
                                                                                                                 />
+                                                                                                                <button
+                                                                                                                        type='button'
+                                                                                                                        tabIndex={-1}
+                                                                                                                        className='absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200'
+                                                                                                                        onClick={() => setShowStudentPassword((v) => !v)}
+                                                                                                                        aria-label={showStudentPassword ? 'Hide password' : 'Show password'}
+                                                                                                                >
+                                                                                                                        {showStudentPassword ? (
+                                                                                                                                <EyeOff className='h-5 w-5' />
+                                                                                                                        ) : (
+                                                                                                                                <Eye className='h-5 w-5' />
+                                                                                                                        )}
+                                                                                                                </button>
                                                                                                         </div>
                                                                                                 </FormControl>
                                                                                                 <FormMessage />
@@ -328,14 +345,27 @@ export default function SignUpPage() {
                                                                                                         <div className='relative'>
                                                                                                                 <Lock className='absolute left-3 top-3 h-4 w-4 text-gray-400' />
                                                                                                                 <Input
-                                                                                                                        type='password'
+                                                                                                                        type={showTeacherPassword ? 'text' : 'password'}
                                                                                                                         placeholder='Create a password'
-                                                                                                                        className='pl-10'
+                                                                                                                        className='pl-10 pr-10'
                                                                                                                         {...field}
                                                                                                                         autoComplete='current-password'
                                                                                                                         id='password'
                                                                                                                         disabled={isLoading}
                                                                                                                 />
+                                                                                                                <button
+                                                                                                                        type='button'
+                                                                                                                        tabIndex={-1}
+                                                                                                                        className='absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200'
+                                                                                                                        onClick={() => setShowTeacherPassword((v) => !v)}
+                                                                                                                        aria-label={showTeacherPassword ? 'Hide password' : 'Show password'}
+                                                                                                                >
+                                                                                                                        {showTeacherPassword ? (
+                                                                                                                                <EyeOff className='h-5 w-5' />
+                                                                                                                        ) : (
+                                                                                                                                <Eye className='h-5 w-5' />
+                                                                                                                        )}
+                                                                                                                </button>
                                                                                                         </div>
                                                                                                 </FormControl>
                                                                                                 <FormMessage />

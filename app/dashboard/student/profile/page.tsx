@@ -82,13 +82,13 @@ export default function StudentProfile() {
 
                         <div className='grid gap-6 max-w-2xl'>
                                 <Card className='max-[425px]:py-4'>
-                                        <CardHeader className='gap-0 max-[425px]:px-4'>
+                                <CardHeader className='gap-0 max-[425px]:px-4'>
                                                 <CardTitle className='text-xl'>Profile Picture</CardTitle>
                                                 <CardDescription className='text-xs'>Upload a profile picture to personalize your account</CardDescription>
                                         </CardHeader>
                                         <CardContent className='space-y-4 max-[425px]:px-4'>
                                                 <div className='flex items-center space-x-4'>
-                                                        <Avatar className='w-20 h-20'>
+                                                        <Avatar className='w-20 h-20 z-10'>
                                                                 {previewUrl ? (
                                                                         <Image
                                                                                 src={previewUrl}
@@ -188,7 +188,16 @@ export default function StudentProfile() {
                                                         </div>
                                                         <div>
                                                                 <Label className='text-sm font-medium text-gray-500'>Member Since</Label>
-                                                                <p className='text-sm font-semibold text-gray-900'>{new Date(profile.created_at).toLocaleString()}</p>
+                                                                <p className='text-sm font-semibold text-gray-900'>
+                                                                        {new Date(profile.created_at)
+                                                                                .toLocaleString([], {
+                                                                                        day: 'numeric',
+                                                                                        month: 'long',
+                                                                                        hour: '2-digit',
+                                                                                        minute: '2-digit',
+                                                                                })
+                                                                                .replace(/\bat\b/gi, '')}
+                                                                </p>
                                                         </div>
                                                         <div className='relative'>
                                                                 <Label className='text-sm font-medium text-gray-500'>Student ID</Label>
@@ -207,12 +216,12 @@ export default function StudentProfile() {
                                         </CardContent>
                                 </Card>
 
-                                <div className='flex justify-end'>
+                                {/* <div className='flex justify-end'>
                                         <Button className='flex items-center'>
                                                 <Save className='w-4 h-4 mr-2' />
                                                 Save Changes
                                         </Button>
-                                </div>
+                                </div> */}
                         </div>
                 </div>
         )
