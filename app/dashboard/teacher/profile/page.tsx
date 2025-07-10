@@ -210,11 +210,20 @@ export default function TeacherProfile() {
                                                 <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                                                         <div>
                                                                 <Label className='text-sm font-medium text-gray-500'>Account Type</Label>
-                                                                <p className='text-sm font-semibold text-gray-900'>{new Date(profile.created_at).toLocaleString()}</p>
+                                                                <p className='text-sm font-semibold text-gray-900'>Teacher</p>
                                                         </div>
                                                         <div>
                                                                 <Label className='text-sm font-medium text-gray-500'>Member Since</Label>
-                                                                <p className='text-sm font-semibold text-gray-900'>January 2025</p>
+                                                                <p className='text-sm font-semibold text-gray-900'>
+                                                                        {new Date(profile.created_at)
+                                                                                .toLocaleString([], {
+                                                                                        day: 'numeric',
+                                                                                        month: 'long',
+                                                                                        hour: '2-digit',
+                                                                                        minute: '2-digit',
+                                                                                })
+                                                                                .replace(/\bat\b/gi, '')}
+                                                                </p>
                                                         </div>
                                                         <div className='relative'>
                                                                 <Label className='text-sm font-medium text-gray-500'>Teacher ID</Label>

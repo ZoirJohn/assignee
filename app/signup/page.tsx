@@ -76,9 +76,8 @@ export default function SignUpPage() {
                         } else {
                                 redirect('/dashboard/student')
                         }
-                } catch {
-                        setAuthError('An unexpected error occurred. Please try again.')
-                } finally {
+                } catch (error) {
+                        console.error(error)
                         setIsLoading(false)
                 }
         }
@@ -101,7 +100,8 @@ export default function SignUpPage() {
                         } else {
                                 redirect('/dashboard/teacher')
                         }
-                } finally {
+                } catch (error) {
+                        console.error(error)
                         setIsLoading(false)
                 }
         }
