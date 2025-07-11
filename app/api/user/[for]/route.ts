@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-export async function GET(req: NextRequest, { params }: { params: { for: string } }) {
+export async function GET(req: NextRequest, context: { params: { for: string } }) {
         try {
                 const supabase = await createClient()
 
@@ -12,8 +12,10 @@ export async function GET(req: NextRequest, { params }: { params: { for: string 
                 }
                 const userName = data.user.user_metadata.fullName
                 const userType = data.user.user_metadata.role
-
-                if (params.for == 'dashboard') {
+                const {
+                        params: { for: reason },
+                } = context
+                if (reason == 'dashboard') {
                         return new Response(JSON.stringify({ userName, userType }), {
                                 status: 200,
                                 headers: { 'Content-Type': 'application/json' },
