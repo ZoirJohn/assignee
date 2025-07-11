@@ -1,6 +1,6 @@
 import { FileText, MessageSquare, Star } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { TeacherTabs } from '@/components/teacher-tabs'
+import { TeacherTabs } from '@/app/dashboard/teacher/teacher-tabs'
 
 export default async function TeacherDashboard() {
         return (

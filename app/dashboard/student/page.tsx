@@ -1,4 +1,4 @@
-import StudentTabs from '@/components/student-tabs'
+import StudentTabs from '@/app/dashboard/student/student-tabs'
 import { Calendar, MessageSquare, FileText } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
