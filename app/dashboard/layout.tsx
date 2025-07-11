@@ -2,16 +2,20 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import Image from 'next/image'
 import { ReactNode } from 'react'
 import Sidebar from './dashboard-layout'
+import { cookies } from 'next/headers'
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
-        const user = await fetch('/api/user/dashboard')
-        const { userName, userType }: { userName: string; userType: string } = await user.json()
-        console.log(user)
+        const cookieStore = await cookies()
+        const { userName, userType } = await fetch('http://localhost:3000/api/user/dashboard', {
+                headers: {
+                        Cookie: cookieStore.toString(),
+                },
+        }).then((res) => res.json())
         return (
                 <div className='md:h-screen flex'>
                         <Sidebar
-                                userName={''}
-                                userType={''}
+                                userName={userName}
+                                userType={userType}
                         />
                         <div className='flex-1 flex flex-col'>
                                 <div className='lg:hidden bg-white border-b border-gray-200 p-4 pl-16 sticky top-0'>
