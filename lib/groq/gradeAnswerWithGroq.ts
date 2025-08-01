@@ -1,5 +1,5 @@
 export async function gradeAnswerWithGroq(studentAnswer: string, question: string, assignmentName: string, subject: string) {
-        const model = 'mistral-saba-24b'
+        const model = 'qwen/qwen3-32b'
 
         const context = question ? `Question: "${question}"` : `Assignment Title: "${assignmentName ?? 'Unnamed'}"\nSubject: "${subject ?? 'Unknown'}"`
 

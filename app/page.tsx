@@ -1,5 +1,4 @@
 'use client'
-
 import { ArrowRight, Users, Clock, Star, CheckCircle, User, MessageSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -103,19 +102,7 @@ export default function LandingPage() {
 
         return (
                 <>
-                        <Link
-                                href='https://bolt.new'
-                                className='absolute top-25 sm:left-1/5 left-0 z-10 '
-                                target='_blank'
-                        >
-                                <Image
-                                        src={'/bolt.png'}
-                                        alt='Bolt'
-                                        className='rounded-full'
-                                        width={80}
-                                        height={80}
-                                />
-                        </Link>
+                      
                         <div className='min-h-screen bg-gray-50'>
                                 <header className='sticky top-0 z-10 bg-dark-background backdrop-blur-3xl border-b border-gray-100 py-4'>
                                         <div className='container flex items-center justify-between'>
