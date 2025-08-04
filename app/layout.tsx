@@ -2,7 +2,6 @@ import './globals.css';
 import { Manrope } from 'next/font/google';
 import type { Metadata } from 'next';
 import { Analytics } from '@vercel/analytics/next';
-import { createClient } from '@/lib/supabase/server';
 
 const manrope = Manrope({
         subsets: ['latin'],

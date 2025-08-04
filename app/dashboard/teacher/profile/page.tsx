@@ -73,8 +73,8 @@ export default function TeacherProfile() {
                         const {
                                 data,
                         } = await supabase.auth.getClaims();
-                        const claims=data?.claims!
-                        if (claims.sub) {
+                        const claims=data?.claims
+                        if (claims?.sub) {
                                 setEmail(claims.user_metadata.email);
                                 setId(claims.sub);
                         }
