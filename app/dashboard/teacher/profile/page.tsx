@@ -71,8 +71,9 @@ export default function TeacherProfile() {
         useEffect(() => {
                 const fetchUser = async () => {
                         const {
-                                data: { claims },
+                                data,
                         } = await supabase.auth.getClaims();
+                        const claims=data?.claims!
                         if (claims.sub) {
                                 setEmail(claims.user_metadata.email);
                                 setId(claims.sub);
