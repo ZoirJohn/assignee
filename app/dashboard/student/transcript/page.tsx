@@ -1,49 +1,51 @@
-import { FileText, Download, TrendingUp } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { createClient } from '@/lib/supabase/server'
-import { TAssignment } from '@/definitions'
+import { FileText, Download, TrendingUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { createClient } from '@/lib/supabase/server';
+import { TAssignment } from '@/definitions';
 
 export default async function StudentTranscript() {
-        const supabase = await createClient()
-        const id = (await supabase.auth.getUser()).data.user!.user_metadata.teacherId
-        const { data: assignments }: { data: TAssignment[] | null } = await supabase.from('assignments').select('*').eq('created_by', id)
+        const supabase = await createClient();
+        const id = (await supabase.auth.getClaims()).data?.claims.sub;
+        const { data: assignments }: { data: TAssignment[] | null } = await supabase.from('assignments').select('*').eq('created_by', id);
         return (
-                <div className='space-y-6'>
-                        <div className='flex items-center justify-between max-[400px]:flex-col max-[400px]:gap-2'>
+                <div className="space-y-6">
+                        <div className="flex items-center justify-between max-[400px]:flex-col max-[400px]:gap-2">
                                 <div>
-                                        <h1 className='text-3xl font-bold text-gray-900'>Academic Transcript</h1>
-                                        <p className='text-gray-600'>Your complete academic record and performance history</p>
+                                        <h1 className="text-3xl font-bold text-gray-900">Academic Transcript</h1>
+                                        <p className="text-gray-600">Your complete academic record and performance history</p>
                                 </div>
                                 <Button
-                                        variant='outline'
-                                        className='flex items-center'
-                                >
-                                        <Download className='w-4 h-4 mr-2' />
+                                        variant="outline"
+                                        className="flex items-center">
+                                        <Download className="w-4 h-4 mr-2" />
                                         Download PDF
                                 </Button>
                         </div>
 
-                        <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-                                <Card className='max-[425px]:py-4'>
-                                        <CardHeader className='max-[425px]:px-4 flex justify-between'>
-                                                <CardTitle className='text-sm font-medium'>Overall GPA</CardTitle>
-                                                <TrendingUp className='h-4 w-4 text-muted-foreground' />
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <Card className="max-[425px]:py-4">
+                                        <CardHeader className="max-[425px]:px-4 flex justify-between">
+                                                <CardTitle className="text-sm font-medium">Overall GPA</CardTitle>
+                                                <TrendingUp className="h-4 w-4 text-muted-foreground" />
                                         </CardHeader>
                                         <CardContent>
-                                                <div className='text-2xl font-bold text-blue-600'>{assignments!.reduce((prv, nwv) => prv + nwv.teacher_grade!, 0) / assignments!.length}</div>
-                                                <p className='text-xs text-muted-foreground'>Out of 5.0 scale</p>
+                                                <div className="text-2xl font-bold text-blue-600">
+                                                        {assignments!.reduce((prv, nwv) => prv + nwv.teacher_grade!, 0) /
+                                                                assignments!.length}
+                                                </div>
+                                                <p className="text-xs text-muted-foreground">Out of 5.0 scale</p>
                                         </CardContent>
                                 </Card>
 
-                                <Card className='max-[425px]:py-4'>
-                                        <CardHeader className='max-[425px]:px-4 flex justify-between'>
-                                                <CardTitle className='text-sm font-medium'>Total Assignments</CardTitle>
-                                                <FileText className='h-4 w-4 text-muted-foreground' />
+                                <Card className="max-[425px]:py-4">
+                                        <CardHeader className="max-[425px]:px-4 flex justify-between">
+                                                <CardTitle className="text-sm font-medium">Total Assignments</CardTitle>
+                                                <FileText className="h-4 w-4 text-muted-foreground" />
                                         </CardHeader>
                                         <CardContent>
-                                                <div className='text-2xl font-bold'>{assignments!.length}</div>
-                                                <p className='text-xs text-muted-foreground'>Completed successfully</p>
+                                                <div className="text-2xl font-bold">{assignments!.length}</div>
+                                                <p className="text-xs text-muted-foreground">Completed successfully</p>
                                         </CardContent>
                                 </Card>
 
@@ -136,5 +138,5 @@ export default async function StudentTranscript() {
                                 </CardContent>
                         </Card> */}
                 </div>
-        )
+        );
 }

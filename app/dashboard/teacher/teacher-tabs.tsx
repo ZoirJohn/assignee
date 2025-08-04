@@ -1,82 +1,85 @@
-'use client'
-import { Fragment, useEffect, useRef, useState } from 'react'
-import { Clock, Send, Eye, CheckCircle, XCircle, Pen } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Textarea } from '@/components/ui/textarea'
-import { TabsContent } from '@/components/ui/tabs'
-import { createClient } from '@/lib/supabase/client'
-import { TAssignment, TMessage, TStudent } from '@/definitions'
-import { cn } from '@/lib/utils'
-import { Label } from '../../../components/ui/label'
+'use client';
+import { Fragment, useEffect, useRef, useState } from 'react';
+import { Clock, Send, Eye, CheckCircle, XCircle, Pen } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Textarea } from '@/components/ui/textarea';
+import { TabsContent } from '@/components/ui/tabs';
+import { createClient } from '@/lib/supabase/client';
+import { TAssignment, TMessage, TStudent } from '@/definitions';
+import { cn } from '@/lib/utils';
+import { Label } from '../../../components/ui/label';
 
 export function TeacherTabs() {
-        const supabase = createClient()
+        const supabase = createClient();
 
-        const [selectedAssignment, setSelectedAssignment] = useState<TAssignment | null>(null)
-        const [gradeOverride, setGradeOverride] = useState<number>()
-        const [isSubmitting, setIsSubmitting] = useState(false)
+        const [selectedAssignment, setSelectedAssignment] = useState<TAssignment | null>(null);
+        const [gradeOverride, setGradeOverride] = useState<number>();
+        const [isSubmitting, setIsSubmitting] = useState(false);
 
-        const [messages, setMessages] = useState<TMessage[]>([])
-        const [assignments, setAssignments] = useState<TAssignment[]>([])
-        const [students, setStudents] = useState<TStudent[]>([])
-        const [newMessage, setNewMessage] = useState<string>('')
-        const [currentUserId, setCurrentUserId] = useState<string>('')
-        const [userId, setUserId] = useState<string>()
-        const [disabled, setDisabled] = useState<boolean>()
-        const messagesEndRef = useRef<HTMLDivElement>(null)
+        const [messages, setMessages] = useState<TMessage[]>([]);
+        const [assignments, setAssignments] = useState<TAssignment[]>([]);
+        const [students, setStudents] = useState<TStudent[]>([]);
+        const [newMessage, setNewMessage] = useState<string>('');
+        const [currentUserId, setCurrentUserId] = useState<string>('');
+        const [userId, setUserId] = useState<string>();
+        const [disabled, setDisabled] = useState<boolean>();
+        const messagesEndRef = useRef<HTMLDivElement>(null);
 
         const handleGradeSubmission = async () => {
-                setIsSubmitting(true)
+                setIsSubmitting(true);
                 if (!selectedAssignment) {
-                        setIsSubmitting(false)
-                        return
+                        setIsSubmitting(false);
+                        return;
                 }
                 try {
                         await supabase
                                 .from('assignments')
-                                .update({ teacher_grade: gradeOverride || selectedAssignment.ai_grade, status: 'graded', feedback: selectedAssignment.feedback })
+                                .update({
+                                        teacher_grade: gradeOverride || selectedAssignment.ai_grade,
+                                        status: 'graded',
+                                        feedback: selectedAssignment.feedback,
+                                })
                                 .eq('id', selectedAssignment.id)
-                                .select()
+                                .select();
                 } catch {
                 } finally {
-                        setGradeOverride(undefined)
-                        setSelectedAssignment(null)
-                        setIsSubmitting(false)
+                        setGradeOverride(undefined);
+                        setSelectedAssignment(null);
+                        setIsSubmitting(false);
                 }
-        }
+        };
         const openSubmissionReview = (submission: TAssignment) => {
                 if (selectedAssignment) {
-                        setSelectedAssignment(null)
+                        setSelectedAssignment(null);
                 } else {
-                        setSelectedAssignment(submission)
+                        setSelectedAssignment(submission);
                 }
-        }
+        };
         const handleSendMessage = async () => {
-                setDisabled(true)
+                setDisabled(true);
                 await supabase.from('messages').insert({
                         sender_id: userId,
                         receiver_id: currentUserId,
                         content: newMessage,
-                })
-                setNewMessage('')
-                setDisabled(false)
-        }
+                });
+                setNewMessage('');
+                setDisabled(false);
+        };
         useEffect(() => {
                 async function fetchUser() {
-                        const {
-                                data: { user },
-                        } = await supabase.auth.getUser()
+                        const { data } = await supabase.auth.getClaims();
+                        const user = data?.claims;
                         if (user) {
-                                setUserId(user.id)
+                                setUserId(user.sub);
                         }
                 }
-                fetchUser()
-        }, [])
+                fetchUser();
+        }, []);
         useEffect(() => {
                 const channel = supabase
                         .channel('realtime-chat:teacher-student')
@@ -88,168 +91,198 @@ export function TeacherTabs() {
                                         table: 'messages',
                                 },
                                 (payload) => {
-                                        const { eventType, new: newRow, old: oldRow } = payload
+                                        const { eventType, new: newRow, old: oldRow } = payload;
                                         if (eventType === 'INSERT') {
-                                                setMessages((prev) => [...prev, newRow] as TMessage[])
+                                                setMessages((prev) => [...prev, newRow] as TMessage[]);
                                         }
 
                                         if (eventType === 'DELETE') {
-                                                console.log(oldRow)
-                                                setMessages((prev) => prev.filter((messages) => messages.id !== oldRow.id))
+                                                console.log(oldRow);
+                                                setMessages((prev) => prev.filter((messages) => messages.id !== oldRow.id));
                                         }
                                 }
                         )
-                        .subscribe()
+                        .subscribe();
                 return () => {
-                        supabase.removeChannel(channel)
-                }
-        }, [])
+                        supabase.removeChannel(channel);
+                };
+        }, []);
         useEffect(() => {
                 const channel = supabase
                         .channel('realtime-assignment-update')
                         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'assignments' }, (payload) => {
-                                const { eventType, new: newRow } = payload
-                                console.log(eventType)
-                                setAssignments((prev) => [...prev, newRow] as TAssignment[])
+                                const { eventType, new: newRow } = payload;
+                                console.log(eventType);
+                                setAssignments((prev) => [...prev, newRow] as TAssignment[]);
                         })
-                        .subscribe()
+                        .subscribe();
                 return () => {
-                        supabase.removeChannel(channel)
-                }
-        }, [])
+                        supabase.removeChannel(channel);
+                };
+        }, []);
         useEffect(() => {
                 async function fetchStudents() {
-                        const { data: students } = await supabase.from('profiles').select('id, full_name').eq('teacher_id', userId)
+                        const { data: students } = await supabase.from('profiles').select('id, full_name').eq('teacher_id', userId);
                         if (students?.length) {
-                                setStudents(students)
-                                setCurrentUserId(students[0].id)
+                                setStudents(students);
+                                setCurrentUserId(students[0].id);
                         }
                 }
                 if (userId) {
-                        fetchStudents()
+                        fetchStudents();
                 }
-        }, [userId])
+        }, [userId]);
         useEffect(() => {
                 const fetchMessages = async () => {
                         const { data: messages } = await supabase
                                 .from('messages')
                                 .select('*')
-                                .or(`and(sender_id.eq.${userId},receiver_id.eq.${currentUserId}),and(sender_id.eq.${currentUserId},receiver_id.eq.${userId})`)
-                                .order('created_at', { ascending: true })
+                                .or(
+                                        `and(sender_id.eq.${userId},receiver_id.eq.${currentUserId}),and(sender_id.eq.${currentUserId},receiver_id.eq.${userId})`
+                                )
+                                .order('created_at', { ascending: true });
 
-                        setMessages(messages as TMessage[])
-                }
+                        setMessages(messages as TMessage[]);
+                };
 
-                if (currentUserId) fetchMessages()
-                setDisabled(students.length == 0)
-        }, [currentUserId, userId, students.length])
+                if (currentUserId) fetchMessages();
+                setDisabled(students.length == 0);
+        }, [currentUserId, userId, students.length]);
         useEffect(() => {
                 const fetchAssignments = async () => {
-                        const { data: assignments } = await supabase.from('assignments').select('*').eq('created_by', userId)
-                        setAssignments((prev) => [...prev, ...(assignments as TAssignment[])])
-                }
-                if (userId) fetchAssignments()
-        }, [userId])
+                        const { data: assignments } = await supabase.from('assignments').select('*').eq('created_by', userId);
+                        setAssignments((prev) => [...prev, ...(assignments as TAssignment[])]);
+                };
+                if (userId) fetchAssignments();
+        }, [userId]);
         useEffect(() => {
                 const scrollTimeout = setTimeout(() => {
-                        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-                }, 0)
+                        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                }, 0);
 
                 return () => {
-                        clearTimeout(scrollTimeout)
-                }
-        }, [messages])
+                        clearTimeout(scrollTimeout);
+                };
+        }, [messages]);
         return (
                 <>
                         <TabsContent
-                                value='assignments'
-                                className='space-y-4'
-                        >
-                                <div className='grid gap-3 overflow-hidden'>
+                                value="assignments"
+                                className="space-y-4">
+                                <div className="grid gap-3 overflow-hidden">
                                         {assignments.length ? (
                                                 assignments.map((assignment) => (
                                                         <Fragment key={assignment.id}>
-                                                                <Card className='gap-0 max-[425px]:py-4 border'>
-                                                                        <CardHeader className='max-[425px]:px-4'>
-                                                                                <div className='flex flex-col gap-1'>
-                                                                                        <CardTitle className='text-2xl font-bold leading-tight text-blue-900'>{assignment.title}</CardTitle>
-                                                                                        <div className='text-sm text-gray-400 mt-0.5 mb-0.5'>{assignment.subject}</div>
-                                                                                        <div className='text-lg font-medium text-gray-800 mb-1'>{assignment.description}</div>
-                                                                                        <div className='flex items-center flex-wrap gap-1 mt-1'>
+                                                                <Card className="gap-0 max-[425px]:py-4 border">
+                                                                        <CardHeader className="max-[425px]:px-4">
+                                                                                <div className="flex flex-col gap-1">
+                                                                                        <CardTitle className="text-2xl font-bold leading-tight text-blue-900">
+                                                                                                {assignment.title}
+                                                                                        </CardTitle>
+                                                                                        <div className="text-sm text-gray-400 mt-0.5 mb-0.5">
+                                                                                                {assignment.subject}
+                                                                                        </div>
+                                                                                        <div className="text-lg font-medium text-gray-800 mb-1">
+                                                                                                {assignment.description}
+                                                                                        </div>
+                                                                                        <div className="flex items-center flex-wrap gap-1 mt-1">
                                                                                                 <Badge
                                                                                                         className={cn(
-                                                                                                                assignment.status === 'graded' && 'bg-green-100 text-green-800',
-                                                                                                                assignment.status === 'submitted' && 'bg-blue-100 text-blue-800',
-                                                                                                                assignment.status === 'pending' && 'bg-yellow-100 text-yellow-800',
-                                                                                                                assignment.status === 'missed' && 'bg-red-100 text-red-800',
+                                                                                                                assignment.status ===
+                                                                                                                        'graded' &&
+                                                                                                                        'bg-green-100 text-green-800',
+                                                                                                                assignment.status ===
+                                                                                                                        'submitted' &&
+                                                                                                                        'bg-blue-100 text-blue-800',
+                                                                                                                assignment.status ===
+                                                                                                                        'pending' &&
+                                                                                                                        'bg-yellow-100 text-yellow-800',
+                                                                                                                assignment.status ===
+                                                                                                                        'missed' &&
+                                                                                                                        'bg-red-100 text-red-800',
                                                                                                                 'text-sm rounded-full'
                                                                                                         )}
-                                                                                                        variant='secondary'
-                                                                                                >
+                                                                                                        variant="secondary">
                                                                                                         {assignment.status === 'graded' ? (
                                                                                                                 <>
-                                                                                                                        <CheckCircle className='w-3 h-3 mr-1' />
+                                                                                                                        <CheckCircle className="w-3 h-3 mr-1" />
                                                                                                                         Graded
                                                                                                                 </>
-                                                                                                        ) : assignment.status === 'submitted' ? (
+                                                                                                        ) : assignment.status ===
+                                                                                                          'submitted' ? (
                                                                                                                 <>
-                                                                                                                        <Clock className='w-3 h-3 mr-1' />
+                                                                                                                        <Clock className="w-3 h-3 mr-1" />
                                                                                                                         Submitted
                                                                                                                 </>
-                                                                                                        ) : assignment.status === 'pending' ? (
+                                                                                                        ) : assignment.status ===
+                                                                                                          'pending' ? (
                                                                                                                 <>
-                                                                                                                        <Clock className='w-3 h-3 mr-1' />
+                                                                                                                        <Clock className="w-3 h-3 mr-1" />
                                                                                                                         Pending
                                                                                                                 </>
-                                                                                                        ) : assignment.status === 'missed' ? (
+                                                                                                        ) : assignment.status ===
+                                                                                                          'missed' ? (
                                                                                                                 <>
-                                                                                                                        <XCircle className='w-3 h-3 mr-1' />
+                                                                                                                        <XCircle className="w-3 h-3 mr-1" />
                                                                                                                         Missed
                                                                                                                 </>
                                                                                                         ) : null}
                                                                                                 </Badge>
                                                                                                 <Badge
-                                                                                                        variant='outline'
-                                                                                                        className='bg-blue-50 text-blue-700 text-sm rounded-full'
-                                                                                                >
-                                                                                                        {assignment.ai_grade !== undefined && assignment.teacher_grade !== null
+                                                                                                        variant="outline"
+                                                                                                        className="bg-blue-50 text-blue-700 text-sm rounded-full">
+                                                                                                        {assignment.ai_grade !==
+                                                                                                                undefined &&
+                                                                                                        assignment.teacher_grade !== null
                                                                                                                 ? `Score: ${assignment.teacher_grade}`
                                                                                                                 : assignment.ai_grade
                                                                                                                 ? `AI Score: ${assignment.ai_grade}`
                                                                                                                 : 'AI Score: Not scored'}
                                                                                                 </Badge>
                                                                                                 {assignment.teacher_grade && (
-                                                                                                        <Badge className='bg-green-100 text-green-800 hover:bg-green-100'>
-                                                                                                                Graded: {new Date().toLocaleDateString([], { day: 'numeric', month: 'long' })}
+                                                                                                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                                                                                                                Graded:{' '}
+                                                                                                                {new Date().toLocaleDateString(
+                                                                                                                        [],
+                                                                                                                        {
+                                                                                                                                day: 'numeric',
+                                                                                                                                month: 'long',
+                                                                                                                        }
+                                                                                                                )}
                                                                                                         </Badge>
                                                                                                 )}
                                                                                         </div>
                                                                                 </div>
                                                                         </CardHeader>
-                                                                        <CardContent className='max-[425px]:px-4'>
-                                                                                <div className='flex items-center justify-between flex-wrap gap-4 border-t pt-3 mt-2'>
-                                                                                        <div className='flex flex-col gap-2'>
-                                                                                                <div className='flex items-center text-base font-medium text-gray-700'>
-                                                                                                        <Clock className='w-5 h-5 mr-2' />
+                                                                        <CardContent className="max-[425px]:px-4">
+                                                                                <div className="flex items-center justify-between flex-wrap gap-4 border-t pt-3 mt-2">
+                                                                                        <div className="flex flex-col gap-2">
+                                                                                                <div className="flex items-center text-base font-medium text-gray-700">
+                                                                                                        <Clock className="w-5 h-5 mr-2" />
                                                                                                         Due:{' '}
-                                                                                                        {new Date(assignment.deadline).toLocaleDateString('en-UZ', {
+                                                                                                        {new Date(
+                                                                                                                assignment.deadline
+                                                                                                        ).toLocaleDateString('en-UZ', {
                                                                                                                 day: 'numeric',
                                                                                                                 month: 'long',
                                                                                                                 year: 'numeric',
                                                                                                         })}
                                                                                                 </div>
                                                                                         </div>
-                                                                                        <div className='flex items-center space-x-2'>
+                                                                                        <div className="flex items-center space-x-2">
                                                                                                 <Button
-                                                                                                        variant='outline'
-                                                                                                        size='sm'
-                                                                                                        onClick={() => openSubmissionReview(assignment)}
-                                                                                                >
+                                                                                                        variant="outline"
+                                                                                                        size="sm"
+                                                                                                        onClick={() =>
+                                                                                                                openSubmissionReview(
+                                                                                                                        assignment
+                                                                                                                )
+                                                                                                        }>
                                                                                                         {assignment.status == 'graded' ? (
                                                                                                                 <Pen />
                                                                                                         ) : (
                                                                                                                 <>
-                                                                                                                        <Eye className='w-4 h-4 mr-2' />
+                                                                                                                        <Eye className="w-4 h-4 mr-2" />
                                                                                                                         Review
                                                                                                                 </>
                                                                                                         )}
@@ -259,82 +292,148 @@ export function TeacherTabs() {
                                                                         </CardContent>
                                                                 </Card>
                                                                 {selectedAssignment && selectedAssignment.id === assignment.id && (
-                                                                        <Card className='border-2 border-blue-200 bg-blue-50/30'>
+                                                                        <Card className="border-2 border-blue-200 bg-blue-50/30">
                                                                                 <CardHeader>
-                                                                                        <CardTitle>Review: {selectedAssignment.title}</CardTitle>
+                                                                                        <CardTitle>
+                                                                                                Review: {selectedAssignment.title}
+                                                                                        </CardTitle>
                                                                                 </CardHeader>
-                                                                                <CardContent className='space-y-4'>
+                                                                                <CardContent className="space-y-4">
                                                                                         <div>
-                                                                                                <h4 className='font-semibold mb-2'>Extracted Text:</h4>
-                                                                                                <div className='bg-gray-50 p-4 rounded-lg max-h-32 overflow-y-auto'>
-                                                                                                        <p className='text-lg'>{selectedAssignment.extracted_text}</p>
+                                                                                                <h4 className="font-semibold mb-2">
+                                                                                                        Extracted Text:
+                                                                                                </h4>
+                                                                                                <div className="bg-gray-50 p-4 rounded-lg max-h-32 overflow-y-auto">
+                                                                                                        <p className="text-lg">
+                                                                                                                {
+                                                                                                                        selectedAssignment.extracted_text
+                                                                                                                }
+                                                                                                        </p>
                                                                                                 </div>
                                                                                         </div>
-                                                                                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                                                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                                                                 <div>
-                                                                                                        <Label className='block text-sm font-medium mb-2'>AI Grade</Label>
+                                                                                                        <Label className="block text-sm font-medium mb-2">
+                                                                                                                AI Grade
+                                                                                                        </Label>
                                                                                                         <Input
-                                                                                                                type='number'
-                                                                                                                value={selectedAssignment.ai_grade ?? ''}
+                                                                                                                type="number"
+                                                                                                                value={
+                                                                                                                        selectedAssignment.ai_grade ??
+                                                                                                                        ''
+                                                                                                                }
                                                                                                                 readOnly
-                                                                                                                className='bg-gray-100 cursor-not-allowed'
+                                                                                                                className="bg-gray-100 cursor-not-allowed"
                                                                                                         />
-                                                                                                        <p className='text-xs text-gray-500 mt-1'>This is the AI-predicted grade (out of 5)</p>
+                                                                                                        <p className="text-xs text-gray-500 mt-1">
+                                                                                                                This is the AI-predicted
+                                                                                                                grade (out of 5)
+                                                                                                        </p>
                                                                                                 </div>
                                                                                                 <div>
-                                                                                                        <Label className='block text-sm font-medium mb-2'>Grade</Label>
+                                                                                                        <Label className="block text-sm font-medium mb-2">
+                                                                                                                Grade
+                                                                                                        </Label>
                                                                                                         <Input
-                                                                                                                type='number'
+                                                                                                                type="number"
                                                                                                                 max={5}
                                                                                                                 min={2}
                                                                                                                 step={1}
-                                                                                                                value={gradeOverride === undefined ? '' : gradeOverride}
+                                                                                                                value={
+                                                                                                                        gradeOverride ===
+                                                                                                                        undefined
+                                                                                                                                ? ''
+                                                                                                                                : gradeOverride
+                                                                                                                }
                                                                                                                 onChange={(e) => {
-                                                                                                                        const value = e.target.value
-                                                                                                                        if (value === '' || ['2', '3', '4', '5'].includes(value)) {
-                                                                                                                                setGradeOverride(value === '' ? undefined : parseInt(value, 10))
+                                                                                                                        const value =
+                                                                                                                                e.target
+                                                                                                                                        .value;
+                                                                                                                        if (
+                                                                                                                                value ===
+                                                                                                                                        '' ||
+                                                                                                                                [
+                                                                                                                                        '2',
+                                                                                                                                        '3',
+                                                                                                                                        '4',
+                                                                                                                                        '5',
+                                                                                                                                ].includes(
+                                                                                                                                        value
+                                                                                                                                )
+                                                                                                                        ) {
+                                                                                                                                setGradeOverride(
+                                                                                                                                        value ===
+                                                                                                                                                ''
+                                                                                                                                                ? undefined
+                                                                                                                                                : parseInt(
+                                                                                                                                                          value,
+                                                                                                                                                          10
+                                                                                                                                                  )
+                                                                                                                                );
                                                                                                                         }
                                                                                                                 }}
-                                                                                                                placeholder='Enter grade (2-5)'
-                                                                                                                readOnly={selectedAssignment.ai_grade == undefined}
+                                                                                                                placeholder="Enter grade (2-5)"
+                                                                                                                readOnly={
+                                                                                                                        selectedAssignment.ai_grade ==
+                                                                                                                        undefined
+                                                                                                                }
                                                                                                         />
-                                                                                                        <p className='text-xs text-gray-500 mt-1'>Your grade for this assignment (out of 5)</p>
+                                                                                                        <p className="text-xs text-gray-500 mt-1">
+                                                                                                                Your grade for this
+                                                                                                                assignment (out of 5)
+                                                                                                        </p>
                                                                                                 </div>
                                                                                                 <div>
                                                                                                         <Label
-                                                                                                                className='block text-sm font-medium mb-2'
-                                                                                                                htmlFor='feedback'
-                                                                                                        >
+                                                                                                                className="block text-sm font-medium mb-2"
+                                                                                                                htmlFor="feedback">
                                                                                                                 Feedback
                                                                                                         </Label>
                                                                                                         <Textarea
-                                                                                                                id='feedback'
-                                                                                                                placeholder='Enter feedback for the student...'
-                                                                                                                className='min-h-20 max-h-40'
-                                                                                                                value={selectedAssignment.feedback || ''}
+                                                                                                                id="feedback"
+                                                                                                                placeholder="Enter feedback for the student..."
+                                                                                                                className="min-h-20 max-h-40"
+                                                                                                                value={
+                                                                                                                        selectedAssignment.feedback ||
+                                                                                                                        ''
+                                                                                                                }
                                                                                                                 onChange={(e) =>
                                                                                                                         setSelectedAssignment(
                                                                                                                                 selectedAssignment
-                                                                                                                                        ? { ...selectedAssignment, feedback: e.target.value }
+                                                                                                                                        ? {
+                                                                                                                                                  ...selectedAssignment,
+                                                                                                                                                  feedback: e
+                                                                                                                                                          .target
+                                                                                                                                                          .value,
+                                                                                                                                          }
                                                                                                                                         : selectedAssignment
                                                                                                                         )
                                                                                                                 }
-                                                                                                                readOnly={selectedAssignment.ai_grade == undefined}
+                                                                                                                readOnly={
+                                                                                                                        selectedAssignment.ai_grade ==
+                                                                                                                        undefined
+                                                                                                                }
                                                                                                         />
                                                                                                 </div>
                                                                                         </div>
 
-                                                                                        <div className='flex items-center space-x-2'>
+                                                                                        <div className="flex items-center space-x-2">
                                                                                                 <Button
                                                                                                         onClick={handleGradeSubmission}
-                                                                                                        disabled={selectedAssignment.ai_grade == undefined || isSubmitting}
-                                                                                                >
-                                                                                                        {isSubmitting ? 'Submitting...' : 'Confirm Grade'}
+                                                                                                        disabled={
+                                                                                                                selectedAssignment.ai_grade ==
+                                                                                                                        undefined ||
+                                                                                                                isSubmitting
+                                                                                                        }>
+                                                                                                        {isSubmitting
+                                                                                                                ? 'Submitting...'
+                                                                                                                : 'Confirm Grade'}
                                                                                                 </Button>
                                                                                                 <Button
-                                                                                                        variant='outline'
-                                                                                                        onClick={() => setSelectedAssignment(null)}
-                                                                                                >
+                                                                                                        variant="outline"
+                                                                                                        onClick={() =>
+                                                                                                                setSelectedAssignment(null)
+                                                                                                        }>
                                                                                                         Cancel
                                                                                                 </Button>
                                                                                         </div>
@@ -344,51 +443,74 @@ export function TeacherTabs() {
                                                         </Fragment>
                                                 ))
                                         ) : (
-                                                <h1 className='text-gray-600'>No assignments found</h1>
+                                                <h1 className="text-gray-600">No assignments found</h1>
                                         )}
                                 </div>
                         </TabsContent>
 
                         <TabsContent
-                                value='chat'
-                                className='space-y-4'
-                        >
-                                <Card className='h-120'>
-                                        <CardHeader className='max-[400px]:!pb-0 grid-cols-1'>
+                                value="chat"
+                                className="space-y-4">
+                                <Card className="h-120">
+                                        <CardHeader className="max-[400px]:!pb-0 grid-cols-1">
                                                 <div>
                                                         {students.length ? (
                                                                 <>
-                                                                        <CardTitle className='text-2xl'>Student Messages</CardTitle>
-                                                                        <CardDescription className='text-xs'>Communicate with your students</CardDescription>
+                                                                        <CardTitle className="text-2xl">Student Messages</CardTitle>
+                                                                        <CardDescription className="text-xs">
+                                                                                Communicate with your students
+                                                                        </CardDescription>
                                                                 </>
                                                         ) : (
                                                                 <>
-                                                                        <CardTitle className='text-2xl'>Please wait until your students arrive</CardTitle>
-                                                                        <CardDescription className='text-xs'>Let them register here</CardDescription>
+                                                                        <CardTitle className="text-2xl">
+                                                                                Please wait until your students arrive
+                                                                        </CardTitle>
+                                                                        <CardDescription className="text-xs">
+                                                                                Let them register here
+                                                                        </CardDescription>
                                                                 </>
                                                         )}
                                                 </div>
                                         </CardHeader>
-                                        <CardContent className='flex flex-col max-[425px]:px-3'>
-                                                <ScrollArea className='flex-1 mb-5 max-[400px]:mb-3 max-[332px]:mb-8'>
-                                                        <div className='space-y-4 h-93'>
+                                        <CardContent className="flex flex-col max-[425px]:px-3">
+                                                <ScrollArea className="flex-1 mb-5 max-[400px]:mb-3 max-[332px]:mb-8">
+                                                        <div className="space-y-4 h-93">
                                                                 {messages.map(({ id, sender_id, created_at, content }) => (
                                                                         <div
                                                                                 key={id}
-                                                                                className={`flex ${sender_id === userId ? 'justify-end' : 'justify-start'}`}
-                                                                        >
+                                                                                className={`flex ${
+                                                                                        sender_id === userId
+                                                                                                ? 'justify-end'
+                                                                                                : 'justify-start'
+                                                                                }`}>
                                                                                 <div
                                                                                         className={`flex items-start space-x-2 max-w-xs ${
-                                                                                                sender_id === userId ? 'flex-row-reverse space-x-reverse' : ''
-                                                                                        }`}
-                                                                                >
-                                                                                        <Avatar className='w-8 h-8'>
-                                                                                                <AvatarFallback>{sender_id === userId ? 'T' : 'S'}</AvatarFallback>
+                                                                                                sender_id === userId
+                                                                                                        ? 'flex-row-reverse space-x-reverse'
+                                                                                                        : ''
+                                                                                        }`}>
+                                                                                        <Avatar className="w-8 h-8">
+                                                                                                <AvatarFallback>
+                                                                                                        {sender_id === userId ? 'T' : 'S'}
+                                                                                                </AvatarFallback>
                                                                                         </Avatar>
-                                                                                        <div className={`p-3 rounded-lg ${sender_id === userId ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}>
-                                                                                                <p className='text-sm'>{content}</p>
-                                                                                                <p className={`text-xs mt-1 ${sender_id === userId ? 'text-blue-100' : 'text-gray-500'}`}>
-                                                                                                        {new Date(created_at).toLocaleTimeString([], {
+                                                                                        <div
+                                                                                                className={`p-3 rounded-lg ${
+                                                                                                        sender_id === userId
+                                                                                                                ? 'bg-blue-600 text-white'
+                                                                                                                : 'bg-gray-100'
+                                                                                                }`}>
+                                                                                                <p className="text-sm">{content}</p>
+                                                                                                <p
+                                                                                                        className={`text-xs mt-1 ${
+                                                                                                                sender_id === userId
+                                                                                                                        ? 'text-blue-100'
+                                                                                                                        : 'text-gray-500'
+                                                                                                        }`}>
+                                                                                                        {new Date(
+                                                                                                                created_at
+                                                                                                        ).toLocaleTimeString([], {
                                                                                                                 hour: '2-digit',
                                                                                                                 minute: '2-digit',
                                                                                                                 hour12: true,
@@ -400,31 +522,29 @@ export function TeacherTabs() {
                                                                 ))}
                                                                 <div
                                                                         ref={messagesEndRef}
-                                                                        className='h-0'
+                                                                        className="h-0"
                                                                 />
                                                         </div>
                                                 </ScrollArea>
-                                                <div className='flex items-center space-x-2 pb-5'>
+                                                <div className="flex items-center space-x-2 pb-5">
                                                         <label
-                                                                htmlFor='chat-message-input'
-                                                                className='sr-only'
-                                                        >
+                                                                htmlFor="chat-message-input"
+                                                                className="sr-only">
                                                                 Type your message
                                                         </label>
                                                         <Input
-                                                                id='chat-message-input'
-                                                                placeholder='Type your message...'
+                                                                id="chat-message-input"
+                                                                placeholder="Type your message..."
                                                                 value={newMessage}
                                                                 onChange={(e) => setNewMessage(e.target.value)}
                                                                 onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                                                                 disabled={disabled}
                                                         />
                                                         <Button
-                                                                size='sm'
+                                                                size="sm"
                                                                 onClick={handleSendMessage}
-                                                                disabled={disabled}
-                                                        >
-                                                                <Send className='w-4 h-4' />
+                                                                disabled={disabled}>
+                                                                <Send className="w-4 h-4" />
                                                         </Button>
                                                 </div>
                                         </CardContent>
@@ -432,36 +552,35 @@ export function TeacherTabs() {
                         </TabsContent>
 
                         <TabsContent
-                                value='feedback'
-                                className='space-y-4'
-                        >
+                                value="feedback"
+                                className="space-y-4">
                                 {assignments.length ? (
-                                        <Card className='max-[425px]:py-4'>
-                                                <CardHeader className='max-[425px]:px-4'>
+                                        <Card className="max-[425px]:py-4">
+                                                <CardHeader className="max-[425px]:px-4">
                                                         <CardTitle>Recent Feedback Given</CardTitle>
-                                                        <CardDescription>Track the feedback you&apos;ve provided to students</CardDescription>
+                                                        <CardDescription>
+                                                                Track the feedback you&apos;ve provided to students
+                                                        </CardDescription>
                                                 </CardHeader>
                                                 {assignments.map(({ id, title, teacher_grade, feedback }, idx) => (
                                                         <CardContent
-                                                                className='max-[425px]:px-4'
-                                                                key={idx}
-                                                        >
-                                                                <div className='space-y-4'>
+                                                                className="max-[425px]:px-4"
+                                                                key={idx}>
+                                                                <div className="space-y-4">
                                                                         <div
                                                                                 key={id}
-                                                                                className='p-4 rounded-lg w-full border grid grid-cols-2 max-[425px]:grid-cols-3'
-                                                                        >
-                                                                                <div className='max-[425px]:col-span-2'>
-                                                                                        <h4 className='font-semibold text-xl'>Student </h4>
-                                                                                        <p className='text-sm text-gray-600'>{title}</p>
+                                                                                className="p-4 rounded-lg w-full border grid grid-cols-2 max-[425px]:grid-cols-3">
+                                                                                <div className="max-[425px]:col-span-2">
+                                                                                        <h4 className="font-semibold text-xl">Student </h4>
+                                                                                        <p className="text-sm text-gray-600">{title}</p>
                                                                                 </div>
-                                                                                <div className='flex items-start justify-end'>
-                                                                                        <Badge className='bg-green-100 text-green-800 hover:bg-green-100'>
+                                                                                <div className="flex items-start justify-end">
+                                                                                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
                                                                                                 {teacher_grade}/{5}
                                                                                         </Badge>
                                                                                 </div>
-                                                                                <div className='[425px]:col-span-2 col-span-3 mt-4'>
-                                                                                        <p className='text-sm'>
+                                                                                <div className="[425px]:col-span-2 col-span-3 mt-4">
+                                                                                        <p className="text-sm">
                                                                                                 <b>Feedback: </b>
                                                                                                 {feedback || 'No feedback yet'}
                                                                                         </p>
@@ -472,9 +591,9 @@ export function TeacherTabs() {
                                                 ))}
                                         </Card>
                                 ) : (
-                                        <h1 className='text-gray-600'>No assignments found</h1>
+                                        <h1 className="text-gray-600">No assignments found</h1>
                                 )}
                         </TabsContent>
                 </>
-        )
+        );
 }
