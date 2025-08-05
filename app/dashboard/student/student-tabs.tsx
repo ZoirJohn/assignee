@@ -11,8 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { TabsContent } from '@/components/ui/tabs';
 import { createClient } from '@/lib/supabase/client';
 import { TAssignment, TMessage } from '@/definitions';
-import Image from 'next/image';
 import { submitAssignment } from '@/lib/azure/submitAssignment';
+import Image from 'next/image';
 
 export default function StudentTabs() {
         const supabase = createClient();

@@ -7,7 +7,7 @@ import Image from 'next/image';
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
         const supabase = await createClient();
         const { data } = await supabase.auth.getClaims();
-        const { fullName, role } = data?.claims?.user_metadata || {};
+        const { fullName, role }: { fullName: string; role: string } = data?.claims?.user_metadata || {};
         return (
                 <div className="md:h-screen flex">
                         <Sidebar
@@ -31,7 +31,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
                                                 <div className="flex items-center space-x-2">
                                                         <Avatar className="w-8 h-8">
                                                                 <AvatarFallback className="text-xs">
-                                                                        {''
+                                                                        {fullName
                                                                                 .split(' ')
                                                                                 .map((n) => n[0])
                                                                                 .join('')}

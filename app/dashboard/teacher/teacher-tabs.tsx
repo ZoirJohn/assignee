@@ -96,7 +96,6 @@ export function TeacherTabs() {
                                         }
 
                                         if (eventType === 'DELETE') {
-                                                console.log(oldRow);
                                                 setMessages((prev) => prev.filter((messages) => messages.id !== oldRow.id));
                                         }
                                 }
