@@ -16,15 +16,14 @@ export async function signin(formData: FormData) {
                 return { error: error.message };
         }
 
-        const { data } = await supabase.auth.getClaims();
-        const user = data?.claims;
-        const { data: profiles } = await supabase.from('profiles').select('*').eq('id', user?.sub);
+        const { claims } = (await supabase.auth.getClaims()).data || {};
+        const { data: profiles } = await supabase.from('profiles').select('*').eq('id', claims?.sub);
         if (!profiles?.length) {
                 const { error: insertionError } = await supabase.from('profiles').insert({
-                        id: user?.sub,
-                        full_name: user?.user_metadata.fullName,
-                        role: user?.user_metadata.role,
-                        teacher_id: user?.user_metadata.role == 'student' ? user?.user_metadata.teacherId : null,
+                        id: claims?.sub,
+                        full_name: claims?.user_metadata.fullName,
+                        role: claims?.user_metadata.role,
+                        teacher_id: claims?.user_metadata.role == 'student' ? claims?.user_metadata.teacherId : null,
                 });
                 if (insertionError) {
                         console.error(insertionError);
@@ -32,9 +31,9 @@ export async function signin(formData: FormData) {
         }
 
         revalidatePath('/', 'layout');
-        if (user?.user_metadata.role == 'student') {
+        if (claims?.user_metadata.role == 'student') {
                 redirect('/dashboard/student');
-        } else if (user?.user_metadata.role == 'teacher') {
+        } else if (claims?.user_metadata.role == 'teacher') {
                 redirect('/dashboard/teacher');
         } else {
                 redirect('/');

@@ -150,11 +150,10 @@ export default function StudentTabs() {
 
         useEffect(() => {
                 async function fetchUser() {
-                        const { data } = await supabase.auth.getClaims();
-                        const user = data?.claims;
-                        if (user) {
-                                setTeacherId(user.user_metadata.teacherId as string);
-                                setUserId(user.sub);
+                        const { claims } = (await supabase.auth.getClaims()).data || {};
+                        if (claims) {
+                                setTeacherId(claims.user_metadata.teacherId as string);
+                                setUserId(claims.sub);
                         }
                 }
                 fetchUser();

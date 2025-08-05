@@ -21,19 +21,18 @@ export async function updateSession(request: NextRequest) {
                 },
         });
 
-        const { data } = await supabase.auth.getClaims();
-        const user = data?.claims;
+        const { claims } = (await supabase.auth.getClaims()).data || {};
         if (
-                !user &&
+                !claims &&
                 (request.nextUrl.pathname.startsWith('/dashboard/teacher') || request.nextUrl.pathname.startsWith('/dashboard/student'))
         ) {
                 const url = request.nextUrl.clone();
                 url.pathname = '/';
                 return NextResponse.redirect(url);
         }
-        if (user && (request.nextUrl.pathname.startsWith('/signin') || request.nextUrl.pathname.startsWith('/signup'))) {
+        if (claims && (request.nextUrl.pathname.startsWith('/signin') || request.nextUrl.pathname.startsWith('/signup'))) {
                 const url = request.nextUrl.clone();
-                const role = user.user_metadata.role;
+                const role = claims.user_metadata.role;
                 url.pathname = `/dashboard/${role}`;
                 return NextResponse.redirect(url);
         }

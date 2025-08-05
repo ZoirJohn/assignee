@@ -72,10 +72,9 @@ export function TeacherTabs() {
         };
         useEffect(() => {
                 async function fetchUser() {
-                        const { data } = await supabase.auth.getClaims();
-                        const user = data?.claims;
-                        if (user) {
-                                setUserId(user.sub);
+                        const { claims } = (await supabase.auth.getClaims()).data || {};
+                        if (claims) {
+                                setUserId(claims.sub);
                         }
                 }
                 fetchUser();
