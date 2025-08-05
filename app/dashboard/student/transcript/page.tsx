@@ -1,8 +1,8 @@
-import { FileText, Download, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { createClient } from '@/lib/supabase/server';
 import { TAssignment } from '@/definitions';
+import { createClient } from '@/lib/supabase/server';
+import { Download, FileText, TrendingUp } from 'lucide-react';
 
 export default async function StudentTranscript() {
         const supabase = await createClient();
@@ -32,7 +32,7 @@ export default async function StudentTranscript() {
                                         <CardContent>
                                                 <div className="text-2xl font-bold text-blue-600">
                                                         {assignments!.reduce((prv, nwv) => prv + nwv.teacher_grade!, 0) /
-                                                                assignments!.length}
+                                                                (assignments!.length || 1)}
                                                 </div>
                                                 <p className="text-xs text-muted-foreground">Out of 5.0 scale</p>
                                         </CardContent>
