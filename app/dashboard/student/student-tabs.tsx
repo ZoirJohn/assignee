@@ -194,7 +194,7 @@ export default function StudentTabs() {
                                 .or(
                                         `and(sender_id.eq.${userId},receiver_id.eq.${teacherId}),and(sender_id.eq.${teacherId},receiver_id.eq.${userId})`
                                 )
-                                .order('created_at', { ascending: true });
+                                .order('sent_at', { ascending: true });
                         setMessages(messages as TMessage[]);
                 };
 
@@ -593,7 +593,7 @@ export default function StudentTabs() {
                                         <CardContent className="flex flex-col h-full max-[425px]:px-3">
                                                 <ScrollArea className="flex-1 mb-5 max-[400px]:mb-3 max-[332px]:mb-8">
                                                         <div className="space-y-4 h-93">
-                                                                {messages.map(({ id, sender_id, content, created_at }) => (
+                                                                {messages.map(({ id, sender_id, content, sent_at }) => (
                                                                         <div
                                                                                 key={id}
                                                                                 className={`flex ${
@@ -626,7 +626,7 @@ export default function StudentTabs() {
                                                                                                                         : 'text-gray-500'
                                                                                                         }`}>
                                                                                                         {new Date(
-                                                                                                                created_at
+                                                                                                                sent_at
                                                                                                         ).toLocaleTimeString([], {
                                                                                                                 hour: '2-digit',
                                                                                                                 minute: '2-digit',
