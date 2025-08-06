@@ -30,7 +30,7 @@ export async function signin(formData: FormData) {
 
     const decision = await aj.protect(req, { email });
     if (decision.isDenied()) {
-        const decisionMessage: string[] = decision.reason.type?.split('_')!;
+        const decisionMessage = decision.reason.type?.split('_') as string[];
         let message: string = '';
         for (let i = 0; i < decisionMessage.length; i++) {
             message += decisionMessage[i].charAt(0) + decisionMessage[i].toLowerCase() + ' ';
@@ -79,7 +79,7 @@ export async function signup(formData: FormData) {
 
 	const decision = await aj.protect(req, { email });
 	if (decision.isDenied()) {
-		const decisionMessage: string[] = decision.reason.type?.split('_')!;
+		const decisionMessage= decision.reason.type?.split('_') as string[];
 		let message: string = '';
 		for (let i = 0; i < decisionMessage.length; i++) {
 			message += decisionMessage[i].charAt(0) + decisionMessage[i].toLowerCase() + ' ';
@@ -118,7 +118,6 @@ export async function reset(formData: FormData) {
     const supabase = await createClient();
 
     const email = formData.get('email') as string;
-
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: 'https://assignee-psi.vercel.app/signin',
     });
