@@ -70,15 +70,20 @@ export function TeacherTabs() {
                 setNewMessage('');
                 setDisabled(false);
         };
+
         useEffect(() => {
-                async function fetchUser() {
-                        const { claims } = (await supabase.auth.getClaims()).data || {};
-                        if (claims) {
-                                setUserId(claims.sub);
+                const fetchUserId = async () => {
+                        try {
+                                const { data } = await supabase.auth.getClaims();
+                                const userId = data?.claims?.sub;
+                                if (userId) setUserId(userId);
+                        } catch (error) {
+                                console.error(error);
                         }
-                }
-                fetchUser();
+                };
+                fetchUserId();
         }, []);
+
         useEffect(() => {
                 const channel = supabase
                         .channel('realtime-chat:teacher-student')
@@ -90,76 +95,118 @@ export function TeacherTabs() {
                                         table: 'messages',
                                 },
                                 (payload) => {
-                                        const { eventType, new: newRow, old: oldRow } = payload;
+                                        const { eventType, new: newMessage, old: oldMessage } = payload;
+                                        console.log(payload);
                                         if (eventType === 'INSERT') {
-                                                setMessages((prev) => [...prev, newRow] as TMessage[]);
+                                                setMessages((prev) => [...prev, newMessage] as TMessage[]);
                                         }
 
                                         if (eventType === 'DELETE') {
-                                                setMessages((prev) => prev.filter((messages) => messages.id !== oldRow.id));
+                                                setMessages((prev) => prev.filter((msg) => msg.id !== oldMessage.id));
                                         }
                                 }
                         )
                         .subscribe();
+
                 return () => {
                         supabase.removeChannel(channel);
                 };
         }, []);
+
         useEffect(() => {
                 const channel = supabase
                         .channel('realtime-assignment-update')
-                        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'assignments' }, (payload) => {
-                                const { eventType, new: newRow } = payload;
-                                console.log(eventType);
-                                setAssignments((prev) => [...prev, newRow] as TAssignment[]);
-                        })
+                        .on(
+                                'postgres_changes',
+                                {
+                                        event: 'UPDATE',
+                                        schema: 'public',
+                                        table: 'assignments',
+                                },
+                                (payload) => {
+                                        const { new: updatedAssignment } = payload;
+                                        setAssignments((prev) => [...prev, updatedAssignment] as TAssignment[]);
+                                }
+                        )
                         .subscribe();
+
                 return () => {
                         supabase.removeChannel(channel);
                 };
         }, []);
-        useEffect(() => {
-                async function fetchStudents() {
-                        const { data: students } = await supabase.from('profiles').select('id, full_name').eq('teacher_id', userId);
-                        if (students?.length) {
-                                setStudents(students);
-                                setCurrentUserId(students[0].id);
-                        }
-                }
-                if (userId) {
-                        fetchStudents();
-                }
-        }, [userId]);
-        useEffect(() => {
-                const fetchMessages = async () => {
-                        const { data: messages } = await supabase
-                                .from('messages')
-                                .select('*')
-                                .or(
-                                        `and(sender_id.eq.${userId},receiver_id.eq.${currentUserId}),and(sender_id.eq.${currentUserId},receiver_id.eq.${userId})`
-                                )
-                                .order('created_at', { ascending: true });
 
-                        setMessages(messages as TMessage[]);
+        useEffect(() => {
+                const fetchStudents = async () => {
+                        try {
+                                const { data: students, error } = await supabase
+                                        .from('profiles')
+                                        .select('id, full_name')
+                                        .eq('teacher_id', userId);
+
+                                if (error) throw error;
+
+                                if (students?.length) {
+                                        setStudents(students);
+                                        setCurrentUserId(students[0].id);
+                                }
+                        } catch (error) {
+                                console.error(error);
+                        }
                 };
 
-                if (currentUserId) fetchMessages();
+                if (userId) fetchStudents();
+        }, [userId]);
+
+        useEffect(() => {
+                const fetchMessages = async () => {
+                        if (!currentUserId || !userId) return;
+                        try {
+                                const { data: messages, error } = await supabase
+                                        .from('messages')
+                                        .select('*')
+                                        .filter('sender_id', 'in', `(${userId},${currentUserId})`)
+                                        .filter('receiver_id', 'in', `(${userId},${currentUserId})`)
+                                        .order('sent_at', { ascending: true });
+                                if (error) {
+                                        console.error(error);
+                                        return;
+                                }
+                                setMessages(messages as TMessage[]);
+                        } catch (error) {
+                                console.error(error);
+                        }
+                };
+                fetchMessages();
                 setDisabled(students.length == 0);
         }, [currentUserId, userId, students.length]);
+
         useEffect(() => {
                 const fetchAssignments = async () => {
-                        const { data: assignments } = await supabase.from('assignments').select('*').eq('created_by', userId);
+                        try {
+                                const { data: assignments, error } = await supabase
+                                        .from('assignments')
+                                        .select('*')
+                                        .eq('created_by', userId);
+                                if (error) {
+                                        console.error(error);
+                                        return;
+                                }
+                                setAssignments(assignments as TAssignment[]);
+                        } catch (error) {
+                                console.error(error);
+                        }
                         setAssignments((prev) => [...prev, ...(assignments as TAssignment[])]);
                 };
                 if (userId) fetchAssignments();
         }, [userId]);
+
         useEffect(() => {
-                const scrollTimeout = setTimeout(() => {
+                const id = requestAnimationFrame(() => {
                         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-                }, 0);
+                });
 
                 return () => {
-                        clearTimeout(scrollTimeout);
+                        cancelAnimationFrame(id);
                 };
         }, [messages]);
         return (
@@ -474,50 +521,56 @@ export function TeacherTabs() {
                                         <CardContent className="flex flex-col max-[425px]:px-3">
                                                 <ScrollArea className="flex-1 mb-5 max-[400px]:mb-3 max-[332px]:mb-8">
                                                         <div className="space-y-4 h-93">
-                                                                {messages.map(({ id, sender_id, created_at, content }) => (
-                                                                        <div
-                                                                                key={id}
-                                                                                className={`flex ${
-                                                                                        sender_id === userId
-                                                                                                ? 'justify-end'
-                                                                                                : 'justify-start'
-                                                                                }`}>
+                                                                {messages.length ? (
+                                                                        messages.map(({ id, sender_id, created_at, content }) => (
                                                                                 <div
-                                                                                        className={`flex items-start space-x-2 max-w-xs ${
+                                                                                        key={id}
+                                                                                        className={`flex ${
                                                                                                 sender_id === userId
-                                                                                                        ? 'flex-row-reverse space-x-reverse'
-                                                                                                        : ''
+                                                                                                        ? 'justify-end'
+                                                                                                        : 'justify-start'
                                                                                         }`}>
-                                                                                        <Avatar className="w-8 h-8">
-                                                                                                <AvatarFallback>
-                                                                                                        {sender_id === userId ? 'T' : 'S'}
-                                                                                                </AvatarFallback>
-                                                                                        </Avatar>
                                                                                         <div
-                                                                                                className={`p-3 rounded-lg ${
+                                                                                                className={`flex items-start space-x-2 max-w-xs ${
                                                                                                         sender_id === userId
-                                                                                                                ? 'bg-blue-600 text-white'
-                                                                                                                : 'bg-gray-100'
+                                                                                                                ? 'flex-row-reverse space-x-reverse'
+                                                                                                                : ''
                                                                                                 }`}>
-                                                                                                <p className="text-sm">{content}</p>
-                                                                                                <p
-                                                                                                        className={`text-xs mt-1 ${
+                                                                                                <Avatar className="w-8 h-8">
+                                                                                                        <AvatarFallback>
+                                                                                                                {sender_id === userId
+                                                                                                                        ? 'T'
+                                                                                                                        : 'S'}
+                                                                                                        </AvatarFallback>
+                                                                                                </Avatar>
+                                                                                                <div
+                                                                                                        className={`p-3 rounded-lg ${
                                                                                                                 sender_id === userId
-                                                                                                                        ? 'text-blue-100'
-                                                                                                                        : 'text-gray-500'
+                                                                                                                        ? 'bg-blue-600 text-white'
+                                                                                                                        : 'bg-gray-100'
                                                                                                         }`}>
-                                                                                                        {new Date(
-                                                                                                                created_at
-                                                                                                        ).toLocaleTimeString([], {
-                                                                                                                hour: '2-digit',
-                                                                                                                minute: '2-digit',
-                                                                                                                hour12: true,
-                                                                                                        })}
-                                                                                                </p>
+                                                                                                        <p className="text-sm">{content}</p>
+                                                                                                        <p
+                                                                                                                className={`text-xs mt-1 ${
+                                                                                                                        sender_id === userId
+                                                                                                                                ? 'text-blue-100'
+                                                                                                                                : 'text-gray-500'
+                                                                                                                }`}>
+                                                                                                                {new Date(
+                                                                                                                        created_at
+                                                                                                                ).toLocaleTimeString([], {
+                                                                                                                        hour: '2-digit',
+                                                                                                                        minute: '2-digit',
+                                                                                                                        hour12: true,
+                                                                                                                })}
+                                                                                                        </p>
+                                                                                                </div>
                                                                                         </div>
                                                                                 </div>
-                                                                        </div>
-                                                                ))}
+                                                                        ))
+                                                                ) : (
+                                                                        <></>
+                                                                )}
                                                                 <div
                                                                         ref={messagesEndRef}
                                                                         className="h-0"
@@ -589,7 +642,7 @@ export function TeacherTabs() {
                                                 ))}
                                         </Card>
                                 ) : (
-                                        <h1 className="text-gray-600">No assignments found</h1>
+                                        <h1 className="text-gray-600">No feedback found</h1>
                                 )}
                         </TabsContent>
                 </>
