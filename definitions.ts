@@ -27,7 +27,7 @@ export type TMessage = {
         sender_id: string
         receiver_id: string
         content: string
-        created_at: string
+        sent_at: string
 }
 
 export type TAssignment = {

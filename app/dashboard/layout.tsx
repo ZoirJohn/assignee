@@ -41,7 +41,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
                                         </div>
                                 </div>
 
-                                <main className="p-6 lg:p-8 max-[425px]:p-1 h-screen overflow-auto max-[425px]:height-full">
+                                <main className="sm:p-6 lg:p-8 p-2">
                                         {children}
                                 </main>
                         </div>
