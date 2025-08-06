@@ -138,13 +138,12 @@ export function TeacherTabs() {
     useEffect(() => {
         const fetchStudents = async () => {
             try {
-                const { data: students, error } = await supabase.from('profiles').select('id, full_name').eq('teacher_id', userId);
+                const { data: students, error } = await supabase.from('profiles').select('id, full_name, avatar_url').eq('teacher_id', userId);
 
                 if (error) throw error;
 
                 if (students?.length) {
-                    setStudents(students);
-                    setCurrentUserId(students[0].id);
+                    setStudents(students as TStudent[]);
                 }
             } catch (error) {
                 console.error(error);
@@ -414,8 +413,36 @@ export function TeacherTabs() {
                             )}
                         </div>
                     </CardHeader>
-                    <CardContent className="flex flex-col max-[425px]:px-3">
+                    <CardContent className="grid grid-cols-3">
                         <ScrollArea className="flex-1 mb-5">
+                            <div className="space-y-4 lg:h-143 sm:h-93 h-83">
+                                {students.length ? (
+                                    students.map((student) => (
+                                        <button
+                                            key={student.id}
+                                            onClick={() => setCurrentUserId(student.id)}
+                                            className={`w-full flex items-center space-x-3 px-4 py-3 transition-colors duration-200 
+                        ${currentUserId === student.id ? 'bg-gray-100' : 'bg-white'}
+                        hover:bg-gray-50 border-b last:border-b-0 text-left`}>
+                                            <Avatar className="h-10 w-10">
+                                                <AvatarFallback>{student.avatar_url}</AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium text-gray-900 truncate">{student.full_name}</p>
+                                                {/* <p className="text-xs text-gray-500">{student.lastSeen}</p> */}
+                                            </div>
+                                        </button>
+                                    ))
+                                ) : (
+                                    <></>
+                                )}
+                                <div
+                                    ref={messagesEndRef}
+                                    className="h-0"
+                                />
+                            </div>
+                        </ScrollArea>
+                        <ScrollArea className="col-start-2 col-end-4 flex-1 mb-5">
                             <div className="space-y-4 lg:h-143 sm:h-93 h-83">
                                 {messages.length ? (
                                     messages.map(({ id, sender_id, sent_at, content }) => (
@@ -457,7 +484,7 @@ export function TeacherTabs() {
                                 />
                             </div>
                         </ScrollArea>
-                        <div className="flex items-center space-x-2 pb-5">
+                        <div className="col-start-1 col-end-4 flex items-center space-x-2 pb-5">
                             <label
                                 htmlFor="chat-message-input"
                                 className="sr-only">
