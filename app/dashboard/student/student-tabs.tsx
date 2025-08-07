@@ -498,14 +498,14 @@ export default function StudentTabs() {
             <TabsContent
                 value="chat"
                 className="space-y-4">
-                <Card className="h-120 max-[425px]:py-4">
+                <Card className="lg:h-170 sm:h-120 h-110">
                     <CardHeader className="max-[400px]:!pb-0 max-[425px]:px-4">
                         <CardTitle className="text-2xl">Chat with Teachers</CardTitle>
                         <CardDescription className="text-xs">Get help and feedback from your instructors</CardDescription>
                     </CardHeader>
-                    <CardContent className="flex flex-col h-full max-[425px]:px-3">
-                        <ScrollArea className="flex-1 mb-5 max-[400px]:mb-3 max-[332px]:mb-8">
-                            <div className="space-y-4 h-93">
+                    <CardContent className="flex flex-col">
+                        <ScrollArea className="flex-1 mb-5">
+                            <div className="lg:h-143 sm:h-93 h-83 space-y-4">
                                 {messages.map(({ id, sender_id, content, sent_at }) => (
                                     <div
                                         key={id}
@@ -521,8 +521,10 @@ export default function StudentTabs() {
                                                 className={`p-3 rounded-lg ${
                                                     sender_id === userId ? 'bg-blue-600 text-white' : 'bg-gray-100'
                                                 }`}>
-                                                <p className="text-sm">{content}</p>
-                                                <p className={`text-xs mt-1 ${sender_id === userId ? 'text-blue-100' : 'text-gray-500'}`}>
+                                                <p className="sm:text-lg text-sm font-medium leading-6">{content}</p>
+                                                <p className={`text-xs sm:mt-2 mt-1 ${
+                                                            sender_id === userId ? 'text-blue-100 text-right' : 'text-gray-500 text-left'
+                                                        }`}>
                                                     {new Date(sent_at).toLocaleTimeString([], {
                                                         hour: '2-digit',
                                                         minute: '2-digit',

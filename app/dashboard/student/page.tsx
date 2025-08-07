@@ -14,27 +14,28 @@ export default async function StudentDashboard() {
                                 defaultValue='deadlines'
                                 className='space-y-4'
                         >
-                                <TabsList>
+                                <TabsList className="max-[375px]:w-full">
+                                
                                         <TabsTrigger
                                                 value='deadlines'
-                                                className='flex items-center gap-2'
+                                                className="flex items-center gap-2 max-[400px]:px-2"
                                         >
                                                 <Calendar className='w-4 h-4' />
-                                                Deadlines
+                                                <span className='max-[375px]:hidden'>Deadlines</span>
                                         </TabsTrigger>
                                         <TabsTrigger
                                                 value='chat'
-                                                className='flex items-center gap-2'
+                                                className="flex items-center gap-2 max-[400px]:px-2"
                                         >
                                                 <MessageSquare className='w-4 h-4' />
-                                                Chat
+                                                <span className='max-[375px]:hidden'>Chat</span>
                                         </TabsTrigger>
                                         <TabsTrigger
                                                 value='transcript'
-                                                className='flex items-center gap-2'
+                                                className="flex items-center gap-2 max-[400px]:px-2"
                                         >
                                                 <FileText className='w-4 h-4' />
-                                                Transcript
+                                                <span className='max-[375px]:hidden'>Transcript</span>
                                         </TabsTrigger>
                                 </TabsList>
                                 <StudentTabs />

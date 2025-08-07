@@ -424,7 +424,7 @@ export function TeacherTabs() {
                     </CardHeader>
                     <CardContent className="grid grid-cols-4">
                         <ScrollArea className="flex-1 mb-5">
-                            <div className=" lg:h-143 sm:h-93 h-83">
+                            <div className="lg:h-143 sm:h-93 h-83">
                                 {students.length ? (
                                     students.map((student) => (
                                         <button
@@ -466,7 +466,7 @@ export function TeacherTabs() {
                             </div>
                         </ScrollArea>
                         <ScrollArea className="col-start-2 col-end-5 flex-1 mb-5">
-                            <div className="space-y-4 lg:h-143 sm:h-93 h-83">
+                            <div className="space-y-4 lg:h-143 sm:h-93 h-83 pl-1">
                                 {messages.length ? (
                                     messages.map(({ id, sender_id, sent_at, content }) => (
                                         <div
@@ -485,8 +485,8 @@ export function TeacherTabs() {
                                                     }`}>
                                                     <p className="sm:text-lg text-sm font-medium leading-6">{content}</p>
                                                     <p
-                                                        className={`text-xs sm:mt-2 mt-1 text-right ${
-                                                            sender_id === userId ? 'text-blue-100' : 'text-gray-500'
+                                                        className={`text-xs sm:mt-2 mt-1 ${
+                                                            sender_id === userId ? 'text-blue-100 text-right' : 'text-gray-500 text-left'
                                                         }`}>
                                                         {new Date(sent_at).toLocaleTimeString([], {
                                                             hour: '2-digit',
