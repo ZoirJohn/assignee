@@ -13,14 +13,13 @@ import { createClient } from '@/lib/supabase/client';
 import { TAssignment, TMessage, TStudent } from '@/definitions';
 import { cn } from '@/lib/utils';
 import { Label } from '../../../components/ui/label';
+import Image from 'next/image';
 
 export function TeacherTabs() {
     const supabase = createClient();
-
     const [selectedAssignment, setSelectedAssignment] = useState<TAssignment | null>(null);
     const [gradeOverride, setGradeOverride] = useState<number>();
     const [isSubmitting, setIsSubmitting] = useState(false);
-
     const [messages, setMessages] = useState<TMessage[]>([]);
     const [assignments, setAssignments] = useState<TAssignment[]>([]);
     const [students, setStudents] = useState<TStudent[]>([]);
@@ -74,11 +73,11 @@ export function TeacherTabs() {
     useEffect(() => {
         const fetchUserId = async () => {
             try {
-                const { data } = await supabase.auth.getClaims();
-                const userId = data?.claims?.sub;
-                if (userId) setUserId(userId);
+                const { claims } = (await supabase.auth.getClaims()).data || {};
+                if (claims) setUserId(claims.sub);
             } catch (error) {
                 console.error(error);
+                return;
             }
         };
         fetchUserId();
@@ -137,20 +136,26 @@ export function TeacherTabs() {
 
     useEffect(() => {
         const fetchStudents = async () => {
+            if (!userId) return;
             try {
-                const { data: students, error } = await supabase.from('profiles').select('id, full_name, avatar_url').eq('teacher_id', userId);
+                const { data: students, error } = await supabase
+                    .from('profiles')
+                    .select('id, full_name, avatar_url')
+                    .eq('teacher_id', userId);
 
-                if (error) throw error;
-
-                if (students?.length) {
-                    setStudents(students as TStudent[]);
+                if (error) {
+                    console.error(error);
+                    return;
                 }
+
+                setStudents(students as TStudent[]);
             } catch (error) {
                 console.error(error);
+                return;
             }
         };
 
-        if (userId) fetchStudents();
+        fetchStudents();
     }, [userId]);
 
     useEffect(() => {
@@ -160,8 +165,9 @@ export function TeacherTabs() {
                 const { data: messages, error } = await supabase
                     .from('messages')
                     .select('*')
-                    .filter('sender_id', 'in', `(${userId},${currentUserId})`)
-                    .filter('receiver_id', 'in', `(${userId},${currentUserId})`)
+                    .or(
+                        `and(sender_id.eq.${userId}, receiver_id.eq.${currentUserId}),and(sender_id.eq.${currentUserId},receiver_id.eq.${userId})`
+                    )
                     .order('sent_at', { ascending: true });
                 if (error) {
                     console.error(error);
@@ -170,6 +176,7 @@ export function TeacherTabs() {
                 setMessages(messages as TMessage[]);
             } catch (error) {
                 console.error(error);
+                return;
             }
         };
         fetchMessages();
@@ -178,6 +185,7 @@ export function TeacherTabs() {
 
     useEffect(() => {
         const fetchAssignments = async () => {
+            if (!userId) return;
             try {
                 const { data: assignments, error } = await supabase.from('assignments').select('*').eq('created_by', userId);
                 if (error) {
@@ -187,10 +195,11 @@ export function TeacherTabs() {
                 setAssignments(assignments as TAssignment[]);
             } catch (error) {
                 console.error(error);
+                return;
             }
             setAssignments((prev) => [...prev, ...(assignments as TAssignment[])]);
         };
-        if (userId) fetchAssignments();
+        fetchAssignments();
     }, [userId]);
 
     useEffect(() => {
@@ -413,19 +422,33 @@ export function TeacherTabs() {
                             )}
                         </div>
                     </CardHeader>
-                    <CardContent className="grid grid-cols-3">
+                    <CardContent className="grid grid-cols-4">
                         <ScrollArea className="flex-1 mb-5">
-                            <div className="space-y-4 lg:h-143 sm:h-93 h-83">
+                            <div className=" lg:h-143 sm:h-93 h-83">
                                 {students.length ? (
                                     students.map((student) => (
                                         <button
                                             key={student.id}
                                             onClick={() => setCurrentUserId(student.id)}
-                                            className={`w-full flex items-center space-x-3 px-4 py-3 transition-colors duration-200 
+                                            className={`w-full flex items-center space-x-3 px-4 py-3 transition-colors duration-200 cursor-pointer
                         ${currentUserId === student.id ? 'bg-gray-100' : 'bg-white'}
                         hover:bg-gray-50 border-b last:border-b-0 text-left`}>
-                                            <Avatar className="h-10 w-10">
-                                                <AvatarFallback>{student.avatar_url}</AvatarFallback>
+                                            <Avatar className="h-10 w-10 bg-gray-400">
+                                                <AvatarFallback className="bg-gray-400">
+                                                    {student.avatar_url ? (
+                                                        <Image
+                                                            src={student.avatar_url}
+                                                            alt="avatar"
+                                                            width={40}
+                                                            height={40}
+                                                        />
+                                                    ) : (
+                                                        student.full_name
+                                                            .split(' ')
+                                                            .map((n) => n[0])
+                                                            .join('')
+                                                    )}
+                                                </AvatarFallback>
                                             </Avatar>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-medium text-gray-900 truncate">{student.full_name}</p>
@@ -442,7 +465,7 @@ export function TeacherTabs() {
                                 />
                             </div>
                         </ScrollArea>
-                        <ScrollArea className="col-start-2 col-end-4 flex-1 mb-5">
+                        <ScrollArea className="col-start-2 col-end-5 flex-1 mb-5">
                             <div className="space-y-4 lg:h-143 sm:h-93 h-83">
                                 {messages.length ? (
                                     messages.map(({ id, sender_id, sent_at, content }) => (
@@ -484,7 +507,7 @@ export function TeacherTabs() {
                                 />
                             </div>
                         </ScrollArea>
-                        <div className="col-start-1 col-end-4 flex items-center space-x-2 pb-5">
+                        <div className="col-start-1 col-end-5 flex items-center space-x-2 pb-5">
                             <label
                                 htmlFor="chat-message-input"
                                 className="sr-only">

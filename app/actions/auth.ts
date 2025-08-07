@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import arcjet, { detectBot, request, shield, validateEmail } from '@arcjet/next';
+import { console } from 'inspector';
 
 const aj = arcjet({
     key: process.env.ARCJET_KEY!,
@@ -16,7 +17,7 @@ const aj = arcjet({
         }),
         validateEmail({
             mode: 'LIVE',
-            deny: ['DISPOSABLE', 'INVALID', 'NO_MX_RECORDS'],
+            deny: [ 'INVALID', 'NO_MX_RECORDS'],
         }),
     ],
 });
@@ -30,12 +31,8 @@ export async function signin(formData: FormData) {
 
     const decision = await aj.protect(req, { email });
     if (decision.isDenied()) {
-        const decisionMessage = decision.reason.type?.split('_') as string[];
-        let message: string = '';
-        for (let i = 0; i < decisionMessage.length; i++) {
-            message += decisionMessage[i].charAt(0) + decisionMessage[i].toLowerCase() + ' ';
-        }
-        throw new Error(message);
+        const decisionMessage = decision.reason.type;
+        throw new Error(decisionMessage);
     }
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -69,7 +66,7 @@ export async function signin(formData: FormData) {
 
 export async function signup(formData: FormData) {
     const supabase = await createClient();
-	const req = await request();
+    const req = await request();
 
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
@@ -77,15 +74,12 @@ export async function signup(formData: FormData) {
     const role = formData.get('role') as string;
     const teacherId = formData.get('teacherId');
 
-	const decision = await aj.protect(req, { email });
-	if (decision.isDenied()) {
-		const decisionMessage= decision.reason.type?.split('_') as string[];
-		let message: string = '';
-		for (let i = 0; i < decisionMessage.length; i++) {
-			message += decisionMessage[i].charAt(0) + decisionMessage[i].toLowerCase() + ' ';
-		}
-		throw new Error(message);
-	}
+    const decision = await aj.protect(req, { email });
+    if (decision.isDenied()) {
+        const decisionMessage = decision.reason.type;
+        console.error(decisionMessage);
+        throw new Error(decisionMessage);
+    }
 
     const { error } = await supabase.auth.signUp({
         email,
