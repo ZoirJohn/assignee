@@ -1,6 +1,6 @@
 'use client';
 import { Fragment, useEffect, useRef, useState } from 'react';
-import { Clock, Send, Eye, CheckCircle, XCircle, Pen } from 'lucide-react';
+import { Clock, Send, Eye, CheckCircle, XCircle, Pen, ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,9 +23,14 @@ export function TeacherTabs() {
     const [assignments, setAssignments] = useState<TAssignment[]>([]);
     const [students, setStudents] = useState<TStudent[]>([]);
     const [newMessage, setNewMessage] = useState<string>('');
-    const [currentUserId, setCurrentUserId] = useState<string>('');
+    const [{ id: currentUserId, full_name: currentUsername, avatar_url }, setCurrentUser] = useState<TStudent>({
+        id: '',
+        full_name: '',
+        avatar_url: '',
+    });
     const [userId, setUserId] = useState<string>();
     const [disabled, setDisabled] = useState<boolean>();
+    const [isListOfUsersOpen, openListOfUsers] = useState<boolean>(true);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const handleGradeSubmission = async () => {
@@ -410,17 +415,44 @@ export function TeacherTabs() {
                     )}
                 </div>
             </TabsContent>
-
             <TabsContent
                 value="chat"
                 className="space-y-4">
                 <Card className="lg:h-170 sm:h-120 h-110">
-                    <CardHeader className="max-[400px]:!pb-0 grid-cols-1">
+                    <CardHeader className="max-[400px]:!pb-0 flex">
                         <div>
                             {students.length ? (
                                 <>
-                                    <CardTitle className="text-2xl">Student Messages</CardTitle>
-                                    <CardDescription className="text-xs">Communicate with your students</CardDescription>
+                                    <div className={`md:block ${!isListOfUsersOpen ? 'hidden' : 'block'}`}>
+                                        <CardTitle className="text-2xl">Student Messages</CardTitle>
+                                        <CardDescription className="text-xs">Communicate with your students</CardDescription>
+                                    </div>
+                                    <div className={`items-center gap-4 md:hidden py-1 ${isListOfUsersOpen ? 'hidden' : 'flex'}`}>
+                                        <ArrowLeft
+                                            onClick={() => {
+                                                setCurrentUser({ id: '', full_name: '', avatar_url: '' });
+                                                openListOfUsers(true);
+                                            }}
+                                        />
+
+                                        <Avatar className="h-10 w-10 bg-gray-400">
+                                            <AvatarFallback className="bg-gray-400">
+                                                {avatar_url ? (
+                                                    <Image
+                                                        src={avatar_url}
+                                                        alt="avatar"
+                                                        width={40}
+                                                        height={40}
+                                                    />
+                                                ) : (
+                                                    currentUsername
+                                                        .split(' ')
+                                                        .map((n) => n[0])
+                                                        .join('')
+                                                )}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                    </div>
                                 </>
                             ) : (
                                 <>
@@ -430,14 +462,21 @@ export function TeacherTabs() {
                             )}
                         </div>
                     </CardHeader>
-                    <CardContent className="grid grid-cols-4">
-                        <ScrollArea className="flex-1 mb-5">
-                            <div className="lg:h-143 sm:h-93 h-83">
+                    <CardContent className="md:grid xl:grid-cols-4 md:grid-cols-3">
+                        <ScrollArea className={`flex-1 mb-5 ${isListOfUsersOpen ? '' : 'max-md:hidden'}`}>
+                            <div className="lg:h-145 sm:h-95 h-85">
                                 {students.length ? (
                                     students.map((student) => (
                                         <button
                                             key={student.id}
-                                            onClick={() => setCurrentUserId(student.id)}
+                                            onClick={() => {
+                                                setCurrentUser({
+                                                    id: student.id,
+                                                    full_name: student.full_name,
+                                                    avatar_url: student.avatar_url,
+                                                });
+                                                openListOfUsers(false);
+                                            }}
                                             className={`w-full flex items-center space-x-3 px-4 py-3 transition-colors duration-200 cursor-pointer
                         ${currentUserId === student.id ? 'bg-gray-100' : 'bg-white'}
                         hover:bg-gray-50 border-b last:border-b-0 text-left`}>
@@ -473,8 +512,11 @@ export function TeacherTabs() {
                                 />
                             </div>
                         </ScrollArea>
-                        <ScrollArea className="col-start-2 col-end-5 flex-1 mb-5">
-                            <div className="space-y-4 lg:h-143 sm:h-93 h-83 pl-1">
+                        <ScrollArea
+                            className={`xl:col-start-2 xl:col-end-5 md:col-start-2 md:col-end-4 flex-1 mb-5 ${
+                                isListOfUsersOpen ? 'max-md:hidden' : ''
+                            }`}>
+                            <div className="space-y-4 lg:h-145 sm:h-95 h-85 pl-1">
                                 {messages.length ? (
                                     messages.map(({ id, sender_id, sent_at, content }) => (
                                         <div
@@ -515,6 +557,7 @@ export function TeacherTabs() {
                                 />
                             </div>
                         </ScrollArea>
+
                         <div className="col-start-1 col-end-5 flex items-center space-x-2 pb-5">
                             <label
                                 htmlFor="chat-message-input"
