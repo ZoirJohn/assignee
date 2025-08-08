@@ -157,7 +157,7 @@ export default function StudentTabs() {
                     setUserId(claims.sub);
                 }
             } catch (error) {
-                console.log(error);
+                console.error(error);
                 return;
             }
         };

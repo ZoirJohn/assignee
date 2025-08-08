@@ -128,8 +128,6 @@ export function TeacherTabs() {
                 (payload) => {
                     const { eventType, new: newAssignment, old: oldAssignment } = payload;
                     if (eventType === 'INSERT') {
-                        console.log(newAssignment);
-
                         setAssignments((prev) => [...prev, newAssignment] as TAssignment[]);
                     }
 

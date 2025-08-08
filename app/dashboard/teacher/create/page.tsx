@@ -61,7 +61,6 @@ export default function CreateAssignmentPage() {
             console.error(error);
             return;
         }
-        console.log(res);
         setSubmitted(true);
     };
 
