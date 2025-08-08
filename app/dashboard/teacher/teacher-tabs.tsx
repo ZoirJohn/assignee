@@ -11,7 +11,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { TabsContent } from '@/components/ui/tabs';
 import { createClient } from '@/lib/supabase/client';
 import { TAssignment, TMessage, TStudent } from '@/definitions';
-import { cn } from '@/lib/utils';
 import { Label } from '../../../components/ui/label';
 import Image from 'next/image';
 
@@ -52,13 +51,13 @@ export function TeacherTabs() {
             setIsSubmitting(false);
         }
     };
-    const openSubmissionReview = (submission: TAssignment) => {
-        if (selectedAssignment) {
-            setSelectedAssignment(null);
-        } else {
-            setSelectedAssignment(submission);
-        }
-    };
+    // const openSubmissionReview = (submission: TAssignment) => {
+    //     if (selectedAssignment) {
+    //         setSelectedAssignment(null);
+    //     } else {
+    //         setSelectedAssignment(submission);
+    //     }
+    // };
     const handleSendMessage = async () => {
         setDisabled(true);
         await supabase.from('messages').insert({
@@ -95,7 +94,6 @@ export function TeacherTabs() {
                 },
                 (payload) => {
                     const { eventType, new: newMessage, old: oldMessage } = payload;
-                    console.log(payload);
                     if (eventType === 'INSERT') {
                         setMessages((prev) => [...prev, newMessage] as TMessage[]);
                     }
@@ -118,13 +116,21 @@ export function TeacherTabs() {
             .on(
                 'postgres_changes',
                 {
-                    event: 'UPDATE',
+                    event: '*',
                     schema: 'public',
                     table: 'assignments',
                 },
                 (payload) => {
-                    const { new: updatedAssignment } = payload;
-                    setAssignments((prev) => [...prev, updatedAssignment] as TAssignment[]);
+                    const { eventType, new: newAssignment, old: oldAssignment } = payload;
+                    if (eventType === 'INSERT') {
+                        console.log(newAssignment);
+
+                        setAssignments((prev) => [...prev, newAssignment] as TAssignment[]);
+                    }
+
+                    if (eventType === 'DELETE') {
+                        setAssignments((prev) => prev.filter((asg) => asg.id !== oldAssignment.id));
+                    }
                 }
             )
             .subscribe();
@@ -192,6 +198,7 @@ export function TeacherTabs() {
                     console.error(error);
                     return;
                 }
+                console.log(assignments);
                 setAssignments(assignments as TAssignment[]);
             } catch (error) {
                 console.error(error);
@@ -229,7 +236,7 @@ export function TeacherTabs() {
                                             <div className="text-sm text-gray-400 mt-0.5 mb-0.5">{assignment.subject}</div>
                                             <div className="text-lg font-medium text-gray-800 mb-1">{assignment.description}</div>
                                             <div className="flex items-center flex-wrap gap-1 mt-1">
-                                                <Badge
+                                                {/* <Badge
                                                     className={cn(
                                                         assignment.status === 'graded' && 'bg-green-100 text-green-800',
                                                         assignment.status === 'submitted' && 'bg-blue-100 text-blue-800',
@@ -259,7 +266,7 @@ export function TeacherTabs() {
                                                             Missed
                                                         </>
                                                     ) : null}
-                                                </Badge>
+                                                </Badge> */}
                                                 <Badge
                                                     variant="outline"
                                                     className="bg-blue-50 text-blue-700 text-sm rounded-full">
@@ -271,7 +278,7 @@ export function TeacherTabs() {
                                                 </Badge>
                                                 {assignment.teacher_grade && (
                                                     <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                                                        Graded:{' '}
+                                                        Graded:
                                                         {new Date().toLocaleDateString([], {
                                                             day: 'numeric',
                                                             month: 'long',
@@ -298,7 +305,8 @@ export function TeacherTabs() {
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    onClick={() => openSubmissionReview(assignment)}>
+                                                    onClick={() => console.log('REVIEW')}>
+                                                    {/* onClick={() => openSubmissionReview(assignment)}> */}
                                                     {assignment.status == 'graded' ? (
                                                         <Pen />
                                                     ) : (
