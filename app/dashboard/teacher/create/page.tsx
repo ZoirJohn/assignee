@@ -48,7 +48,7 @@ export default function CreateAssignmentPage() {
     });
     const onSubmit = async (data: AssignmentForm) => {
         const id = (await supabase.auth.getClaims()).data?.claims.sub;
-        const { data: res, error } = await supabase.from('assignments').insert([
+        const {  error } = await supabase.from('assignments').insert([
             {
                 title: data.name,
                 description: data.description,

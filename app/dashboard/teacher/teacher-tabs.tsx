@@ -1,6 +1,6 @@
 'use client';
 import { Fragment, useEffect, useRef, useState } from 'react';
-import { Clock, Send, Eye, CheckCircle, XCircle, Pen, ArrowLeft } from 'lucide-react';
+import { Clock, Send, Eye,  Pen, ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
