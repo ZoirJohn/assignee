@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
             },
         ],
     },
+    optimization: {
+        splitChunks: {
+            chunks: 'all',
+        },
+    },
 };
 
 export default withBundleAnalyzer(nextConfig);
