@@ -1,6 +1,6 @@
 'use client';
-import { Fragment, useEffect, useRef, useState } from 'react';
-import { Clock, Send, Eye,  Pen, ArrowLeft } from 'lucide-react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import { Clock, Send, Eye, Pen, ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,30 +10,31 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
 import { TabsContent } from '@/components/ui/tabs';
 import { createClient } from '@/lib/supabase/client';
-import { TAssignment, TMessage, TStudent } from '@/definitions';
+import { TAssignment, TMessage, TStudent, TTeacherTabs } from '@/definitions';
 import { Label } from '../../../components/ui/label';
 import Image from 'next/image';
 
-export function TeacherTabs() {
+export function TeacherTabs({ value }: { value: TTeacherTabs }) {
     const supabase = createClient();
+    // State
     const [selectedAssignment, setSelectedAssignment] = useState<TAssignment | null>(null);
     const [gradeOverride, setGradeOverride] = useState<number>();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isListOfUsersOpen, openListOfUsers] = useState<boolean>(true);
+    const [disabled, setDisabled] = useState<boolean>();
+    const [newMessage, setNewMessage] = useState<string>('');
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    // Fetching Data
     const [messages, setMessages] = useState<TMessage[]>([]);
     const [assignments, setAssignments] = useState<TAssignment[]>([]);
     const [students, setStudents] = useState<TStudent[]>([]);
-    const [newMessage, setNewMessage] = useState<string>('');
+    const [userId, setUserId] = useState<string>();
     const [{ id: currentUserId, full_name: currentUsername, avatar_url }, setCurrentUser] = useState<TStudent>({
         id: '',
         full_name: '',
         avatar_url: '',
     });
-    const [userId, setUserId] = useState<string>();
-    const [disabled, setDisabled] = useState<boolean>();
-    const [isListOfUsersOpen, openListOfUsers] = useState<boolean>(true);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-
-    const handleGradeSubmission = async () => {
+    const handleGradeSubmission = useCallback(async () => {
         setIsSubmitting(true);
         if (!selectedAssignment) {
             setIsSubmitting(false);
@@ -50,20 +51,26 @@ export function TeacherTabs() {
                 .eq('id', selectedAssignment.id)
                 .select();
         } catch {
+            // handle error if needed
         } finally {
             setGradeOverride(undefined);
             setSelectedAssignment(null);
             setIsSubmitting(false);
         }
-    };
-    // const openSubmissionReview = (submission: TAssignment) => {
-    //     if (selectedAssignment) {
-    //         setSelectedAssignment(null);
-    //     } else {
-    //         setSelectedAssignment(submission);
-    //     }
-    // };
-    const handleSendMessage = async () => {
+    }, [selectedAssignment, gradeOverride]);
+
+    const openSubmissionReview = useCallback(
+        (submission: TAssignment) => {
+            if (selectedAssignment) {
+                setSelectedAssignment(null);
+            } else {
+                setSelectedAssignment(submission);
+            }
+        },
+        [selectedAssignment]
+    );
+
+    const handleSendMessage = useCallback(async () => {
         setDisabled(true);
         await supabase.from('messages').insert({
             sender_id: userId,
@@ -72,7 +79,7 @@ export function TeacherTabs() {
         });
         setNewMessage('');
         setDisabled(false);
-    };
+    }, [userId, currentUserId, newMessage]);
 
     useEffect(() => {
         const fetchUserId = async () => {
@@ -85,10 +92,29 @@ export function TeacherTabs() {
             }
         };
         fetchUserId();
-    }, []);
+        const assignmentChannel = supabase
+            .channel('realtime-assignment-update')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'assignments',
+                },
+                (payload) => {
+                    const { eventType, new: newAssignment, old: oldAssignment } = payload;
+                    if (eventType === 'INSERT') {
+                        setAssignments((prev) => [...prev, newAssignment] as TAssignment[]);
+                    }
 
-    useEffect(() => {
-        const channel = supabase
+                    if (eventType === 'DELETE') {
+                        setAssignments((prev) => prev.filter((asg) => asg.id !== oldAssignment.id));
+                    }
+                }
+            )
+            .subscribe();
+
+        const messagesChannel = supabase
             .channel('realtime-chat:teacher-student')
             .on(
                 'postgres_changes',
@@ -111,38 +137,10 @@ export function TeacherTabs() {
             .subscribe();
 
         return () => {
-            supabase.removeChannel(channel);
+            supabase.removeChannel(assignmentChannel);
+            supabase.removeChannel(messagesChannel);
         };
     }, []);
-
-    useEffect(() => {
-        const channel = supabase
-            .channel('realtime-assignment-update')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'assignments',
-                },
-                (payload) => {
-                    const { eventType, new: newAssignment, old: oldAssignment } = payload;
-                    if (eventType === 'INSERT') {
-                        setAssignments((prev) => [...prev, newAssignment] as TAssignment[]);
-                    }
-
-                    if (eventType === 'DELETE') {
-                        setAssignments((prev) => prev.filter((asg) => asg.id !== oldAssignment.id));
-                    }
-                }
-            )
-            .subscribe();
-
-        return () => {
-            supabase.removeChannel(channel);
-        };
-    }, []);
-
     useEffect(() => {
         const fetchStudents = async () => {
             if (!userId) return;
@@ -151,7 +149,6 @@ export function TeacherTabs() {
                     .from('profiles')
                     .select('id, full_name, avatar_url')
                     .eq('teacher_id', userId);
-
                 if (error) {
                     console.error(error);
                     return;
@@ -163,8 +160,23 @@ export function TeacherTabs() {
                 return;
             }
         };
-
+        const fetchAssignments = async () => {
+            if (!userId) return;
+            try {
+                const { data: assignments, error } = await supabase.from('assignments').select('*').eq('created_by', userId);
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+                setAssignments(assignments as TAssignment[]);
+            } catch (error) {
+                console.error(error);
+                return;
+            }
+            setAssignments((prev) => [...prev, ...(assignments as TAssignment[])]);
+        };
         fetchStudents();
+        fetchAssignments();
     }, [userId]);
 
     useEffect(() => {
@@ -193,39 +205,18 @@ export function TeacherTabs() {
     }, [currentUserId, userId, students.length]);
 
     useEffect(() => {
-        const fetchAssignments = async () => {
-            if (!userId) return;
-            try {
-                const { data: assignments, error } = await supabase.from('assignments').select('*').eq('created_by', userId);
-                if (error) {
-                    console.error(error);
-                    return;
-                }
-                console.log(assignments);
-                setAssignments(assignments as TAssignment[]);
-            } catch (error) {
-                console.error(error);
-                return;
-            }
-            setAssignments((prev) => [...prev, ...(assignments as TAssignment[])]);
-        };
-        fetchAssignments();
-    }, [userId]);
-
-    useEffect(() => {
-        const id = requestAnimationFrame(() => {
-            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-        });
-
-        return () => {
-            cancelAnimationFrame(id);
-        };
-    }, [messages]);
+        if (value == 'chat') {
+            const id = requestAnimationFrame(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+            return () => {
+                cancelAnimationFrame(id);
+            };
+        }
+    }, [messages, value]);
     return (
         <>
-            <TabsContent
-                value="assignments"
-                className="space-y-4">
+            <TabsContent value="assignments" className="space-y-4">
                 <div className="grid gap-3 overflow-hidden">
                     {assignments.length ? (
                         assignments.map((assignment) => (
@@ -270,9 +261,7 @@ export function TeacherTabs() {
                                                         </>
                                                     ) : null}
                                                 </Badge> */}
-                                                <Badge
-                                                    variant="outline"
-                                                    className="bg-blue-50 text-blue-700 text-sm rounded-full">
+                                                <Badge variant="outline" className="bg-blue-50 text-blue-700 text-sm rounded-full">
                                                     {assignment.ai_grade !== undefined && assignment.teacher_grade !== null
                                                         ? `Score: ${assignment.teacher_grade}`
                                                         : assignment.ai_grade
@@ -305,10 +294,7 @@ export function TeacherTabs() {
                                                 </div>
                                             </div>
                                             <div className="flex items-center space-x-2">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => console.log('REVIEW')}>
+                                                <Button variant="outline" size="sm">
                                                     {/* onClick={() => openSubmissionReview(assignment)}> */}
                                                     {assignment.status == 'graded' ? (
                                                         <Pen />
@@ -366,9 +352,7 @@ export function TeacherTabs() {
                                                     <p className="text-xs text-gray-500 mt-1">Your grade for this assignment (out of 5)</p>
                                                 </div>
                                                 <div>
-                                                    <Label
-                                                        className="block text-sm font-medium mb-2"
-                                                        htmlFor="feedback">
+                                                    <Label className="block text-sm font-medium mb-2" htmlFor="feedback">
                                                         Feedback
                                                     </Label>
                                                     <Textarea
@@ -397,9 +381,7 @@ export function TeacherTabs() {
                                                     disabled={selectedAssignment.ai_grade == undefined || isSubmitting}>
                                                     {isSubmitting ? 'Submitting...' : 'Confirm Grade'}
                                                 </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    onClick={() => setSelectedAssignment(null)}>
+                                                <Button variant="outline" onClick={() => setSelectedAssignment(null)}>
                                                     Cancel
                                                 </Button>
                                             </div>
@@ -413,9 +395,7 @@ export function TeacherTabs() {
                     )}
                 </div>
             </TabsContent>
-            <TabsContent
-                value="chat"
-                className="space-y-4">
+            <TabsContent value="chat" className="space-y-4">
                 <Card className="lg:h-170 sm:h-120 h-110">
                     <CardHeader className="max-[400px]:!pb-0 flex">
                         <div>
@@ -436,12 +416,7 @@ export function TeacherTabs() {
                                         <Avatar className="h-10 w-10 bg-gray-400">
                                             <AvatarFallback className="bg-gray-400">
                                                 {avatar_url ? (
-                                                    <Image
-                                                        src={avatar_url}
-                                                        alt="avatar"
-                                                        width={40}
-                                                        height={40}
-                                                    />
+                                                    <Image src={avatar_url} alt="avatar" width={40} height={40} />
                                                 ) : (
                                                     currentUsername
                                                         .split(' ')
@@ -481,12 +456,7 @@ export function TeacherTabs() {
                                             <Avatar className="h-10 w-10 bg-gray-400">
                                                 <AvatarFallback className="bg-gray-400">
                                                     {student.avatar_url ? (
-                                                        <Image
-                                                            src={student.avatar_url}
-                                                            alt="avatar"
-                                                            width={40}
-                                                            height={40}
-                                                        />
+                                                        <Image src={student.avatar_url} alt="avatar" width={40} height={40} />
                                                     ) : (
                                                         student.full_name
                                                             .split(' ')
@@ -504,10 +474,7 @@ export function TeacherTabs() {
                                 ) : (
                                     <></>
                                 )}
-                                <div
-                                    ref={messagesEndRef}
-                                    className="h-0"
-                                />
+                                <div ref={messagesEndRef} className="h-0" />
                             </div>
                         </ScrollArea>
                         <ScrollArea
@@ -517,9 +484,7 @@ export function TeacherTabs() {
                             <div className="space-y-4 lg:h-145 sm:h-95 h-85 pl-1">
                                 {messages.length ? (
                                     messages.map(({ id, sender_id, sent_at, content }) => (
-                                        <div
-                                            key={id}
-                                            className={`flex ${sender_id === userId ? 'justify-end' : 'justify-start'}`}>
+                                        <div key={id} className={`flex ${sender_id === userId ? 'justify-end' : 'justify-start'}`}>
                                             <div
                                                 className={`flex items-start space-x-2 sm:max-w-sm max-w-64 ${
                                                     sender_id === userId ? 'flex-row-reverse space-x-reverse' : ''
@@ -549,41 +514,34 @@ export function TeacherTabs() {
                                 ) : (
                                     <></>
                                 )}
-                                <div
-                                    ref={messagesEndRef}
-                                    className="h-0"
-                                />
+                                <div ref={messagesEndRef} className="h-0" />
                             </div>
                         </ScrollArea>
 
-                        <div className="col-start-1 col-end-5 flex items-center space-x-2 pb-5">
-                            <label
-                                htmlFor="chat-message-input"
-                                className="sr-only">
-                                Type your message
-                            </label>
-                            <Input
-                                id="chat-message-input"
-                                placeholder="Type your message..."
-                                value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                                disabled={disabled}
-                            />
-                            <Button
-                                size="sm"
-                                onClick={handleSendMessage}
-                                disabled={disabled}>
-                                <Send className="w-4 h-4" />
-                            </Button>
-                        </div>
+                        {currentUserId ? (
+                            <div className="col-start-1 col-end-5 flex items-center space-x-2 pb-5">
+                                <label htmlFor="chat-message-input" className="sr-only">
+                                    Type your message
+                                </label>
+                                <Input
+                                    id="chat-message-input"
+                                    placeholder="Type your message..."
+                                    value={newMessage}
+                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                                    disabled={disabled}
+                                />
+                                <Button size="sm" onClick={handleSendMessage} disabled={disabled}>
+                                    <Send className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        ) : (
+                            <></>
+                        )}
                     </CardContent>
                 </Card>
             </TabsContent>
-
-            <TabsContent
-                value="feedback"
-                className="space-y-4">
+            <TabsContent value="feedback" className="space-y-4">
                 {assignments.length ? (
                     <Card className="max-[425px]:py-4">
                         <CardHeader className="max-[425px]:px-4">
@@ -591,13 +549,9 @@ export function TeacherTabs() {
                             <CardDescription>Track the feedback you&apos;ve provided to students</CardDescription>
                         </CardHeader>
                         {assignments.map(({ id, title, teacher_grade, feedback }, idx) => (
-                            <CardContent
-                                className="max-[425px]:px-4"
-                                key={idx}>
+                            <CardContent className="max-[425px]:px-4" key={idx}>
                                 <div className="space-y-4">
-                                    <div
-                                        key={id}
-                                        className="p-4 rounded-lg w-full border grid grid-cols-2 max-[425px]:grid-cols-3">
+                                    <div key={id} className="p-4 rounded-lg w-full border grid grid-cols-2 max-[425px]:grid-cols-3">
                                         <div className="max-[425px]:col-span-2">
                                             <h4 className="font-semibold text-xl">Student </h4>
                                             <p className="text-sm text-gray-600">{title}</p>

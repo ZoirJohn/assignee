@@ -17,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         return (
                 <html
                         lang="en"
-                        className="select-none overflow-auto">
+                        className="select-none">
                         <body className={`${manrope.className} font-sans text-base bg-gray-50`}>
                                 {children} <Analytics />
                         </body>

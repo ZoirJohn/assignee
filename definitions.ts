@@ -62,3 +62,5 @@ export type TStudent = {
     full_name: string;
     avatar_url: string | null;
 };
+
+export type TTeacherTabs = 'assignments' | 'chat' | 'answers' | 'feedback';

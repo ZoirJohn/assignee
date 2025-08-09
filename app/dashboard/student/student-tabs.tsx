@@ -27,6 +27,7 @@ export default function StudentTabs() {
     const [disabled, setDisabled] = useState<boolean>(false);
     const [grades, setGrades] = useState<{ subject: string; assignment: string; grade: number | undefined; date: string }[]>([]);
     const [submittingAssignmentId, setSubmittingAssignmentId] = useState<string | null>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>, assignmentId: string) => {
         const file = event.target.files?.[0];
@@ -245,9 +246,14 @@ export default function StudentTabs() {
 
         fetchAssignments();
     }, [teacherId]);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        const id = requestAnimationFrame(() => {
+            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        return () => {
+            cancelAnimationFrame(id);
+        };
     }, [messages]);
 
     return (
@@ -268,9 +274,9 @@ export default function StudentTabs() {
                                             <div className="text-sm text-gray-400 mt-0.5 mb-0.5">{assignment.subject}</div>
                                             <div className="text-lg font-medium text-gray-800 mb-1">{assignment.description}</div>
                                             <div className="flex items-center flex-wrap gap-1 mt-1">
-                                                <Badge
+                                                {/* <Badge
                                                     className={
-                                                        assignment.status === 'graded'
+                                                        assignment.dead === 'graded'
                                                             ? 'bg-green-100 text-green-800'
                                                             : assignment.status === 'submitted'
                                                             ? 'bg-blue-100 text-blue-800'
@@ -283,7 +289,7 @@ export default function StudentTabs() {
                                                     variant="secondary">
                                                     {getStatusIcon(assignment.status)}
                                                     <span className="ml-1">{getStatusText(assignment.status)}</span>
-                                                </Badge>
+                                                </Badge> */}
                                                 {assignment.ai_grade && assignment.status !== 'graded' && (
                                                     <Badge
                                                         variant="outline"
@@ -506,35 +512,40 @@ export default function StudentTabs() {
                     <CardContent className="flex flex-col">
                         <ScrollArea className="flex-1 mb-5">
                             <div className="lg:h-143 sm:h-93 h-83 space-y-4">
-                                {messages.map(({ id, sender_id, content, sent_at }) => (
-                                    <div
-                                        key={id}
-                                        className={`flex ${sender_id === userId ? 'justify-end' : 'justify-start'}`}>
+                                {messages.length ? (
+                                    messages.map(({ id, sender_id, content, sent_at }) => (
                                         <div
-                                            className={`flex items-start space-x-2 max-w-xs ${
-                                                sender_id === 'student' ? 'flex-row-reverse space-x-reverse' : ''
-                                            }`}>
-                                            <Avatar className="w-8 h-8">
-                                                <AvatarFallback>{sender_id !== userId ? 'T' : 'S'}</AvatarFallback>
-                                            </Avatar>
+                                            key={id}
+                                            className={`flex ${sender_id === userId ? 'justify-end' : 'justify-start'}`}>
                                             <div
-                                                className={`p-3 rounded-lg ${
-                                                    sender_id === userId ? 'bg-blue-600 text-white' : 'bg-gray-100'
+                                                className={`flex items-start space-x-2 max-w-xs ${
+                                                    sender_id === 'student' ? 'flex-row-reverse space-x-reverse' : ''
                                                 }`}>
-                                                <p className="sm:text-lg text-sm font-medium leading-6">{content}</p>
-                                                <p className={`text-xs sm:mt-2 mt-1 ${
+                                                <Avatar className="w-8 h-8">
+                                                    <AvatarFallback>{sender_id !== userId ? 'T' : 'S'}</AvatarFallback>
+                                                </Avatar>
+                                                <div
+                                                    className={`p-3 rounded-lg ${
+                                                        sender_id === userId ? 'bg-blue-600 text-white' : 'bg-gray-100'
+                                                    }`}>
+                                                    <p className="sm:text-lg text-sm font-medium leading-6">{content}</p>
+                                                    <p
+                                                        className={`text-xs sm:mt-2 mt-1 ${
                                                             sender_id === userId ? 'text-blue-100 text-right' : 'text-gray-500 text-left'
                                                         }`}>
-                                                    {new Date(sent_at).toLocaleTimeString([], {
-                                                        hour: '2-digit',
-                                                        minute: '2-digit',
-                                                        second: undefined,
-                                                    })}
-                                                </p>
+                                                        {new Date(sent_at).toLocaleTimeString([], {
+                                                            hour: '2-digit',
+                                                            minute: '2-digit',
+                                                            second: undefined,
+                                                        })}
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))
+                                ) : (
+                                    <></>
+                                )}
                                 <div
                                     ref={messagesEndRef}
                                     className="h-0"
