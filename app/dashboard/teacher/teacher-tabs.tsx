@@ -1,6 +1,6 @@
 'use client';
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
-import { Clock, Send, Eye, Pen, ArrowLeft } from 'lucide-react';
+import { Clock, Send, Eye, Pen, ArrowLeft, LoaderCircle, Loader } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -26,7 +26,15 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     // Fetching Data
     const [messages, setMessages] = useState<TMessage[]>([]);
-    const [assignments, setAssignments] = useState<TAssignment[]>([]);
+    const [{ data: assignments, error, loading }, setAssignments] = useState<{
+        data: TAssignment[] | null;
+        error: string;
+        loading: boolean;
+    }>({
+        data: null,
+        error: '',
+        loading: true,
+    });
     const [students, setStudents] = useState<TStudent[]>([]);
     const [userId, setUserId] = useState<string>();
     const [{ id: currentUserId, full_name: currentUsername, avatar_url }, setCurrentUser] = useState<TStudent>({
@@ -92,6 +100,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
             }
         };
         fetchUserId();
+
         const assignmentChannel = supabase
             .channel('realtime-assignment-update')
             .on(
@@ -103,12 +112,28 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                 },
                 (payload) => {
                     const { eventType, new: newAssignment, old: oldAssignment } = payload;
-                    if (eventType === 'INSERT') {
-                        setAssignments((prev) => [...prev, newAssignment] as TAssignment[]);
-                    }
 
-                    if (eventType === 'DELETE') {
-                        setAssignments((prev) => prev.filter((asg) => asg.id !== oldAssignment.id));
+                    switch (eventType) {
+                        case 'INSERT':
+                            setAssignments((prev) => ({
+                                ...prev,
+                                data: [...(prev.data ?? []), newAssignment as TAssignment],
+                            }));
+                            break;
+
+                        case 'UPDATE':
+                            setAssignments((prev) => ({
+                                ...prev,
+                                data: (prev.data ?? []).map((asg) => (asg.id === newAssignment.id ? (newAssignment as TAssignment) : asg)),
+                            }));
+                            break;
+
+                        case 'DELETE':
+                            setAssignments((prev) => ({
+                                ...prev,
+                                data: (prev.data ?? []).filter((asg) => asg.id !== oldAssignment.id),
+                            }));
+                            break;
                     }
                 }
             )
@@ -162,19 +187,25 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
         };
         const fetchAssignments = async () => {
             if (!userId) return;
+            let state: {
+                data: TAssignment[] | null;
+                error: string;
+                loading: boolean;
+            } = { loading: false, data: [], error: '' };
             try {
-                const { data: assignments, error } = await supabase.from('assignments').select('*').eq('created_by', userId);
+                const { data, error } = await supabase.from('assignments').select('*').eq('created_by', userId);
                 if (error) {
-                    console.error(error);
-                    return;
+                    state.error = error.message;
+                } else {
+                    state.data = data;
                 }
-                setAssignments(assignments as TAssignment[]);
             } catch (error) {
                 console.error(error);
-                return;
+                state.error = String(error);
             }
-            setAssignments((prev) => [...prev, ...(assignments as TAssignment[])]);
+            setAssignments((prev) => ({ ...prev, ...state }));
         };
+
         fetchStudents();
         fetchAssignments();
     }, [userId]);
@@ -214,11 +245,14 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
             };
         }
     }, [messages, value]);
+
     return (
         <>
             <TabsContent value="assignments" className="space-y-4">
                 <div className="grid gap-3 overflow-hidden">
-                    {assignments.length ? (
+                    {loading ? (
+                        <Loader className="text-black animate-spin [animation-duration:1.5s]" width={80} height={80} />
+                    ) : assignments ? (
                         assignments.map((assignment) => (
                             <Fragment key={assignment.id}>
                                 <Card className="gap-0 max-[425px]:py-4 border">
@@ -542,7 +576,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                 </Card>
             </TabsContent>
             <TabsContent value="feedback" className="space-y-4">
-                {assignments.length ? (
+                {assignments ? (
                     <Card className="max-[425px]:py-4">
                         <CardHeader className="max-[425px]:px-4">
                             <CardTitle>Recent Feedback Given</CardTitle>
