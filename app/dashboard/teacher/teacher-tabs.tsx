@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
 import { TabsContent } from '@/components/ui/tabs';
 import { createClient } from '@/lib/supabase/client';
-import { TAssignment, TMessage, TStudent, TTeacherTabs } from '@/definitions';
+import { responseState, TAssignment, TMessage, TStudent, TTeacherTabs } from '@/definitions';
 import { Label } from '../../../components/ui/label';
 import Image from 'next/image';
 
@@ -25,23 +25,12 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
     const [newMessage, setNewMessage] = useState<string>('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     // Fetching Data
-    const [messages, setMessages] = useState<TMessage[]>([]);
-    const [{ data: assignments, error, loading }, setAssignments] = useState<{
-        data: TAssignment[] | null;
-        error: string;
-        loading: boolean;
-    }>({
-        data: null,
-        error: '',
-        loading: true,
-    });
+    const [{ data: messages, error: msgError, loading: msgLoading }, setMessages] = useState<responseState<TMessage[]>>({ data: null, error: '', loading: true });
+    const [{ data: assignments, error: asgError, loading: asgLoading }, setAssignments] = useState<responseState<TAssignment[]>>({ data: null, error: '', loading: true });
+    // const [{ data: answers, error: aswError, loading: aswLoading }, setAnswers] = useState<responseState<[]>>({ data: null, error: '', loading: true });
+    const [{ id: currentUserId, full_name: currentUsername, avatar_url }, setCurrentUser] = useState<TStudent>({ id: '', full_name: '', avatar_url: '' });
     const [students, setStudents] = useState<TStudent[]>([]);
     const [userId, setUserId] = useState<string>();
-    const [{ id: currentUserId, full_name: currentUsername, avatar_url }, setCurrentUser] = useState<TStudent>({
-        id: '',
-        full_name: '',
-        avatar_url: '',
-    });
     const handleGradeSubmission = useCallback(async () => {
         setIsSubmitting(true);
         if (!selectedAssignment) {
@@ -150,12 +139,28 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                 },
                 (payload) => {
                     const { eventType, new: newMessage, old: oldMessage } = payload;
-                    if (eventType === 'INSERT') {
-                        setMessages((prev) => [...prev, newMessage] as TMessage[]);
-                    }
 
-                    if (eventType === 'DELETE') {
-                        setMessages((prev) => prev.filter((msg) => msg.id !== oldMessage.id));
+                    switch (eventType) {
+                        case 'INSERT':
+                            setMessages((prev) => ({
+                                ...prev,
+                                data: [...(prev.data ?? []), newMessage as TMessage],
+                            }));
+                            break;
+
+                        case 'UPDATE':
+                            setMessages((prev) => ({
+                                ...prev,
+                                data: (prev.data ?? []).map((msg) => (msg.id === newMessage.id ? (newMessage as TMessage) : msg)),
+                            }));
+                            break;
+
+                        case 'DELETE':
+                            setMessages((prev) => ({
+                                ...prev,
+                                data: (prev.data ?? []).filter((msg) => msg.id !== oldMessage.id),
+                            }));
+                            break;
                     }
                 }
             )
@@ -170,10 +175,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
         const fetchStudents = async () => {
             if (!userId) return;
             try {
-                const { data: students, error } = await supabase
-                    .from('profiles')
-                    .select('id, full_name, avatar_url')
-                    .eq('teacher_id', userId);
+                const { data: students, error } = await supabase.from('profiles').select('id, full_name, avatar_url').eq('teacher_id', userId);
                 if (error) {
                     console.error(error);
                     return;
@@ -213,24 +215,29 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
     useEffect(() => {
         const fetchMessages = async () => {
             if (!currentUserId || !userId) return;
+
+            let state: {
+                data: TMessage[] | null;
+                error: string;
+                loading: boolean;
+            } = { loading: false, data: [], error: '' };
+
             try {
-                const { data: messages, error } = await supabase
-                    .from('messages')
-                    .select('*')
-                    .or(
-                        `and(sender_id.eq.${userId}, receiver_id.eq.${currentUserId}),and(sender_id.eq.${currentUserId},receiver_id.eq.${userId})`
-                    )
-                    .order('sent_at', { ascending: true });
+                const { data, error } = await supabase.from('messages').select('*').or(`and(sender_id.eq.${userId},receiver_id.eq.${currentUserId}),and(sender_id.eq.${currentUserId},receiver_id.eq.${userId})`).order('sent_at', { ascending: true });
+
                 if (error) {
-                    console.error(error);
-                    return;
+                    state.error = error.message;
+                } else {
+                    state.data = data as TMessage[];
                 }
-                setMessages(messages as TMessage[]);
             } catch (error) {
                 console.error(error);
-                return;
+                state.error = String(error);
             }
+
+            setMessages((prev) => ({ ...prev, ...state }));
         };
+
         fetchMessages();
         setDisabled(students.length == 0);
     }, [currentUserId, userId, students.length]);
@@ -245,12 +252,13 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
             };
         }
     }, [messages, value]);
+    console.log(messages);
 
     return (
         <>
             <TabsContent value="assignments" className="space-y-4">
                 <div className="grid gap-3 overflow-hidden">
-                    {loading ? (
+                    {asgLoading ? (
                         <Loader className="text-black animate-spin [animation-duration:1.5s]" width={80} height={80} />
                     ) : assignments ? (
                         assignments.map((assignment) => (
@@ -258,9 +266,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                                 <Card className="gap-0 max-[425px]:py-4 border">
                                     <CardHeader className="max-[425px]:px-4">
                                         <div className="flex flex-col gap-1">
-                                            <CardTitle className="text-2xl font-bold leading-tight text-blue-900">
-                                                {assignment.title}
-                                            </CardTitle>
+                                            <CardTitle className="text-2xl font-bold leading-tight text-blue-900">{assignment.title}</CardTitle>
                                             <div className="text-sm text-gray-400 mt-0.5 mb-0.5">{assignment.subject}</div>
                                             <div className="text-lg font-medium text-gray-800 mb-1">{assignment.description}</div>
                                             <div className="flex items-center flex-wrap gap-1 mt-1">
@@ -296,11 +302,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                                                     ) : null}
                                                 </Badge> */}
                                                 <Badge variant="outline" className="bg-blue-50 text-blue-700 text-sm rounded-full">
-                                                    {assignment.ai_grade !== undefined && assignment.teacher_grade !== null
-                                                        ? `Score: ${assignment.teacher_grade}`
-                                                        : assignment.ai_grade
-                                                        ? `AI Score: ${assignment.ai_grade}`
-                                                        : 'AI Score: Not scored'}
+                                                    {assignment.ai_grade !== undefined && assignment.teacher_grade !== null ? `Score: ${assignment.teacher_grade}` : assignment.ai_grade ? `AI Score: ${assignment.ai_grade}` : 'AI Score: Not scored'}
                                                 </Badge>
                                                 {assignment.teacher_grade && (
                                                     <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
@@ -358,12 +360,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div>
                                                     <Label className="block text-sm font-medium mb-2">AI Grade</Label>
-                                                    <Input
-                                                        type="number"
-                                                        value={selectedAssignment.ai_grade ?? ''}
-                                                        readOnly
-                                                        className="bg-gray-100 cursor-not-allowed"
-                                                    />
+                                                    <Input type="number" value={selectedAssignment.ai_grade ?? ''} readOnly className="bg-gray-100 cursor-not-allowed" />
                                                     <p className="text-xs text-gray-500 mt-1">This is the AI-predicted grade (out of 5)</p>
                                                 </div>
                                                 <div>
@@ -410,9 +407,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                                             </div>
 
                                             <div className="flex items-center space-x-2">
-                                                <Button
-                                                    onClick={handleGradeSubmission}
-                                                    disabled={selectedAssignment.ai_grade == undefined || isSubmitting}>
+                                                <Button onClick={handleGradeSubmission} disabled={selectedAssignment.ai_grade == undefined || isSubmitting}>
                                                     {isSubmitting ? 'Submitting...' : 'Confirm Grade'}
                                                 </Button>
                                                 <Button variant="outline" onClick={() => setSelectedAssignment(null)}>
@@ -511,30 +506,24 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                                 <div ref={messagesEndRef} className="h-0" />
                             </div>
                         </ScrollArea>
-                        <ScrollArea
-                            className={`xl:col-start-2 xl:col-end-5 md:col-start-2 md:col-end-4 flex-1 mb-5 ${
-                                isListOfUsersOpen ? 'max-md:hidden' : ''
-                            }`}>
+                        <ScrollArea className={`xl:col-start-2 xl:col-end-5 md:col-start-2 md:col-end-4 flex-1 mb-5 ${isListOfUsersOpen ? 'max-md:hidden' : ''}`}>
                             <div className="space-y-4 lg:h-145 sm:h-95 h-85 pl-1">
-                                {messages.length ? (
+                                {!currentUserId ? (
+                                    <></>
+                                ) : msgLoading ? (
+                                    <div className="flex h-full items-center justify-center">
+                                        <Loader className="text-black animate-spin [animation-duration:1.5s]" width={80} height={80} />
+                                    </div>
+                                ) : messages ? (
                                     messages.map(({ id, sender_id, sent_at, content }) => (
                                         <div key={id} className={`flex ${sender_id === userId ? 'justify-end' : 'justify-start'}`}>
-                                            <div
-                                                className={`flex items-start space-x-2 sm:max-w-sm max-w-64 ${
-                                                    sender_id === userId ? 'flex-row-reverse space-x-reverse' : ''
-                                                }`}>
+                                            <div className={`flex items-start space-x-2 sm:max-w-sm max-w-64 ${sender_id === userId ? 'flex-row-reverse space-x-reverse' : ''}`}>
                                                 <Avatar className="w-8 h-8">
                                                     <AvatarFallback>{sender_id === userId ? 'T' : 'S'}</AvatarFallback>
                                                 </Avatar>
-                                                <div
-                                                    className={`p-2 rounded-lg ${
-                                                        sender_id === userId ? 'bg-blue-600 text-white' : 'bg-gray-100'
-                                                    }`}>
+                                                <div className={`p-2 rounded-lg ${sender_id === userId ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}>
                                                     <p className="sm:text-lg text-sm font-medium leading-6">{content}</p>
-                                                    <p
-                                                        className={`text-xs sm:mt-2 mt-1 ${
-                                                            sender_id === userId ? 'text-blue-100 text-right' : 'text-gray-500 text-left'
-                                                        }`}>
+                                                    <p className={`text-xs sm:mt-2 mt-1 ${sender_id === userId ? 'text-blue-100 text-right' : 'text-gray-500 text-left'}`}>
                                                         {new Date(sent_at).toLocaleTimeString([], {
                                                             hour: '2-digit',
                                                             minute: '2-digit',
@@ -546,7 +535,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                                         </div>
                                     ))
                                 ) : (
-                                    <></>
+                                    <h1 className="text-gray-600">No assignments found</h1>
                                 )}
                                 <div ref={messagesEndRef} className="h-0" />
                             </div>
@@ -557,14 +546,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                                 <label htmlFor="chat-message-input" className="sr-only">
                                     Type your message
                                 </label>
-                                <Input
-                                    id="chat-message-input"
-                                    placeholder="Type your message..."
-                                    value={newMessage}
-                                    onChange={(e) => setNewMessage(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                                    disabled={disabled}
-                                />
+                                <Input id="chat-message-input" placeholder="Type your message..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()} disabled={disabled} />
                                 <Button size="sm" onClick={handleSendMessage} disabled={disabled}>
                                     <Send className="w-4 h-4" />
                                 </Button>

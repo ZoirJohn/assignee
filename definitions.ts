@@ -64,3 +64,5 @@ export type TStudent = {
 };
 
 export type TTeacherTabs = 'assignments' | 'chat' | 'answers' | 'feedback';
+
+export type responseState<dataType> = { data: dataType | null; error: string; loading: boolean }
