@@ -10,14 +10,14 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
 import { TabsContent } from '@/components/ui/tabs';
 import { createClient } from '@/lib/supabase/client';
-import { responseState, TAssignment, TMessage, TStudent, TTeacherTabs } from '@/definitions';
+import { responseState, TAnswer, TAssignment, TMessage, TStudent, TTeacherTabs } from '@/definitions';
 import { Label } from '../../../components/ui/label';
 import Image from 'next/image';
 
 export function TeacherTabs({ value }: { value: TTeacherTabs }) {
     const supabase = createClient();
     // State
-    const [selectedAssignment, setSelectedAssignment] = useState<TAssignment | null>(null);
+    const [selectedAssignment, setSelectedAssignment] = useState<TAnswer | null>(null);
     const [gradeOverride, setGradeOverride] = useState<number>();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isListOfUsersOpen, openListOfUsers] = useState<boolean>(true);
@@ -27,10 +27,11 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
     // Fetching Data
     const [{ data: messages, error: msgError, loading: msgLoading }, setMessages] = useState<responseState<TMessage[]>>({ data: null, error: '', loading: true });
     const [{ data: assignments, error: asgError, loading: asgLoading }, setAssignments] = useState<responseState<TAssignment[]>>({ data: null, error: '', loading: true });
-    // const [{ data: answers, error: aswError, loading: aswLoading }, setAnswers] = useState<responseState<[]>>({ data: null, error: '', loading: true });
+    const [{ data: answers, error: aswError, loading: aswLoading }, setAnswers] = useState<responseState<TAnswer[]>>({ data: null, error: '', loading: true });
     const [{ id: currentUserId, full_name: currentUsername, avatar_url }, setCurrentUser] = useState<TStudent>({ id: '', full_name: '', avatar_url: '' });
     const [students, setStudents] = useState<TStudent[]>([]);
     const [userId, setUserId] = useState<string>();
+
     const handleGradeSubmission = useCallback(async () => {
         setIsSubmitting(true);
         if (!selectedAssignment) {
@@ -48,7 +49,6 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                 .eq('id', selectedAssignment.id)
                 .select();
         } catch {
-            // handle error if needed
         } finally {
             setGradeOverride(undefined);
             setSelectedAssignment(null);
@@ -57,7 +57,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
     }, [selectedAssignment, gradeOverride]);
 
     const openSubmissionReview = useCallback(
-        (submission: TAssignment) => {
+        (submission: TAnswer) => {
             if (selectedAssignment) {
                 setSelectedAssignment(null);
             } else {
@@ -77,6 +77,18 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
         setNewMessage('');
         setDisabled(false);
     }, [userId, currentUserId, newMessage]);
+
+    const handleTitle = useCallback(
+        (id: string) => {
+            if (!assignments) return;
+            for (let i = 0; i < assignments.length; i++) {
+                console.log(assignments[i].id, id);
+
+                if (assignments[i].id == id) return assignments[i].title;
+            }
+        },
+        [assignments]
+    );
 
     useEffect(() => {
         const fetchUserId = async () => {
@@ -207,9 +219,29 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
             }
             setAssignments((prev) => ({ ...prev, ...state }));
         };
-
+        const fetchAnswers = async () => {
+            if (!userId) return;
+            let state: {
+                data: TAnswer[] | null;
+                error: string;
+                loading: boolean;
+            } = { loading: false, data: [], error: '' };
+            try {
+                const { data, error } = await supabase.from('answers').select('*, creator:profiles!inner(id)').eq('creator.teacher_id', userId);
+                if (error) {
+                    state.error = error.message;
+                } else {
+                    state.data = data;
+                }
+            } catch (error) {
+                console.error(error);
+                state.error = String(error);
+            }
+            setAnswers((prev) => ({ ...prev, ...state }));
+        };
         fetchStudents();
         fetchAssignments();
+        fetchAnswers();
     }, [userId]);
 
     useEffect(() => {
@@ -238,7 +270,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
             setMessages((prev) => ({ ...prev, ...state }));
         };
 
-        fetchMessages();
+        // fetchMessages();
         setDisabled(students.length == 0);
     }, [currentUserId, userId, students.length]);
 
@@ -252,8 +284,6 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
             };
         }
     }, [messages, value]);
-    console.log(messages);
-
     return (
         <>
             <TabsContent value="assignments" className="space-y-4">
@@ -301,10 +331,10 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                                                         </>
                                                     ) : null}
                                                 </Badge> */}
-                                                <Badge variant="outline" className="bg-blue-50 text-blue-700 text-sm rounded-full">
+                                                {/* <Badge variant="outline" className="bg-blue-50 text-blue-700 text-sm rounded-full">
                                                     {assignment.ai_grade !== undefined && assignment.teacher_grade !== null ? `Score: ${assignment.teacher_grade}` : assignment.ai_grade ? `AI Score: ${assignment.ai_grade}` : 'AI Score: Not scored'}
-                                                </Badge>
-                                                {assignment.teacher_grade && (
+                                                </Badge> */}
+                                                {/* {assignment.teacher_grade && (
                                                     <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
                                                         Graded:
                                                         {new Date().toLocaleDateString([], {
@@ -312,7 +342,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                                                             month: 'long',
                                                         })}
                                                     </Badge>
-                                                )}
+                                                )} */}
                                             </div>
                                         </div>
                                     </CardHeader>
@@ -332,20 +362,20 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                                             <div className="flex items-center space-x-2">
                                                 <Button variant="outline" size="sm">
                                                     {/* onClick={() => openSubmissionReview(assignment)}> */}
-                                                    {assignment.status == 'graded' ? (
+                                                    {/* {assignment.status == 'graded' ? (
                                                         <Pen />
                                                     ) : (
                                                         <>
                                                             <Eye className="w-4 h-4 mr-2" />
                                                             Review
                                                         </>
-                                                    )}
+                                                    )} */}
                                                 </Button>
                                             </div>
                                         </div>
                                     </CardContent>
                                 </Card>
-                                {selectedAssignment && selectedAssignment.id === assignment.id && (
+                                {/* {selectedAssignment && selectedAssignment.id === assignment.id && (
                                     <Card className="border-2 border-blue-200 bg-blue-50/30">
                                         <CardHeader>
                                             <CardTitle>Review: {selectedAssignment.title}</CardTitle>
@@ -416,7 +446,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                                             </div>
                                         </CardContent>
                                     </Card>
-                                )}
+                                )} */}
                             </Fragment>
                         ))
                     ) : (
@@ -564,7 +594,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                             <CardTitle>Recent Feedback Given</CardTitle>
                             <CardDescription>Track the feedback you&apos;ve provided to students</CardDescription>
                         </CardHeader>
-                        {assignments.map(({ id, title, teacher_grade, feedback }, idx) => (
+                        {assignments.map(({ id, title }, idx) => (
                             <CardContent className="max-[425px]:px-4" key={idx}>
                                 <div className="space-y-4">
                                     <div key={id} className="p-4 rounded-lg w-full border grid grid-cols-2 max-[425px]:grid-cols-3">
@@ -573,14 +603,12 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                                             <p className="text-sm text-gray-600">{title}</p>
                                         </div>
                                         <div className="flex items-start justify-end">
-                                            <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                                                {teacher_grade}/{5}
-                                            </Badge>
+                                            <Badge className="bg-green-100 text-green-800 hover:bg-green-100">{/* {teacher_grade}/{5} */}</Badge>
                                         </div>
                                         <div className="[425px]:col-span-2 col-span-3 mt-4">
                                             <p className="text-sm">
                                                 <b>Feedback: </b>
-                                                {feedback || 'No feedback yet'}
+                                                {/* {feedback || 'No feedback yet'} */}
                                             </p>
                                         </div>
                                     </div>
@@ -590,6 +618,25 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                     </Card>
                 ) : (
                     <h1 className="text-gray-600">No feedback found</h1>
+                )}
+            </TabsContent>
+            <TabsContent value="answers" className="space-y-4">
+                {aswLoading ? (
+                    <Loader className="text-black animate-spin [animation-duration:1.5s]" width={80} height={80} />
+                ) : !answers ? (
+                    <h1 className="text-gray-600">No answers found</h1>
+                ) : (
+                    <div>
+                        {answers.map(({ assignment_id }, key) => (
+                            <Card key={key}>
+                                <CardHeader>
+                                    <CardTitle>This is not a title</CardTitle>
+                                    <CardDescription></CardDescription>
+                                </CardHeader>
+                                <CardContent>{handleTitle(assignment_id)}</CardContent>
+                            </Card>
+                        ))}
+                    </div>
                 )}
             </TabsContent>
         </>

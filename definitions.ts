@@ -30,7 +30,7 @@ export type TMessage = {
     sent_at: string;
 };
 
-export type TAssignment = {
+export type Ass = {
     id: string;
     title: string;
     description: string;
@@ -47,7 +47,7 @@ export type TAssignment = {
     created_at: string;
 };
 
-export type Assignment = {
+export type TAssignment = {
     id: string;
     title: string;
     description: string;
@@ -63,6 +63,20 @@ export type TStudent = {
     avatar_url: string | null;
 };
 
+export type TAnswer = {
+    id: string;
+    assignment_id: string;
+    student_id: string;
+    answer_text: string;
+    teacher_grade: number | null;
+    ai_grade: number;
+    status: 'submitted' | 'graded';
+    submitted_at: string;
+    created_by: string;
+    image_url: string;
+      feedback: string | null;
+};
+
 export type TTeacherTabs = 'assignments' | 'chat' | 'answers' | 'feedback';
 
-export type responseState<dataType> = { data: dataType | null; error: string; loading: boolean }
+export type responseState<dataType> = { data: dataType | null; error: string; loading: boolean };
