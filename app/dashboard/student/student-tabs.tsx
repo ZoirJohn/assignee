@@ -19,7 +19,7 @@ import Image from 'next/image';
 // feedback
 // answers
 
-export default function StudentTabs({ value }: { value: string }) {
+export function StudentTabs({ value }: { value: string }) {
     const supabase = createClient();
     // State
     const [selectedFiles] = useState<{ [key: string]: File }>({});

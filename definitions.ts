@@ -80,6 +80,6 @@ export type TAnswer = {
     }
 };
 
-export type TTeacherTabs = 'assignments' | 'chat' | 'answers' | 'feedback';
+export type TTabs = 'assignments' | 'chat' | 'answers' | 'feedback';
 
 export type responseState<dataType> = { data: dataType; error: string; loading: boolean };
