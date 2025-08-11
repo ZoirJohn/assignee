@@ -1,6 +1,6 @@
 'use client';
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
-import { Clock, Send, Eye, Pen, ArrowLeft, LoaderCircle, Loader } from 'lucide-react';
+import { Clock, Send, Eye, ArrowLeft, Loader } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,9 +25,9 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
     const [newMessage, setNewMessage] = useState<string>('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     // Fetching Data
-    const [{ data: messages, error: msgError, loading: msgLoading }, setMessages] = useState<responseState<TMessage[]>>({ data: null, error: '', loading: true });
-    const [{ data: assignments, error: asgError, loading: asgLoading }, setAssignments] = useState<responseState<TAssignment[]>>({ data: null, error: '', loading: true });
-    const [{ data: answers, error: aswError, loading: aswLoading }, setAnswers] = useState<responseState<TAnswer[]>>({ data: null, error: '', loading: true });
+    const [{ data: messages, error: msgError, loading: msgLoading }, setMessages] = useState<responseState<TMessage[]>>({ data: [], error: '', loading: true });
+    const [{ data: assignments, error: asgError, loading: asgLoading }, setAssignments] = useState<responseState<TAssignment[]>>({ data: [], error: '', loading: true });
+    const [{ data: answers, error: aswError, loading: aswLoading }, setAnswers] = useState<responseState<TAnswer[]>>({ data: [], error: '', loading: true });
     const [{ id: currentUserId, full_name: currentUsername, avatar_url }, setCurrentUser] = useState<TStudent>({ id: '', full_name: '', avatar_url: '' });
     const [students, setStudents] = useState<TStudent[]>([]);
     const [userId, setUserId] = useState<string>();
@@ -40,7 +40,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
         }
         try {
             await supabase
-                .from('assignments')
+                .from('answers')
                 .update({
                     teacher_grade: gradeOverride || selectedAssignment.ai_grade,
                     status: 'graded',
@@ -205,16 +205,16 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
         const fetchAssignments = async () => {
             if (!userId) return;
             let state: {
-                data: TAssignment[] | null;
+                data: TAssignment[];
                 error: string;
                 loading: boolean;
-            } = { loading: false, data: null, error: '' };
+            } = { loading: false, data: [], error: '' };
             try {
                 const { data, error } = await supabase.from('assignments').select('*').eq('created_by', userId);
                 if (error) {
                     state.error = error.message;
                 } else {
-                    state.data = data.length ? data : null;
+                    state.data = data;
                 }
             } catch (error) {
                 console.error(error);
@@ -225,16 +225,16 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
         const fetchAnswers = async () => {
             if (!userId) return;
             let state: {
-                data: TAnswer[] | null;
+                data: TAnswer[];
                 error: string;
                 loading: boolean;
-            } = { loading: false, data: null, error: '' };
+            } = { loading: false, data: [], error: '' };
             try {
                 const { data, error } = await supabase.from('answers').select('*, creator:profiles!inner(full_name)').eq('creator.teacher_id', userId);
                 if (error) {
                     state.error = error.message;
                 } else {
-                    state.data = data.length ? data : null;
+                    state.data = data;
                 }
             } catch (error) {
                 console.error(error);
@@ -252,10 +252,10 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
             if (!currentUserId || !userId) return;
 
             let state: {
-                data: TMessage[] | null;
+                data: TMessage[];
                 error: string;
                 loading: boolean;
-            } = { loading: false, data: null, error: '' };
+            } = { loading: false, data: [], error: '' };
 
             try {
                 const { data, error } = await supabase.from('messages').select('*').or(`and(sender_id.eq.${userId},receiver_id.eq.${currentUserId}),and(sender_id.eq.${currentUserId},receiver_id.eq.${userId})`).order('sent_at', { ascending: true });
@@ -263,7 +263,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                 if (error) {
                     state.error = error.message;
                 } else {
-                    state.data = data.length ? data : null;
+                    state.data = data;
                 }
             } catch (error) {
                 console.error(error);
@@ -287,14 +287,16 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
             };
         }
     }, [messages, value]);
+    if(asgError ?? msgError ?? aswError){
 
+    }
     return (
         <>
             <TabsContent value="assignments" className="space-y-4">
                 <div className="grid gap-3 overflow-hidden">
                     {asgLoading ? (
                         <Loader className="text-black animate-spin [animation-duration:1.5s]" width={80} height={80} />
-                    ) : assignments ? (
+                    ) : assignments?.length ? (
                         assignments.map((assignment, idx) => (
                             <Card className="gap-0 max-[425px]:py-4 border" key={idx}>
                                 <CardHeader className="max-[425px]:px-4">
@@ -458,43 +460,10 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                     </CardContent>
                 </Card>
             </TabsContent>
-            <TabsContent value="feedback" className="space-y-4">
-                {answers ? (
-                    <Card className="max-[425px]:py-4">
-                        <CardHeader className="max-[425px]:px-4">
-                            <CardTitle>Recent Feedback Given</CardTitle>
-                            <CardDescription>Track the feedback you&apos;ve provided to students</CardDescription>
-                        </CardHeader>
-                        {answers.map(({ id, feedback }, idx) => (
-                            <CardContent className="max-[425px]:px-4" key={idx}>
-                                <div className="space-y-4">
-                                    <div key={id} className="p-4 rounded-lg w-full border grid grid-cols-2 max-[425px]:grid-cols-3">
-                                        <div className="max-[425px]:col-span-2">
-                                            <h4 className="font-semibold text-xl">Student </h4>
-                                            <p className="text-sm text-gray-600"></p>
-                                        </div>
-                                        <div className="flex items-start justify-end">
-                                            <Badge className="bg-green-100 text-green-800 hover:bg-green-100">{/* {teacher_grade}/{5} */}</Badge>
-                                        </div>
-                                        <div className="[425px]:col-span-2 col-span-3 mt-4">
-                                            <p className="text-sm">
-                                                <b>Feedback: </b>
-                                                {feedback || 'No feedback yet'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        ))}
-                    </Card>
-                ) : (
-                    <h1 className="text-gray-600">No feedback found</h1>
-                )}
-            </TabsContent>
             <TabsContent value="answers" className="space-y-4">
                 {aswLoading ? (
                     <Loader className="text-black animate-spin [animation-duration:1.5s]" width={80} height={80} />
-                ) : !answers ? (
+                ) : answers?.length==0 ? (
                     <h1 className="text-gray-600">No answers found</h1>
                 ) : (
                     <div>
@@ -595,6 +564,39 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                             );
                         })}
                     </div>
+                )}
+            </TabsContent>
+            <TabsContent value="feedback" className="space-y-4">
+                {answers.length ? (
+                    <Card className="max-[425px]:py-4">
+                        <CardHeader className="max-[425px]:px-4">
+                            <CardTitle>Recent Feedback Given</CardTitle>
+                            <CardDescription>Track the feedback you&apos;ve provided to students</CardDescription>
+                        </CardHeader>
+                        {answers.map(({ id, feedback }, idx) => (
+                            <CardContent className="max-[425px]:px-4" key={idx}>
+                                <div className="space-y-4">
+                                    <div key={id} className="p-4 rounded-lg w-full border grid grid-cols-2 max-[425px]:grid-cols-3">
+                                        <div className="max-[425px]:col-span-2">
+                                            <h4 className="font-semibold text-xl">Student </h4>
+                                            <p className="text-sm text-gray-600"></p>
+                                        </div>
+                                        <div className="flex items-start justify-end">
+                                            <Badge className="bg-green-100 text-green-800 hover:bg-green-100">{/* {teacher_grade}/{5} */}</Badge>
+                                        </div>
+                                        <div className="[425px]:col-span-2 col-span-3 mt-4">
+                                            <p className="text-sm">
+                                                <b>Feedback: </b>
+                                                {feedback || 'No feedback yet'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        ))}
+                    </Card>
+                ) : (
+                    <h1 className="text-gray-600">No feedback found</h1>
                 )}
             </TabsContent>
         </>

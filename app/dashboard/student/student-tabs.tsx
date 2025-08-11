@@ -113,35 +113,35 @@ export default function StudentTabs() {
         }
     };
 
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'graded':
-                return <CheckCircle className="w-4 h-4" />;
-            case 'submitted':
-                return <CheckCircle className="w-4 h-4" />;
-            case 'pending':
-                return <Clock className="w-4 h-4" />;
-            case 'missed':
-                return <XCircle className="w-4 h-4" />;
-            default:
-                return <AlertCircle className="w-4 h-4" />;
-        }
-    };
+    // const getStatusIcon = (status: string) => {
+    //     switch (status) {
+    //         case 'graded':
+    //             return <CheckCircle className="w-4 h-4" />;
+    //         case 'submitted':
+    //             return <CheckCircle className="w-4 h-4" />;
+    //         case 'pending':
+    //             return <Clock className="w-4 h-4" />;
+    //         case 'missed':
+    //             return <XCircle className="w-4 h-4" />;
+    //         default:
+    //             return <AlertCircle className="w-4 h-4" />;
+    //     }
+    // };
 
-    const getStatusText = (status: string) => {
-        switch (status) {
-            case 'graded':
-                return 'Graded';
-            case 'submitted':
-                return 'Submitted';
-            case 'pending':
-                return 'Pending';
-            case 'missed':
-                return 'Missed';
-            default:
-                return 'Unknown';
-        }
-    };
+    // const getStatusText = (status: string) => {
+    //     switch (status) {
+    //         case 'graded':
+    //             return 'Graded';
+    //         case 'submitted':
+    //             return 'Submitted';
+    //         case 'pending':
+    //             return 'Pending';
+    //         case 'missed':
+    //             return 'Missed';
+    //         default:
+    //             return 'Unknown';
+    //     }
+    // };
 
     const isAssignmentMissed = (assignment: TAssignment) => {
         const deadline = new Date(assignment.deadline);
