@@ -54,9 +54,9 @@ export default async function TeacherTranscript() {
                                         </CardHeader>
                                         <CardContent className="max-[425px]:px-4">
                                                 <div className="text-2xl font-bold text-green-600">
-                                                        {(100 * assignments!.filter((assignment) => assignment.teacher_grade).length) /
+                                                        {/* {(100 * assignments!.filter((assignment) => assignment.teacher_grade).length) /
                                                                 (assignments!.length || 1)}
-                                                        %
+                                                        % */}
                                                 </div>
                                                 <p className="text-xs text-muted-foreground">Student completion rate</p>
                                         </CardContent>

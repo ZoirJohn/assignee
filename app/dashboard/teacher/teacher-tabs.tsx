@@ -10,11 +10,11 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
 import { TabsContent } from '@/components/ui/tabs';
 import { createClient } from '@/lib/supabase/client';
-import { responseState, TAnswer, TAssignment, TMessage, TStudent, TTeacherTabs } from '@/definitions';
+import { responseState, TAnswer, TAssignment, TMessage, TStudent, TTabs } from '@/definitions';
 import { Label } from '../../../components/ui/label';
 import Image from 'next/image';
 
-export function TeacherTabs({ value }: { value: TTeacherTabs }) {
+export function TeacherTabs({ value }: { value: TTabs }) {
     const supabase = createClient();
     // State
     const [selectedAssignment, setSelectedAssignment] = useState<(TAnswer & { title: string }) | null>(null);
