@@ -24,7 +24,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
     const [disabled, setDisabled] = useState<boolean>();
     const [newMessage, setNewMessage] = useState<string>('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    // Fetching Data
+    // Fetched Data
     const [{ data: messages, error: msgError, loading: msgLoading }, setMessages] = useState<responseState<TMessage[]>>({ data: [], error: '', loading: true });
     const [{ data: assignments, error: asgError, loading: asgLoading }, setAssignments] = useState<responseState<TAssignment[]>>({ data: [], error: '', loading: true });
     const [{ data: answers, error: aswError, loading: aswLoading }, setAnswers] = useState<responseState<TAnswer[]>>({ data: [], error: '', loading: true });
@@ -186,6 +186,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
             supabase.removeChannel(messagesChannel);
         };
     }, []);
+
     useEffect(() => {
         const fetchStudents = async () => {
             if (!userId) return;
@@ -287,8 +288,8 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
             };
         }
     }, [messages, value]);
-    if(asgError ?? msgError ?? aswError){
-
+    if (asgError ?? msgError ?? aswError) {
+        return <></>;
     }
     return (
         <>
@@ -463,7 +464,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
             <TabsContent value="answers" className="space-y-4">
                 {aswLoading ? (
                     <Loader className="text-black animate-spin [animation-duration:1.5s]" width={80} height={80} />
-                ) : answers?.length==0 ? (
+                ) : answers?.length == 0 ? (
                     <h1 className="text-gray-600">No answers found</h1>
                 ) : (
                     <div>
