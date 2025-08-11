@@ -5,7 +5,7 @@ import { StudentTabs } from '@/app/dashboard/student/student-tabs';
 import { TTabs } from '@/definitions';
 import { useState } from 'react';
 
-export default async function StudentDashboard() {
+export default function StudentDashboard() {
     const [value, setValue] = useState<TTabs>('assignments');
     const changeValue = (value: string) => {
         setValue(value as TTabs);
