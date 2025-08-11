@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { BookOpen, Home, AlertTriangle, Bug } from 'lucide-react';
+import {  Home, AlertTriangle, Bug } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

@@ -1,7 +1,7 @@
 'use client';
 
-import { ChangeEvent, Fragment, useEffect, useRef, useState } from 'react';
-import { Clock, Upload, Send, AlertCircle, CheckCircle, XCircle, Eye, Image as ImageIcon } from 'lucide-react';
+import {  Fragment,  useEffect, useRef, useState } from 'react';
+import { Clock,  Send,  Image as ImageIcon, Loader } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
@@ -11,86 +11,118 @@ import { Badge } from '@/components/ui/badge';
 import { TabsContent } from '@/components/ui/tabs';
 import { createClient } from '@/lib/supabase/client';
 import { responseState, TAnswer, TAssignment, TMessage } from '@/definitions';
-import { submitAssignment } from '@/lib/azure/submitAssignment';
+// import { submitAssignment } from '@/lib/azure/submitAssignment';
 import Image from 'next/image';
 
-export default function StudentTabs({value}:{value:string}) {
+// assignments
+// messages
+// feedback
+// answers
+
+export default function StudentTabs({ value }: { value: string }) {
     const supabase = createClient();
     // State
-    const [selectedFiles, setSelectedFiles] = useState<{ [key: string]: File }>({});
-    const [previewUrls, setPreviewUrls] = useState<{ [key: string]: string }>({});
-    const [selectedAssignment, setSelectedAssignment] = useState<TAnswer &{title:string}| null>(null);
+    const [selectedFiles] = useState<{ [key: string]: File }>({});
+    const [previewUrls] = useState<{ [key: string]: string }>({});
+    const [selectedAssignment, setSelectedAssignment] = useState<(TAnswer & { title: string }) | null>(null);
     const [newMessage, setNewMessage] = useState<string>('');
     const [disabled, setDisabled] = useState<boolean>(false);
-    const [grades, setGrades] = useState<{ subject: string; assignment: string; grade: number | undefined; date: string }[]>([]);
-    const [submittingAssignmentId, setSubmittingAssignmentId] = useState<string | null>(null);
+    const [grades, ] = useState<{ subject: string; assignment: string; grade: number | undefined; date: string }[]>([]);
+    // const [submittingAssignmentId, setSubmittingAssignmentId] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     // Fetched data
     const [userId, setUserId] = useState<string>('');
     const [teacherId, setTeacherId] = useState<string>('');
     const [{ data: messages, error: msgError, loading: msgLoading }, setMessages] = useState<responseState<TMessage[]>>({ data: [], error: '', loading: true });
     const [{ data: assignments, error: asgError, loading: asgLoading }, setAssignments] = useState<responseState<TAssignment[]>>({ data: [], error: '', loading: true });
-const [{ data: answers, error: aswError, loading: aswLoading }, setAnswers] = useState<responseState<TAnswer[]>>({ data: [], error: '', loading: true });
+    const [{ data: answers, error: aswError, loading: aswLoading }] = useState<responseState<TAnswer[]>>({ data: [], error: '', loading: true });
+
+    // const handleAssignmentData = useCallback(
+    //     (id: string) => {
+    //         let data = { title: '', subject: '', description: ''};
+    //         if (!assignments) return data;
+    //         for (let i = 0; i < assignments.length; i++) {
+    //             if (assignments[i].id == id) {
+    //                 data = { title: assignments[i].title, subject: assignments[i].subject, description: assignments[i].description };
+    //                 break;
+    //             }
+    //         }
+    //         return data;
+    //     },
+    //     [assignments]
+    // );
     
+    // const handleAnwerData=useCallback((id:string)=>{
+    //     let data = { status:''};
+    //         if (!answers) return data;
+    //         for (let i = 0; i < answers.length; i++) {
+    //             if (answers[i].id == id) {
+    //                 data = { status:answers[i].status };
+    //                 break;
+    //             }
+    //         }
+    //         return data;
+    // },[answers])
 
-    const handleFileChange = (event: ChangeEvent<HTMLInputElement>, assignmentId: string) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/bmp'];
-            if (!validImageTypes.includes(file.type)) {
-                alert('Please select an image file (JPEG, PNG, WebP, GIF, or BMP)');
-                event.target.value = '';
-                return;
-            }
+    // const handleFileChange = (event: ChangeEvent<HTMLInputElement>, assignmentId: string) => {
+    //     const file = event.target.files?.[0];
+    //     if (file) {
+    //         const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/bmp'];
+    //         if (!validImageTypes.includes(file.type)) {
+    //             alert('Please select an image file (JPEG, PNG, WebP, GIF, or BMP)');
+    //             event.target.value = '';
+    //             return;
+    //         }
 
-            const previewUrl = URL.createObjectURL(file);
+    //         const previewUrl = URL.createObjectURL(file);
 
-            setSelectedFiles((prev) => ({
-                ...prev,
-                [assignmentId]: file,
-            }));
+    //         setSelectedFiles((prev) => ({
+    //             ...prev,
+    //             [assignmentId]: file,
+    //         }));
 
-            setPreviewUrls((prev) => ({
-                ...prev,
-                [assignmentId]: previewUrl,
-            }));
-        }
-    };
+    //         setPreviewUrls((prev) => ({
+    //             ...prev,
+    //             [assignmentId]: previewUrl,
+    //         }));
+    //     }
+    // };
 
-    const handleSubmitAnswer = async (assignmentId: string) => {
-        const selectedFile = selectedFiles[assignmentId];
-        if (!selectedFile) {
-            alert('Please select a file first');
-            return;
-        }
+    // const handleSubmitAnswer = async (assignmentId: string) => {
+    //     const selectedFile = selectedFiles[assignmentId];
+    //     if (!selectedFile) {
+    //         alert('Please select a file first');
+    //         return;
+    //     }
+    //     const { title, subject, description } = handleAssignmentData(assignmentId);
 
-        try {
-            await submitAssignment({
-                file: selectedFile,
-                assignmentId,
-                teacherId,
-                assignmentName: selectedAssignment?.title,
-                question: selectedAssignment?.description,
-                subject: selectedAssignment?.subject,
-            });
-            setAssignments((prev) => prev.map((assignment: ) => (assignment.id === assignmentId ? { ...assignment, status: 'submitted', image_url: URL.createObjectURL(selectedFile) } : assignment)));
-            setSelectedFiles((prev) => {
-                const newFiles = { ...prev };
-                delete newFiles[assignmentId];
-                return newFiles;
-            });
-            setPreviewUrls((prev) => {
-                const newUrls = { ...prev };
-                if (newUrls[assignmentId]) {
-                    URL.revokeObjectURL(newUrls[assignmentId]);
-                    delete newUrls[assignmentId];
-                }
-                return newUrls;
-            });
-            const fileInput = document.getElementById(`file-${assignmentId}`) as HTMLInputElement;
-            if (fileInput) fileInput.value = '';
-        } catch {}
-    };
+    //     try {
+    //         await submitAssignment({
+    //             file: selectedFile,
+    //             assignmentId,
+    //             teacherId,
+    //             assignmentName: title,
+    //             question: description,
+    //             subject: subject,
+    //         });
+    //         setAnswers((prev) => ({ ...prev, data: prev.data.map((answer: TAnswer) => (answer.assignment_id === assignmentId ? { ...answer, status: 'submitted', image_url: URL.createObjectURL(selectedFile) } : answer)) }));
+    //         setSelectedFiles((prev) => {
+    //             const newFiles = { ...prev };
+    //             delete newFiles[assignmentId];
+    //             return newFiles;
+    //         });
+    //         setPreviewUrls((prev) => {
+    //             const newUrls = { ...prev };
+    //             if (newUrls[assignmentId]) {
+    //                 URL.revokeObjectURL(newUrls[assignmentId]);
+    //                 delete newUrls[assignmentId];
+    //             }
+    //             return newUrls;
+    //         });
+    //         const fileInput = document.getElementById(`file-${assignmentId}`) as HTMLInputElement;
+    //         if (fileInput) fileInput.value = '';
+    //     } catch {}
+    // };
 
     const handleSendMessage = async () => {
         setDisabled(true);
@@ -103,25 +135,29 @@ const [{ data: answers, error: aswError, loading: aswLoading }, setAnswers] = us
         setDisabled(false);
     };
 
-    const openSubmissionView = (assignment: TAssignment) => {
-        if (assignment.status === 'graded') {
-            setSelectedAssignment(assignment);
-        } else {
-            setSelectedAssignment(assignment);
-        }
-    };
+    // const openSubmissionView = useCallback((submission: TAnswer & { title: string }) => {
+    //     if (submission.status === 'graded') {
+    //         setSelectedAssignment(submission);
+    //     } else {
+    //         setSelectedAssignment(submission);
+    //     }
+    // }, []);
 
-    const isAssignmentMissed = (assignment: TAssignment) => {
-        const deadline = new Date(assignment.deadline);
-        const now = new Date();
-        return now > deadline && assignment.status === 'pending';
-    };
+    // const isAssignmentMissed = ({ deadline: time ,id}: { deadline: string ,id:string}) => {
+    //     const {status}=handleAnwerData(id)
+    //     const deadline = new Date(time);
+    //     const now = new Date();
+    //     return now > deadline && status === 'submitted';
+    // };
 
     useEffect(() => {
         const fetchUserId = async () => {
             try {
                 const { claims } = (await supabase.auth.getClaims()).data || {};
-                if (claims) setUserId(claims.sub);
+                if (claims) {
+                    setUserId(claims.sub);
+                    setTeacherId(claims.user_metadata.teacher_id);
+                }
             } catch (error) {
                 console.error(error);
                 return;
@@ -152,14 +188,14 @@ const [{ data: answers, error: aswError, loading: aswLoading }, setAnswers] = us
                         case 'UPDATE':
                             setAssignments((prev) => ({
                                 ...prev,
-                                data: (prev.data).map((asg) => (asg.id === newAssignment.id ? (newAssignment as TAssignment) : asg)),
+                                data: prev.data.map((asg) => (asg.id === newAssignment.id ? (newAssignment as TAssignment) : asg)),
                             }));
                             break;
 
                         case 'DELETE':
                             setAssignments((prev) => ({
                                 ...prev,
-                                data: (prev.data).filter((asg) => asg.id !== oldAssignment.id),
+                                data: prev.data.filter((asg) => asg.id !== oldAssignment.id),
                             }));
                             break;
                     }
@@ -215,7 +251,7 @@ const [{ data: answers, error: aswError, loading: aswLoading }, setAnswers] = us
         const fetchMessages = async () => {
             if (!teacherId || !userId) return;
 
-            let state: {
+            const state: {
                 data: TMessage[];
                 error: string;
                 loading: boolean;
@@ -238,13 +274,13 @@ const [{ data: answers, error: aswError, loading: aswLoading }, setAnswers] = us
         };
         const fetchAssignments = async () => {
             if (!userId) return;
-            let state: {
+            const state: {
                 data: TAssignment[];
                 error: string;
                 loading: boolean;
             } = { loading: false, data: [], error: '' };
             try {
-                const { data, error } = await supabase.from('assignments').select('*').eq('created_by', userId);
+                const { data, error } = await supabase.from('assignments').select('*').eq('created_by', teacherId);
                 if (error) {
                     state.error = error.message;
                 } else {
@@ -260,7 +296,6 @@ const [{ data: answers, error: aswError, loading: aswLoading }, setAnswers] = us
         fetchMessages();
     }, [teacherId, userId]);
 
-    
     useEffect(() => {
         if (value == 'chat') {
             const id = requestAnimationFrame(() => {
@@ -276,7 +311,9 @@ const [{ data: answers, error: aswError, loading: aswLoading }, setAnswers] = us
         <>
             <TabsContent value="deadlines" className="space-y-4">
                 <div className="grid gap-3">
-                    {assignments.length ? (
+                    {asgLoading ? (
+                        <Loader className="text-black animate-spin [animation-duration:1.5s]" width={80} height={80} />
+                    ) : assignments.length ? (
                         assignments.map((assignment) => (
                             <Fragment key={assignment.id}>
                                 <Card className="gap-0 max-[425px]:py-4">
@@ -285,7 +322,7 @@ const [{ data: answers, error: aswError, loading: aswLoading }, setAnswers] = us
                                             <CardTitle className="text-2xl font-bold leading-tight text-blue-900">{assignment.title}</CardTitle>
                                             <div className="text-sm text-gray-400 mt-0.5 mb-0.5">{assignment.subject}</div>
                                             <div className="text-lg font-medium text-gray-800 mb-1">{assignment.description}</div>
-                                            <div className="flex items-center flex-wrap gap-1 mt-1">
+                                            {/* <div className="flex items-center flex-wrap gap-1 mt-1">
                                                 {assignment.ai_grade && assignment.status !== 'graded' && (
                                                     <Badge variant="outline" className="bg-blue-50 text-blue-700">
                                                         {assignment.ai_grade !== undefined && assignment.ai_grade !== null ? `AI Score: ${assignment.ai_grade}` : 'AI Score: Not scored'}
@@ -296,7 +333,7 @@ const [{ data: answers, error: aswError, loading: aswLoading }, setAnswers] = us
                                                         Teacher Grade: {assignment.teacher_grade}
                                                     </Badge>
                                                 )}
-                                            </div>
+                                            </div> */}
                                         </div>
                                     </CardHeader>
                                     <CardContent className="max-[425px]:px-4">
@@ -310,7 +347,7 @@ const [{ data: answers, error: aswError, loading: aswLoading }, setAnswers] = us
                                                     year: 'numeric',
                                                 })}
                                             </div>
-                                            <div className="flex items-center space-x-2">
+                                            {/* <div className="flex items-center space-x-2">
                                                 {assignment.status === 'pending' && (
                                                     <>
                                                         <Input type="file" onChange={(e) => handleFileChange(e, assignment.id.toString())} className="hidden" id={`file-${assignment.id}`} accept="image/*" disabled={submittingAssignmentId === assignment.id.toString()} />
@@ -343,7 +380,7 @@ const [{ data: answers, error: aswError, loading: aswLoading }, setAnswers] = us
                                                     </Button>
                                                 )}
                                                 {assignment.status === 'missed' && <div className="text-sm text-red-600 font-medium">Deadline passed</div>}
-                                            </div>
+                                            </div> */}
                                         </div>
                                         {selectedFiles[assignment.id] && (
                                             <div className="mt-4 p-3 bg-gray-50 rounded-lg">
@@ -538,6 +575,40 @@ const [{ data: answers, error: aswError, loading: aswLoading }, setAnswers] = us
                         </div>
                     </CardContent>
                 </Card>
+            </TabsContent>
+
+            <TabsContent value="feedback" className="space-y-4">
+                {answers.length ? (
+                    <Card className="max-[425px]:py-4">
+                        <CardHeader className="max-[425px]:px-4">
+                            <CardTitle>Recent Feedback Given</CardTitle>
+                            <CardDescription>Track the feedback you&apos;ve provided to students</CardDescription>
+                        </CardHeader>
+                        {answers.map(({ id, feedback }, idx) => (
+                            <CardContent className="max-[425px]:px-4" key={idx}>
+                                <div className="space-y-4">
+                                    <div key={id} className="p-4 rounded-lg w-full border grid grid-cols-2 max-[425px]:grid-cols-3">
+                                        <div className="max-[425px]:col-span-2">
+                                            <h4 className="font-semibold text-xl">Student </h4>
+                                            <p className="text-sm text-gray-600"></p>
+                                        </div>
+                                        <div className="flex items-start justify-end">
+                                            <Badge className="bg-green-100 text-green-800 hover:bg-green-100">{/* {teacher_grade}/{5} */}</Badge>
+                                        </div>
+                                        <div className="[425px]:col-span-2 col-span-3 mt-4">
+                                            <p className="text-sm">
+                                                <b>Feedback: </b>
+                                                {feedback || 'No feedback yet'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        ))}
+                    </Card>
+                ) : (
+                    <h1 className="text-gray-600">No feedback found</h1>
+                )}
             </TabsContent>
         </>
     );

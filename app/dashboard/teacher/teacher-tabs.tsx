@@ -205,7 +205,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
         };
         const fetchAssignments = async () => {
             if (!userId) return;
-            let state: {
+            const state: {
                 data: TAssignment[];
                 error: string;
                 loading: boolean;
@@ -225,7 +225,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
         };
         const fetchAnswers = async () => {
             if (!userId) return;
-            let state: {
+            const state: {
                 data: TAnswer[];
                 error: string;
                 loading: boolean;
@@ -252,7 +252,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
         const fetchMessages = async () => {
             if (!currentUserId || !userId) return;
 
-            let state: {
+            const state: {
                 data: TMessage[];
                 error: string;
                 loading: boolean;
@@ -297,7 +297,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                 <div className="grid gap-3 overflow-hidden">
                     {asgLoading ? (
                         <Loader className="text-black animate-spin [animation-duration:1.5s]" width={80} height={80} />
-                    ) : assignments?.length ? (
+                    ) : assignments.length ? (
                         assignments.map((assignment, idx) => (
                             <Card className="gap-0 max-[425px]:py-4 border" key={idx}>
                                 <CardHeader className="max-[425px]:px-4">
