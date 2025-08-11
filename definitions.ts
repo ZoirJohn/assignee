@@ -74,7 +74,10 @@ export type TAnswer = {
     submitted_at: string;
     created_by: string;
     image_url: string;
-      feedback: string | null;
+    feedback: string | null;
+    creator:{
+        full_name:string
+    }
 };
 
 export type TTeacherTabs = 'assignments' | 'chat' | 'answers' | 'feedback';

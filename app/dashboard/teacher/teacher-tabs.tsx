@@ -17,7 +17,7 @@ import Image from 'next/image';
 export function TeacherTabs({ value }: { value: TTeacherTabs }) {
     const supabase = createClient();
     // State
-    const [selectedAssignment, setSelectedAssignment] = useState<TAnswer | null>(null);
+    const [selectedAssignment, setSelectedAssignment] = useState<(TAnswer & { title: string }) | null>(null);
     const [gradeOverride, setGradeOverride] = useState<number>();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isListOfUsersOpen, openListOfUsers] = useState<boolean>(true);
@@ -57,7 +57,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
     }, [selectedAssignment, gradeOverride]);
 
     const openSubmissionReview = useCallback(
-        (submission: TAnswer) => {
+        (submission: TAnswer & { title: string }) => {
             if (selectedAssignment) {
                 setSelectedAssignment(null);
             } else {
@@ -78,14 +78,17 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
         setDisabled(false);
     }, [userId, currentUserId, newMessage]);
 
-    const handleTitle = useCallback(
+    const handleAssignmentData = useCallback(
         (id: string) => {
-            if (!assignments) return;
+            let data = { title: '', subject: '' };
+            if (!assignments) return data;
             for (let i = 0; i < assignments.length; i++) {
-                console.log(assignments[i].id, id);
-
-                if (assignments[i].id == id) return assignments[i].title;
+                if (assignments[i].id == id) {
+                    data = { title: assignments[i].title, subject: assignments[i].subject };
+                    break;
+                }
             }
+            return data;
         },
         [assignments]
     );
@@ -205,13 +208,13 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                 data: TAssignment[] | null;
                 error: string;
                 loading: boolean;
-            } = { loading: false, data: [], error: '' };
+            } = { loading: false, data: null, error: '' };
             try {
                 const { data, error } = await supabase.from('assignments').select('*').eq('created_by', userId);
                 if (error) {
                     state.error = error.message;
                 } else {
-                    state.data = data;
+                    state.data = data.length ? data : null;
                 }
             } catch (error) {
                 console.error(error);
@@ -225,13 +228,13 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                 data: TAnswer[] | null;
                 error: string;
                 loading: boolean;
-            } = { loading: false, data: [], error: '' };
+            } = { loading: false, data: null, error: '' };
             try {
-                const { data, error } = await supabase.from('answers').select('*, creator:profiles!inner(id)').eq('creator.teacher_id', userId);
+                const { data, error } = await supabase.from('answers').select('*, creator:profiles!inner(full_name)').eq('creator.teacher_id', userId);
                 if (error) {
                     state.error = error.message;
                 } else {
-                    state.data = data;
+                    state.data = data.length ? data : null;
                 }
             } catch (error) {
                 console.error(error);
@@ -252,7 +255,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                 data: TMessage[] | null;
                 error: string;
                 loading: boolean;
-            } = { loading: false, data: [], error: '' };
+            } = { loading: false, data: null, error: '' };
 
             try {
                 const { data, error } = await supabase.from('messages').select('*').or(`and(sender_id.eq.${userId},receiver_id.eq.${currentUserId}),and(sender_id.eq.${currentUserId},receiver_id.eq.${userId})`).order('sent_at', { ascending: true });
@@ -260,7 +263,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                 if (error) {
                     state.error = error.message;
                 } else {
-                    state.data = data as TMessage[];
+                    state.data = data.length ? data : null;
                 }
             } catch (error) {
                 console.error(error);
@@ -270,7 +273,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
             setMessages((prev) => ({ ...prev, ...state }));
         };
 
-        // fetchMessages();
+        fetchMessages();
         setDisabled(students.length == 0);
     }, [currentUserId, userId, students.length]);
 
@@ -284,6 +287,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
             };
         }
     }, [messages, value]);
+
     return (
         <>
             <TabsContent value="assignments" className="space-y-4">
@@ -291,163 +295,31 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                     {asgLoading ? (
                         <Loader className="text-black animate-spin [animation-duration:1.5s]" width={80} height={80} />
                     ) : assignments ? (
-                        assignments.map((assignment) => (
-                            <Fragment key={assignment.id}>
-                                <Card className="gap-0 max-[425px]:py-4 border">
-                                    <CardHeader className="max-[425px]:px-4">
-                                        <div className="flex flex-col gap-1">
-                                            <CardTitle className="text-2xl font-bold leading-tight text-blue-900">{assignment.title}</CardTitle>
-                                            <div className="text-sm text-gray-400 mt-0.5 mb-0.5">{assignment.subject}</div>
-                                            <div className="text-lg font-medium text-gray-800 mb-1">{assignment.description}</div>
-                                            <div className="flex items-center flex-wrap gap-1 mt-1">
-                                                {/* <Badge
-                                                    className={cn(
-                                                        assignment.status === 'graded' && 'bg-green-100 text-green-800',
-                                                        assignment.status === 'submitted' && 'bg-blue-100 text-blue-800',
-                                                        assignment.status === 'pending' && 'bg-yellow-100 text-yellow-800',
-                                                        assignment.status === 'missed' && 'bg-red-100 text-red-800',
-                                                        'text-sm rounded-full'
-                                                    )}
-                                                    variant="secondary">
-                                                    {assignment.status === 'graded' ? (
-                                                        <>
-                                                            <CheckCircle className="w-3 h-3 mr-1" />
-                                                            Graded
-                                                        </>
-                                                    ) : assignment.status === 'submitted' ? (
-                                                        <>
-                                                            <Clock className="w-3 h-3 mr-1" />
-                                                            Submitted
-                                                        </>
-                                                    ) : assignment.status === 'pending' ? (
-                                                        <>
-                                                            <Clock className="w-3 h-3 mr-1" />
-                                                            Pending
-                                                        </>
-                                                    ) : assignment.status === 'missed' ? (
-                                                        <>
-                                                            <XCircle className="w-3 h-3 mr-1" />
-                                                            Missed
-                                                        </>
-                                                    ) : null}
-                                                </Badge> */}
-                                                {/* <Badge variant="outline" className="bg-blue-50 text-blue-700 text-sm rounded-full">
-                                                    {assignment.ai_grade !== undefined && assignment.teacher_grade !== null ? `Score: ${assignment.teacher_grade}` : assignment.ai_grade ? `AI Score: ${assignment.ai_grade}` : 'AI Score: Not scored'}
-                                                </Badge> */}
-                                                {/* {assignment.teacher_grade && (
-                                                    <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                                                        Graded:
-                                                        {new Date().toLocaleDateString([], {
-                                                            day: 'numeric',
-                                                            month: 'long',
-                                                        })}
-                                                    </Badge>
-                                                )} */}
+                        assignments.map((assignment, idx) => (
+                            <Card className="gap-0 max-[425px]:py-4 border" key={idx}>
+                                <CardHeader className="max-[425px]:px-4">
+                                    <div className="flex flex-col gap-1">
+                                        <CardTitle className="text-2xl font-bold leading-tight text-blue-900">{assignment.title}</CardTitle>
+                                        <div className="text-sm text-gray-400 mt-0.5 mb-0.5">{assignment.subject}</div>
+                                        <div className="text-lg font-medium text-gray-800 mb-1">{assignment.description}</div>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="max-[425px]:px-4">
+                                    <div className="flex items-center justify-between flex-wrap gap-4 border-t pt-3 mt-2">
+                                        <div className="flex flex-col gap-2">
+                                            <div className="flex items-center text-base font-medium text-gray-700">
+                                                <Clock className="w-5 h-5 mr-2" />
+                                                Due:{' '}
+                                                {new Date(assignment.deadline).toLocaleDateString('en-UZ', {
+                                                    day: 'numeric',
+                                                    month: 'long',
+                                                    year: 'numeric',
+                                                })}
                                             </div>
                                         </div>
-                                    </CardHeader>
-                                    <CardContent className="max-[425px]:px-4">
-                                        <div className="flex items-center justify-between flex-wrap gap-4 border-t pt-3 mt-2">
-                                            <div className="flex flex-col gap-2">
-                                                <div className="flex items-center text-base font-medium text-gray-700">
-                                                    <Clock className="w-5 h-5 mr-2" />
-                                                    Due:{' '}
-                                                    {new Date(assignment.deadline).toLocaleDateString('en-UZ', {
-                                                        day: 'numeric',
-                                                        month: 'long',
-                                                        year: 'numeric',
-                                                    })}
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <Button variant="outline" size="sm">
-                                                    {/* onClick={() => openSubmissionReview(assignment)}> */}
-                                                    {/* {assignment.status == 'graded' ? (
-                                                        <Pen />
-                                                    ) : (
-                                                        <>
-                                                            <Eye className="w-4 h-4 mr-2" />
-                                                            Review
-                                                        </>
-                                                    )} */}
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                                {/* {selectedAssignment && selectedAssignment.id === assignment.id && (
-                                    <Card className="border-2 border-blue-200 bg-blue-50/30">
-                                        <CardHeader>
-                                            <CardTitle>Review: {selectedAssignment.title}</CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="space-y-4">
-                                            <div>
-                                                <h4 className="font-semibold mb-2">Extracted Text:</h4>
-                                                <div className="bg-gray-50 p-4 rounded-lg max-h-32 overflow-y-auto">
-                                                    <p className="text-lg">{selectedAssignment.extracted_text}</p>
-                                                </div>
-                                            </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div>
-                                                    <Label className="block text-sm font-medium mb-2">AI Grade</Label>
-                                                    <Input type="number" value={selectedAssignment.ai_grade ?? ''} readOnly className="bg-gray-100 cursor-not-allowed" />
-                                                    <p className="text-xs text-gray-500 mt-1">This is the AI-predicted grade (out of 5)</p>
-                                                </div>
-                                                <div>
-                                                    <Label className="block text-sm font-medium mb-2">Grade</Label>
-                                                    <Input
-                                                        type="number"
-                                                        max={5}
-                                                        min={2}
-                                                        step={1}
-                                                        value={gradeOverride === undefined ? '' : gradeOverride}
-                                                        onChange={(e) => {
-                                                            const value = e.target.value;
-                                                            if (value === '' || ['2', '3', '4', '5'].includes(value)) {
-                                                                setGradeOverride(value === '' ? undefined : parseInt(value, 10));
-                                                            }
-                                                        }}
-                                                        placeholder="Enter grade (2-5)"
-                                                        readOnly={selectedAssignment.ai_grade == undefined}
-                                                    />
-                                                    <p className="text-xs text-gray-500 mt-1">Your grade for this assignment (out of 5)</p>
-                                                </div>
-                                                <div>
-                                                    <Label className="block text-sm font-medium mb-2" htmlFor="feedback">
-                                                        Feedback
-                                                    </Label>
-                                                    <Textarea
-                                                        id="feedback"
-                                                        placeholder="Enter feedback for the student..."
-                                                        className="min-h-20 max-h-40"
-                                                        value={selectedAssignment.feedback || ''}
-                                                        onChange={(e) =>
-                                                            setSelectedAssignment(
-                                                                selectedAssignment
-                                                                    ? {
-                                                                          ...selectedAssignment,
-                                                                          feedback: e.target.value,
-                                                                      }
-                                                                    : selectedAssignment
-                                                            )
-                                                        }
-                                                        readOnly={selectedAssignment.ai_grade == undefined}
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-center space-x-2">
-                                                <Button onClick={handleGradeSubmission} disabled={selectedAssignment.ai_grade == undefined || isSubmitting}>
-                                                    {isSubmitting ? 'Submitting...' : 'Confirm Grade'}
-                                                </Button>
-                                                <Button variant="outline" onClick={() => setSelectedAssignment(null)}>
-                                                    Cancel
-                                                </Button>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                )} */}
-                            </Fragment>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         ))
                     ) : (
                         <h1 className="text-gray-600">No assignments found</h1>
@@ -526,7 +398,6 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                                             </Avatar>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-medium text-gray-900 truncate">{student.full_name}</p>
-                                                {/* <p className="text-xs text-gray-500">{student.lastSeen}</p> */}
                                             </div>
                                         </button>
                                     ))
@@ -565,7 +436,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                                         </div>
                                     ))
                                 ) : (
-                                    <h1 className="text-gray-600">No assignments found</h1>
+                                    <h1 className="text-gray-600">No messages found</h1>
                                 )}
                                 <div ref={messagesEndRef} className="h-0" />
                             </div>
@@ -588,19 +459,19 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                 </Card>
             </TabsContent>
             <TabsContent value="feedback" className="space-y-4">
-                {assignments ? (
+                {answers ? (
                     <Card className="max-[425px]:py-4">
                         <CardHeader className="max-[425px]:px-4">
                             <CardTitle>Recent Feedback Given</CardTitle>
                             <CardDescription>Track the feedback you&apos;ve provided to students</CardDescription>
                         </CardHeader>
-                        {assignments.map(({ id, title }, idx) => (
+                        {answers.map(({ id, feedback }, idx) => (
                             <CardContent className="max-[425px]:px-4" key={idx}>
                                 <div className="space-y-4">
                                     <div key={id} className="p-4 rounded-lg w-full border grid grid-cols-2 max-[425px]:grid-cols-3">
                                         <div className="max-[425px]:col-span-2">
                                             <h4 className="font-semibold text-xl">Student </h4>
-                                            <p className="text-sm text-gray-600">{title}</p>
+                                            <p className="text-sm text-gray-600"></p>
                                         </div>
                                         <div className="flex items-start justify-end">
                                             <Badge className="bg-green-100 text-green-800 hover:bg-green-100">{/* {teacher_grade}/{5} */}</Badge>
@@ -608,7 +479,7 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                                         <div className="[425px]:col-span-2 col-span-3 mt-4">
                                             <p className="text-sm">
                                                 <b>Feedback: </b>
-                                                {/* {feedback || 'No feedback yet'} */}
+                                                {feedback || 'No feedback yet'}
                                             </p>
                                         </div>
                                     </div>
@@ -627,15 +498,102 @@ export function TeacherTabs({ value }: { value: TTeacherTabs }) {
                     <h1 className="text-gray-600">No answers found</h1>
                 ) : (
                     <div>
-                        {answers.map(({ assignment_id }, key) => (
-                            <Card key={key}>
-                                <CardHeader>
-                                    <CardTitle>This is not a title</CardTitle>
-                                    <CardDescription></CardDescription>
-                                </CardHeader>
-                                <CardContent>{handleTitle(assignment_id)}</CardContent>
-                            </Card>
-                        ))}
+                        {answers.map((answer, idx) => {
+                            const { title, subject } = handleAssignmentData(answer.assignment_id);
+                            return (
+                                <Fragment key={idx}>
+                                    <Card className="gap-0 max-[425px]:py-4 border" key={idx}>
+                                        <CardHeader className="max-[425px]:px-4">
+                                            <div className="flex flex-col gap-1">
+                                                <CardTitle className="text-2xl font-bold leading-tight text-blue-900">{title}</CardTitle>
+
+                                                <div className="text-sm text-gray-400 mt-0.5 mb-0.5">{subject}</div>
+
+                                                <div className="text-lg font-medium text-gray-800 mb-1">
+                                                    By <span className="font-semibold text-gray-900">{answer.creator.full_name}</span>
+                                                </div>
+
+                                                <div className="flex items-center flex-wrap gap-1 mt-1">
+                                                    <Badge variant="outline" className="bg-blue-50 text-blue-700 text-sm rounded-full px-2 py-1">
+                                                        AI Score: {answer.ai_grade ? `${answer.ai_grade}/5` : 'Not scored'}
+                                                    </Badge>
+                                                </div>
+                                            </div>
+                                        </CardHeader>
+
+                                        <CardContent className="max-[425px]:px-4">
+                                            <div className="flex items-center justify-between flex-wrap gap-4 border-t pt-3 mt-2">
+                                                <div>
+                                                    <Button variant="outline" onClick={() => openSubmissionReview({ ...answer, title })}>
+                                                        <Eye className="w-4 h-4" />
+                                                        Check
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                    {selectedAssignment && selectedAssignment.id === answer.id && (
+                                        <Card className="mt-4 border-2 border-blue-200 bg-blue-50/30 rounded-lg overflow-hidden">
+                                            <CardHeader>
+                                                <CardTitle>Review: {selectedAssignment.title}</CardTitle>
+                                            </CardHeader>
+                                            <CardContent className="space-y-4">
+                                                <div>
+                                                    <h4 className="font-semibold mb-2">Extracted Text:</h4>
+                                                    <div className="bg-white p-4 rounded-lg max-h-32 overflow-y-auto">
+                                                        <p className="text-lg">{selectedAssignment.answer_text || 'No text extracted.'}</p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <Label className="block text-sm font-medium mb-2">AI Grade</Label>
+                                                        <Input type="number" value={selectedAssignment.ai_grade ?? ''} readOnly className="bg-gray-100 cursor-not-allowed" />
+                                                        <p className="text-xs text-gray-500 mt-1">This is the AI-predicted grade (out of 5)</p>
+                                                    </div>
+
+                                                    <div>
+                                                        <Label className="block text-sm font-medium mb-2">Grade</Label>
+                                                        <Input
+                                                            type="number"
+                                                            max={5}
+                                                            min={2}
+                                                            step={1}
+                                                            value={gradeOverride === undefined ? '' : gradeOverride}
+                                                            onChange={(e) => {
+                                                                const value = e.target.value;
+                                                                if (value === '' || ['2', '3', '4', '5'].includes(value)) {
+                                                                    setGradeOverride(value === '' ? undefined : parseInt(value, 10));
+                                                                }
+                                                            }}
+                                                            placeholder="Enter grade (2-5)"
+                                                            readOnly={selectedAssignment.ai_grade == null}
+                                                        />
+                                                        <p className="text-xs text-gray-500 mt-1">Your grade for this assignment (out of 5)</p>
+                                                    </div>
+
+                                                    <div className="md:col-span-2">
+                                                        <Label className="block text-sm font-medium mb-2" htmlFor="feedback">
+                                                            Feedback
+                                                        </Label>
+                                                        <Textarea id="feedback" placeholder="Enter feedback for the student..." className="min-h-20 max-h-40" value={selectedAssignment.feedback || ''} onChange={(e) => setSelectedAssignment(selectedAssignment ? { ...selectedAssignment, feedback: e.target.value } : null)} readOnly={selectedAssignment.ai_grade == null} />
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center space-x-2">
+                                                    <Button onClick={handleGradeSubmission} disabled={selectedAssignment.ai_grade == null || isSubmitting}>
+                                                        {isSubmitting ? 'Submitting...' : 'Confirm Grade'}
+                                                    </Button>
+                                                    <Button variant="outline" onClick={() => setSelectedAssignment(null)}>
+                                                        Cancel
+                                                    </Button>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    )}
+                                </Fragment>
+                            );
+                        })}
                     </div>
                 )}
             </TabsContent>
