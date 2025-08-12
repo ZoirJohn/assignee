@@ -19,9 +19,9 @@ export default function StudentDashboard() {
 
             <Tabs defaultValue="deadlines" className="space-y-4">
                 <TabsList className="max-[375px]:w-full">
-                    <TabsTrigger value="deadlines" className="flex items-center gap-2 max-[400px]:px-2">
+                    <TabsTrigger value="assignments" className="flex items-center gap-2 max-[400px]:px-2">
                         <Calendar className="w-4 h-4" />
-                        <span className="max-[375px]:hidden">Deadlines</span>
+                        <span className="max-[375px]:hidden">Assignments</span>
                     </TabsTrigger>
                     <TabsTrigger value="chat" className="flex items-center gap-2 max-[400px]:px-2">
                         <MessageSquare className="w-4 h-4" />
