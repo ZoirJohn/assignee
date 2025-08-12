@@ -1,67 +1,51 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TAssignment } from '@/definitions';
+import { TAnswer, TAssignment } from '@/definitions';
 import { createClient } from '@/lib/supabase/server';
 import { Download, FileText, TrendingUp } from 'lucide-react';
 
 export default async function StudentTranscript() {
-        const supabase = await createClient();
-        const id = (await supabase.auth.getClaims()).data?.claims.sub;
-        const { data: assignments }: { data: TAssignment[] | null } = await supabase.from('assignments').select('*').eq('created_by', id);
-        return (
-                <div className="space-y-6">
-                        <div className="flex items-center justify-between max-[400px]:flex-col max-[400px]:gap-2">
-                                <div>
-                                        <h1 className="text-3xl font-bold text-gray-900">Academic Transcript</h1>
-                                        <p className="text-gray-600">Your complete academic record and performance history</p>
-                                </div>
-                                <Button
-                                        variant="outline"
-                                        className="flex items-center">
-                                        <Download className="w-4 h-4 mr-2" />
-                                        Download PDF
-                                </Button>
-                        </div>
+    const supabase = await createClient();
+    const id = (await supabase.auth.getClaims()).data?.claims.sub;
+    const { data: answers }: { data: TAnswer[] | null;  } = await supabase.from('assignments').select('*').eq('status', 'submitted');
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between max-[400px]:flex-col max-[400px]:gap-2">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Academic Transcript</h1>
+                    <p className="text-gray-600">Your complete academic record and performance history</p>
+                </div>
+                <Button variant="outline" className="flex items-center">
+                    <Download className="w-4 h-4 mr-2" />
+                    Download PDF
+                </Button>
+            </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <Card className="max-[425px]:py-4">
-                                        <CardHeader className="max-[425px]:px-4 flex justify-between">
-                                                <CardTitle className="text-sm font-medium">Overall GPA</CardTitle>
-                                                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                                        </CardHeader>
-                                        <CardContent>
-                                                <div className="text-2xl font-bold text-blue-600">
-                                                        {assignments!.reduce((prv, nwv) => prv + nwv.teacher_grade!, 0) /
-                                                                (assignments!.length || 1)}
-                                                </div>
-                                                <p className="text-xs text-muted-foreground">Out of 5.0 scale</p>
-                                        </CardContent>
-                                </Card>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="max-[425px]:py-4">
+                    <CardHeader className="max-[425px]:px-4 flex justify-between">
+                        <CardTitle className="text-sm font-medium">Overall GPA</CardTitle>
+                        <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-blue-600">{answers?.length ? answers.reduce((pra,cra)=>pra+cra.teacher_grade!,0)/answers.length:<>No Grades</>}</div>
+                        <p className="text-xs text-muted-foreground">Out of 5.0 scale</p>
+                    </CardContent>
+                </Card>
 
-                                <Card className="max-[425px]:py-4">
-                                        <CardHeader className="max-[425px]:px-4 flex justify-between">
-                                                <CardTitle className="text-sm font-medium">Total Assignments</CardTitle>
-                                                <FileText className="h-4 w-4 text-muted-foreground" />
-                                        </CardHeader>
-                                        <CardContent>
-                                                <div className="text-2xl font-bold">{assignments!.length}</div>
-                                                <p className="text-xs text-muted-foreground">Completed successfully</p>
-                                        </CardContent>
-                                </Card>
+                <Card className="max-[425px]:py-4">
+                    <CardHeader className="max-[425px]:px-4 flex justify-between">
+                        <CardTitle className="text-sm font-medium">Total Assignments</CardTitle>
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-blue-600">{answers?.length || 0}</div>
+                        <p className="text-xs text-muted-foreground">Completed successfully</p>
+                    </CardContent>
+                </Card>
+            </div>
 
-                                {/* <Card className='max-[425px]:py-4'>
-                                        <CardHeader className='max-[425px]:px-4 flex justify-between'>
-                                                <CardTitle className='text-sm font-medium'>Semesters</CardTitle>
-                                                <Calendar className='h-4 w-4 text-muted-foreground' />
-                                        </CardHeader>
-                                        <CardContent>
-                                                <div className='text-2xl font-bold'>{transcriptData.length}</div>
-                                                <p className='text-xs text-muted-foreground'>Academic periods</p>
-                                        </CardContent>
-                                </Card> */}
-                        </div>
-
-                        {/* <div className='space-y-6'>
+            {/* <div className='space-y-6'>
                                 {transcriptData.map((semester, index) => (
                                         <Card key={index}>
                                                 <CardHeader>
@@ -105,7 +89,7 @@ export default async function StudentTranscript() {
                                 ))}
                         </div> */}
 
-                        {/* <Card>
+            {/* <Card>
                                 <CardHeader>
                                         <CardTitle>Academic Standing</CardTitle>
                                         <CardDescription>Your current academic status and achievements</CardDescription>
@@ -137,6 +121,6 @@ export default async function StudentTranscript() {
                                         </div>
                                 </CardContent>
                         </Card> */}
-                </div>
-        );
+        </div>
+    );
 }
