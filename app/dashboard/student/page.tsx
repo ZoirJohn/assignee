@@ -1,5 +1,5 @@
 'use client';
-import { Calendar, MessageSquare, FileText, LaptopMinimalCheck } from 'lucide-react';
+import { Calendar, MessageSquare, FileText, LaptopMinimalCheck, Star } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StudentTabs } from '@/app/dashboard/student/student-tabs';
 import { TTabs } from '@/definitions';
@@ -17,7 +17,7 @@ export default function StudentDashboard() {
                 <p className="text-gray-600">Track your assignments, communicate with teachers, and view your progress</p>
             </div>
 
-            <Tabs defaultValue="deadlines" className="space-y-4">
+            <Tabs defaultValue="assignments" className="space-y-4" onValueChange={changeValue}>
                 <TabsList className="max-[375px]:w-full">
                     <TabsTrigger value="assignments" className="flex items-center gap-2 max-[400px]:px-2">
                         <Calendar className="w-4 h-4" />
@@ -27,13 +27,9 @@ export default function StudentDashboard() {
                         <MessageSquare className="w-4 h-4" />
                         <span className="max-[375px]:hidden">Chat</span>
                     </TabsTrigger>
-                    <TabsTrigger value="transcript" className="flex items-center gap-2 max-[400px]:px-2">
-                        <FileText className="w-4 h-4" />
-                        <span className="max-[375px]:hidden">Transcript</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="answers" className="flex items-center gap-2 max-[400px]:px-2">
-                        <LaptopMinimalCheck className="w-4 h-4" />
-                        <span className="max-sm:hidden">Answers</span>
+                    <TabsTrigger value="feedback" className="flex items-center gap-2 max-[400px]:px-2">
+                        <Star className="w-4 h-4" />
+                        <span className="max-sm:hidden">Feedback</span>
                     </TabsTrigger>
                 </TabsList>
                 <StudentTabs value={value} />
